@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Placeholder: substituir pelo QR Code Pix oficial">
+  <!-- Substitua este arquivo por um QR Code Pix gerado no aplicativo bancário da equipe. -->
+  <rect width="240" height="240" rx="12" fill="#fff"/>
+  <g fill="#171220">
+    <path d="M18 18h66v66H18zm12 12v42h42V30zM156 18h66v66h-66zm12 12v42h42V30zM18 156h66v66H18zm12 12v42h42v-42z"/>
+    <path d="M102 18h18v18h-18zm24 18h18v18h-18zm-24 18h18v18h-18zm24 18h18v18h-18zm-24 24h18v18h-18zm24 0h18v18h-18zm24 0h18v18h-18zm-48 24h18v18h-18zm24 0h18v18h-18zm24 0h18v18h-18zm24 0h18v18h-18zm-72 24h18v18h-18zm24 0h18v18h-18zm48 0h18v18h-18zm24 0h18v18h-18zm-96 24h18v18h-18zm24 0h18v18h-18zm48 0h18v18h-18zm24 0h18v18h-18zm-72 24h18v18h-18zm48 0h18v18h-18zm24 0h18v18h-18z"/>
+  </g>
+  <rect x="17" y="106" width="206" height="28" rx="5" fill="#ffdf00"/>
+  <text x="120" y="124" text-anchor="middle" fill="#171220" font-family="Arial,sans-serif" font-size="12" font-weight="700">SUBSTITUIR PELO QR PIX</text>
+</svg>
