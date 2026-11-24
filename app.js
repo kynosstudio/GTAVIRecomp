@@ -284,6 +284,28 @@ function recalculateProgressConnectors(root) {
   const barRect = bar.getBoundingClientRect();
   const width = Math.max(1, timelineRect.width);
   const height = Math.max(1, timelineRect.height);
+  const markerWidth = Math.max(...markers.map((marker) => marker.getBoundingClientRect().width));
+  const gap = markerWidth + 8;
+  const positionedMarkers = markers.map((marker) => ({
+    marker,
+    progress: Number(marker.dataset.markerProgress),
+    x: Number(marker.dataset.markerProgress) / 100 * width
+  })).sort((left, right) => left.x - right.x);
+  positionedMarkers.forEach((item, index) => {
+    item.anchor = index ? Math.max(item.x, positionedMarkers[index - 1].anchor + gap) : item.x;
+  });
+  const averageOffset = positionedMarkers.reduce((total, item) => total + item.x - item.anchor, 0)
+    / positionedMarkers.length;
+  positionedMarkers.forEach((item) => { item.anchor += averageOffset; });
+  const edge = markerWidth / 2 + 4;
+  const leftShift = Math.max(0, edge - positionedMarkers[0].anchor);
+  const rightShift = Math.min(0, width - edge - positionedMarkers[positionedMarkers.length - 1].anchor);
+  const shift = leftShift || rightShift;
+  positionedMarkers.forEach((item) => {
+    item.anchor += shift;
+    item.marker.style.setProperty('--marker-x', `${item.anchor / width * 100}%`);
+  });
+
   svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
   svg.setAttribute('width', `${width}`);
   svg.setAttribute('height', `${height}`);
@@ -291,13 +313,12 @@ function recalculateProgressConnectors(root) {
   svg.style.height = `${height}px`;
 
   const targetTop = barRect.top - timelineRect.top;
-  svg.innerHTML = markers.map((marker) => {
+  svg.innerHTML = positionedMarkers.map(({ marker, progress }) => {
     const markerRect = marker.getBoundingClientRect();
     const startX = markerRect.left - timelineRect.left + markerRect.width / 2;
     const startY = markerRect.bottom - timelineRect.top;
-    const markerProgress = Number(marker.dataset.markerProgress);
-    let endX = Number.isFinite(markerProgress)
-      ? markerProgress / 100 * width
+    let endX = Number.isFinite(progress)
+      ? progress / 100 * width
       : markerRect.left - timelineRect.left + markerRect.width / 2;
     endX = Math.max(0, Math.min(width, endX));
     const endY = targetTop;
@@ -2467,33 +2488,17 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
   const launchingCount = rankedScores.ranked.filter((project) => project.score >= launchThreshold).length;
   const stats = [
     { label: 'Marco mais avançado', value: leader ? leader.milestone : latestMilestoneLabel },
-    { label: 'Média do top 3', markup: `${counterMarkup(topThreeAverage, 'percent')}%` },
-    { label: 'Iniciam o GTA VI', markup: `${counterMarkup(launchingCount)} / ${counterMarkup(rankedScores.ranked.length)}` },
-    { label: 'Projetos acompanhados', markup: counterMarkup(rankedScores.ranked.length) }
+    { label: 'Média do top 3', markup: `<span class="pw-stat-value">${counterMarkup(topThreeAverage, 'percent')}%</span>` },
+    { label: 'Iniciam o GTA VI', markup: `<span class="pw-stat-value">${counterMarkup(launchingCount)} / ${counterMarkup(rankedScores.ranked.length)}</span>` },
+    { label: 'Projetos acompanhados', markup: `<span class="pw-stat-value">${counterMarkup(rankedScores.ranked.length)}</span>` }
   ];
   const timelineProjects = rankedProjects.slice(0, 8).filter((project) => portwatchProjectProgress(project, milestones) >= 0);
   const xlaunchReportProject = projects.find((project) => project.id === 'xlaunchvi' && project.teamReport);
   if (xlaunchReportProject && !timelineProjects.some((project) => project.id === xlaunchReportProject.id)) {
     timelineProjects.push(xlaunchReportProject);
   }
-  const markerLayout = new Map();
-  const laneGroups = new Map();
-  timelineProjects.forEach((project) => {
-    const percent = portwatchProjectProgress(project, milestones);
-    const bucket = Math.round(percent / 5) * 5;
-    if (!laneGroups.has(bucket)) laneGroups.set(bucket, []);
-    laneGroups.get(bucket).push(project);
-  });
-  laneGroups.forEach((items) => {
-    items.sort((left, right) => left.name.localeCompare(right.name));
-    items.forEach((project, itemIndex) => {
-      markerLayout.set(project, itemIndex % 3);
-    });
-  });
   const markerCards = timelineProjects.map((project) => {
-    const lane = markerLayout.get(project) || 0;
     const projectProgress = portwatchProjectProgress(project, milestones);
-    const edge = projectProgress <= 7 ? 'left' : projectProgress >= 93 ? 'right' : 'center';
     const avatar = String(project.avatar || project.name.slice(0, 2)).slice(0, 3);
     const stage = portwatchMilestone(project, milestones).label;
     const progressLabel = formatPercent(projectProgress);
@@ -2513,7 +2518,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
     const markerLabel = publicUrl
       ? `Abrir repositório público de ${project.name}`
       : project.id === 'cgbj' ? 'CGBJ · repositório privado' : `Sem repositório público: ${project.name}`;
-    return `<button class="pw-project-marker align-${edge} ${project.teamReport ? 'pw-project-marker--xlaunch' : ''} ${projectProgress <= progress ? 'is-reached' : ''}" type="button" style="--marker-x:${projectProgress}%;--marker-lane:${lane}" data-marker-progress="${projectProgress}" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(publicUrl ? `${markerLabel}: ${tooltip}` : `${markerLabel}. ${tooltip}`)}" ${publicUrl ? `data-repository-url="${escapeHtml(publicUrl)}"` : 'data-private-repository="true"'}>
+    return `<button class="pw-project-marker ${project.teamReport ? 'pw-project-marker--xlaunch' : ''} ${projectProgress <= progress ? 'is-reached' : ''}" type="button" style="--marker-x:${projectProgress}%" data-marker-progress="${projectProgress}" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(publicUrl ? `${markerLabel}: ${tooltip}` : `${markerLabel}. ${tooltip}`)}" ${publicUrl ? `data-repository-url="${escapeHtml(publicUrl)}"` : 'data-private-repository="true"'}>
       ${avatarMarkup}
     </button>`;
   }).join('');
@@ -3105,33 +3110,74 @@ function renderRepositories(items, progressData = portwatchData || PORTWATCH_FAL
 function formatNewsDate(value) {
   const source = String(value || '').trim();
   const locale = { pt: 'pt-BR', en: 'en', es: 'es', zh: 'zh-CN' }[state.language];
-  if (/^\d{4}-\d{2}-\d{2}$/.test(source)) {
+  const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(source);
+  const hasTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(source);
+  const hasTimeZone = /(?:Z|[+-]\d{2}:\d{2})$/i.test(source);
+  if (dateOnly) {
     const date = new Date(`${source}T12:00:00Z`);
-    return `${new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).format(date)} · ${t('horário não informado')}`;
+    return `${new Intl.DateTimeFormat(locale, {
+      dateStyle: 'medium',
+      timeZone: 'America/Sao_Paulo'
+    }).format(date)} · ${t('horário não informado')}`;
   }
   const date = new Date(source);
   if (Number.isNaN(date.getTime())) return source || t('Data não informada');
-  const formatted = new Intl.DateTimeFormat(locale, {
+  const options = {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
     timeZoneName: 'short'
-  }).format(date);
-  return `${formatted} · ${t('horário local')}`;
+  };
+  if (hasTimeZone) options.timeZone = 'America/Sao_Paulo';
+  const formatted = new Intl.DateTimeFormat(locale, options).format(date);
+  return hasTime && !hasTimeZone ? `${formatted} · ${t('horário local')}` : formatted;
+}
+
+function relativeNewsTime(value) {
+  const source = String(value || '').trim();
+  const locale = { pt: 'pt-BR', en: 'en', es: 'es', zh: 'zh-CN' }[state.language];
+  const relative = new Intl.RelativeTimeFormat(locale, { numeric: 'auto', style: 'short' });
+  if (/^\d{4}-\d{2}-\d{2}$/.test(source)) {
+    const [year, month, day] = source.split('-').map(Number);
+    const todayParts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Sao_Paulo',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).formatToParts(new Date());
+    const today = Object.fromEntries(todayParts.map((part) => [part.type, Number(part.value)]));
+    const eventDay = Date.UTC(year, month - 1, day);
+    const todayDay = Date.UTC(today.year, today.month - 1, today.day);
+    return relative.format(Math.round((eventDay - todayDay) / 86400000), 'day');
+  }
+  const timestamp = Date.parse(source);
+  if (!Number.isFinite(timestamp)) return '';
+  const difference = (timestamp - Date.now()) / 1000;
+  const absolute = Math.abs(difference);
+  const unit = absolute < 60
+    ? { name: 'second', seconds: 1 }
+    : absolute < 3600
+      ? { name: 'minute', seconds: 60 }
+      : absolute < 86400
+        ? { name: 'hour', seconds: 3600 }
+        : { name: 'day', seconds: 86400 };
+  return relative.format(Math.round(difference / unit.seconds), unit.name);
 }
 
 function publicationTimeMarkup(value, className = '') {
   const source = String(value || '').trim();
-  const hasTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/i.test(source);
+  const hasTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(source);
+  const hasTimeZone = /(?:Z|[+-]\d{2}:\d{2})$/i.test(source);
   const date = new Date(source);
   const isValid = !Number.isNaN(date.getTime());
-  const datetime = isValid ? (hasTime ? date.toISOString() : source) : '';
+  const datetime = isValid ? (hasTime && hasTimeZone ? date.toISOString() : source) : '';
   const title = hasTime && isValid
-    ? `UTC: ${date.toISOString()}`
+    ? (hasTimeZone ? `UTC: ${date.toISOString()}` : '')
     : t('A fonte não informou o horário de publicação.');
-  return `<time${className ? ` class="${escapeHtml(className)}"` : ''}${datetime ? ` datetime="${escapeHtml(datetime)}"` : ''} title="${escapeHtml(title)}">${escapeHtml(formatNewsDate(source))}</time>`;
+  const relative = relativeNewsTime(source);
+  return `<time${className ? ` class="${escapeHtml(className)}"` : ''}${datetime ? ` datetime="${escapeHtml(datetime)}"` : ''}${title ? ` title="${escapeHtml(title)}"` : ''}>${escapeHtml(formatNewsDate(source))}</time>${relative ? `<span class="publication-relative"> · ${escapeHtml(relative)}</span>` : ''}`;
 }
 
 function formatPercent(value) {
@@ -3272,8 +3318,8 @@ function renderXlaunchSpotlight(project, team, snapshot, modifier = '') {
       <div class="progress-label"><span>${escapeHtml(t('Estimativa editorial baseada em relato'))}</span><strong>${counterMarkup(percent, 'percent')}%</strong></div>
       <div class="progress-track" role="progressbar" aria-label="${escapeHtml(`${project.name}: ${formatPercent(percent)}% de estimativa editorial`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><span data-progress-value="${percent}"></span></div>
     </div>
-    <p class="xlaunch-spotlight-check">${escapeHtml(t('Progresso PortWatch/GitHub, incluindo preparação:'))} ${formatPercent(project.portwatchPercent)}% · ${escapeHtml(t('Marco GTA VI no snapshot:'))} ${formatPercent(project.portwatchMilestonePercent)}%${snapshotDate ? ` · ${escapeHtml(formatNewsDate(snapshotDate))}` : ''}</p>
-    ${checkMessage ? `<p class="xlaunch-spotlight-check">${escapeHtml(checkMessage)}${checkDate ? ` · ${escapeHtml(formatNewsDate(checkDate))}` : ''}</p>` : ''}
+    <p class="xlaunch-spotlight-check">${escapeHtml(t('Progresso PortWatch/GitHub, incluindo preparação:'))} ${formatPercent(project.portwatchPercent)}% · ${escapeHtml(t('Marco GTA VI no snapshot:'))} ${formatPercent(project.portwatchMilestonePercent)}%${snapshotDate ? ` · ${publicationTimeMarkup(snapshotDate)}` : ''}</p>
+    ${checkMessage ? `<p class="xlaunch-spotlight-check">${escapeHtml(checkMessage)}${checkDate ? ` · ${publicationTimeMarkup(checkDate)}` : ''}</p>` : ''}
     ${reportDate ? `<p class="xlaunch-spotlight-recorded">${escapeHtml(t('Relato registrado no portal:'))} ${publicationTimeMarkup(reportDate)}</p>` : ''}
     <div class="xlaunch-spotlight-links">
       ${repositoryUrl !== '#' ? `<a class="button primary-link" href="${escapeHtml(repositoryUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('GitHub do XlaunchVI ↗'))}</a>` : ''}
@@ -3427,7 +3473,7 @@ function renderXlaunchPage(data) {
       ${repositoryUrl !== '#' ? `<a class="button primary-link" href="${escapeHtml(repositoryUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Repositório de código'))} ↗</a>` : ''}
     </section>
     ${renderXlaunchReportPanel(teamReport, team)}
-    ${repositoryWarning ? `<p class="xlaunch-repository-warning xlaunch-repository-warning--report">${escapeHtml(repositoryWarning)}${repositoryAssessedAt ? ` · ${escapeHtml(t('Verificado em'))} ${escapeHtml(formatNewsDate(repositoryAssessedAt))}` : ''}</p>` : ''}
+    ${repositoryWarning ? `<p class="xlaunch-repository-warning xlaunch-repository-warning--report">${escapeHtml(repositoryWarning)}${repositoryAssessedAt ? ` · ${escapeHtml(t('Verificado em'))} ${publicationTimeMarkup(repositoryAssessedAt)}` : ''}</p>` : ''}
     <div class="xlaunch-overview-grid">
       <article class="panel xlaunch-project-card">
         <div class="xlaunch-project-heading">
@@ -3512,7 +3558,7 @@ function renderTrackerProjectCard(project, rank, leaderId) {
     <div class="repo-progress">
     <div class="progress-label"><span>${escapeHtml(t(inactive ? 'Último marco' : 'Marco atual'))} · ${escapeHtml(t(project.stage))}</span><b>${counterMarkup(projectPercent, 'percent')}%</b></div>
     <div class="progress-track" role="progressbar" aria-label="${escapeHtml(`${project.name}: ${formatPercent(projectPercent)}%`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${projectPercent}"><span data-progress-value="${projectPercent}"></span></div>
-      <small>${escapeHtml(project.verification)} · ${escapeHtml(t('Leitura do snapshot:'))} ${escapeHtml(formatNewsDate(trackerData && trackerData.updatedAt))}</small>
+      <small>${escapeHtml(project.verification)} · ${escapeHtml(t('Leitura do snapshot:'))} ${publicationTimeMarkup(trackerData && trackerData.updatedAt)}</small>
     </div>
   </article>`;
 }
@@ -3626,7 +3672,7 @@ function setupRaceControls() {
 function renderNews(data) {
   const headline = selectFeaturedStory(data);
   const sourceNote = t('Notícias traduzidas e relatos de equipe em PT-BR; confira fontes e rótulos de verificação em cada item.');
-  byId('news-source-note').innerHTML = `${escapeHtml(sourceNote)} <span>· ${escapeHtml(t('Atualizado em'))} ${escapeHtml(formatNewsDate(data.lastSyncedAt || data.updatedAt))} ·</span> <a href="data/tracker-pt-BR.json" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Dados localizados'))} ↗</a>`;
+  byId('news-source-note').innerHTML = `${escapeHtml(sourceNote)} <span>· ${escapeHtml(t('Atualizado em'))} ${publicationTimeMarkup(data.lastSyncedAt || data.updatedAt)} ·</span> <a href="data/tracker-pt-BR.json" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Dados localizados'))} ↗</a>`;
   if (headline) renderStoryFeature(headline, byId('news-feature'));
   byId('news-list').innerHTML = data.news.filter((story) => story !== headline).map((story) => renderStoryCard(story)).join('');
   window.KynosI18n.translateDom(byId('news-source-note'), state.language);
@@ -3686,6 +3732,8 @@ function renderTrackerDetails(data) {
     </article>`).join('');
   byId('tracker-updated').setAttribute('datetime', data.updatedAt || '');
   byId('tracker-updated').textContent = formatNewsDate(data.updatedAt);
+  const updatedRelative = relativeNewsTime(data.updatedAt);
+  byId('tracker-updated-relative').textContent = updatedRelative ? `(${updatedRelative})` : '';
   document.querySelectorAll('#tracker .tracker-content > *, #tracker .tracker-content article').forEach((element) => {
     window.KynosI18n.translateDom(element, state.language);
   });
@@ -3710,7 +3758,9 @@ function renderXclFeed(items, statusMessage) {
 }
 
 function formatFeedDate(value) {
-  return formatNewsDate(value);
+  const formatted = formatNewsDate(value);
+  const relative = relativeNewsTime(value);
+  return relative ? `${formatted} (${relative})` : formatted;
 }
 
 function xclItemToNews(item) {

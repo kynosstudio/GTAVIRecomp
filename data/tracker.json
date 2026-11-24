@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-24T20:59:04.000Z",
+  "updated": "2026-11-24T21:06:54.000Z",
   "site": {
     "title": "PortWatch VI",
     "heroImage": "assets/img/hero-miami.jpg"
@@ -638,46 +638,6 @@
   ],
   "efforts": [
     {
-      "id": "hyphennn",
-      "name": "hyphennn",
-      "manualScore": 65,
-      "repo": null,
-      "basedOn": [
-        "victory-gta6"
-      ],
-      "evidence": "Live streams on Rumble",
-      "byline": "Streams on Rumble as hyphennn · built on victory-gta6, a VIctory fork",
-      "tier": "tracked",
-      "summary": "A private build on the public victory-gta6 fork of VIctory, streamed on Rumble. In the opening prison scenes, shaders, ray tracing, lighting, textures and hair look very close to the console, but it runs at about 3 fps. Code not public.",
-      "highlights": [
-        "Lighting, shadows, textures and hair look very close to the console",
-        "Ray tracing seen working on his Rumble stream",
-        "Playable in the opening prison scenes, built on victory-gta6"
-      ],
-      "blockers": [
-        "Runs at about 3 fps",
-        "Small rendering glitches remain, and it isn't past the opening yet",
-        "No public code or build, so nobody can test it outside the streams"
-      ],
-      "provenOn": null,
-      "gta": {
-        "loads": 1,
-        "boots": 1,
-        "menu": 1,
-        "world": 1,
-        "playable": 1,
-        "story": 0,
-        "render": 0.75,
-        "fps": 3,
-        "stability": "unknown"
-      },
-      "verification": "self-reported",
-      "stats": {},
-      "assessedAt": "2026-11-24",
-      "assessedBy": "manual",
-      "claims": []
-    },
-    {
       "id": "omonkey",
       "name": "omonkey",
       "avatar": "assets/img/efforts/omonkey.jpg",
@@ -687,7 +647,7 @@
       ],
       "evidence": "Live streams on Rumble",
       "link": "news/2026-11-24-omonkey-shaders-prison.html",
-      "byline": "Streamed on Rumble by Swaggely · built on victory-gta6, a VIctory fork",
+      "byline": "Streamed on Rumble by Swaggely · built on hyphennn's victory-fork (formerly victory-gta6)",
       "tier": "tracked",
       "summary": "A developer who streams all his work live on Rumble, through Swaggely's channel. GTA VI's shaders have started loading properly, and a player moves slowly around the opening prison scene at about 5 fps. No public code.",
       "highlights": [
@@ -763,22 +723,22 @@
     },
     {
       "id": "victory-gta6",
-      "name": "victory-gta6",
-      "repo": "fxceless/victory-gta6",
+      "name": "hyphennn",
+      "repo": "fxceless/victory-fork",
       "branch": "main",
       "tier": "tracked",
       "approach": "Compatibility layer",
       "target": "GTA VI only",
-      "summary": "fxceless's fork of VIctory, with about 35,000 lines of its own rendering and speed fixes. Its README reports the prologue rendering with HUD, pause menu and pad input at 2-4 fps; shadowed areas are black. Self-reported.",
+      "summary": "hyphennn's fork of VIctory (formerly victory-gta6), with his own rendering and speed fixes. On his Rumble streams the prologue plays with ray-traced lighting, detailed textures and hair at about 3 fps; the README still lists shadows as black. Self-reported.",
       "highlights": [
-        "README reports the first gameplay scene rendering: characters, textures, sky, sunlit exterior",
-        "HUD, pause menu and pad input work; the opening cutscene plays through, lit",
+        "Streams show the prologue with ray-traced lighting, detailed textures and hair",
+        "README: the first gameplay scene renders, with HUD, pause menu and pad input working",
         "Its own fixes to meshlet culling, descriptor tables and untranslated shaders, on top of VIctory"
       ],
       "blockers": [
-        "2-4 fps, and everything in shadow is black: ray-traced lighting doesn't run yet",
-        "Tested on one PC (RTX 4070); not reproduced by others yet",
-        "Some fixes are shortcuts specific to this game and GPU, by its own account"
+        "About 3 fps (2.5-4 in its README)",
+        "The README hasn't caught up with the streams: it says shadows are black and ray tracing lights nothing yet",
+        "Tested on one PC (RTX 4070); not reproduced by others yet"
       ],
       "provenOn": null,
       "gta": {
@@ -788,16 +748,20 @@
         "world": 1,
         "playable": 1,
         "story": 0,
-        "render": 0.5,
+        "render": 0.7,
         "fps": 3,
         "stability": "unknown"
       },
       "verification": "self-reported",
+      "related": [
+        "fxceless/victory-gta6"
+      ],
       "stats": {
-        "stars": 179,
-        "forks": 24,
-        "openIssues": 11,
-        "pushedAt": "2026-11-24T19:32:07Z",
+        "stars": 721,
+        "forks": 145,
+        "openIssues": 57,
+        "createdAt": "2026-11-24T18:02:37Z",
+        "pushedAt": "2026-11-24T20:45:08Z",
         "archived": false,
         "missing": false
       },
@@ -6295,8 +6259,13 @@
     },
     {
       "date": "2026-11-24",
-      "kind": "up",
-      "text": "hyphennn's private build rises to 65%: on his Rumble stream the opening prison scenes now look very close to the console, with ray-traced lighting, detailed textures and hair, though at about 3 fps. Score 59.9% → 65%."
+      "kind": "flag",
+      "text": "hyphennn's private build re-rated at 59.8%: on his Rumble stream the opening prison scenes look very good, with ray-traced lighting and detailed textures and hair, but at about 3 fps."
+    },
+    {
+      "date": "2026-11-24",
+      "kind": "new",
+      "text": "hyphennn's build is public: victory-gta6 was renamed fxceless/victory-fork, the code behind his Rumble streams. The two entries are now one, and it leads the race at 59.8%. Its README still lists shadows as black; the streams show a newer build with ray-traced lighting."
     }
   ],
   "history": [
@@ -6326,11 +6295,11 @@
     },
     {
       "date": "2026-11-24",
-      "leader": 65,
-      "leaderId": "hyphennn",
-      "top3": 60.1,
+      "leader": 59.8,
+      "leaderId": "victory-gta6",
+      "top3": 57.4,
       "furthest": "playable",
-      "tracked": 33
+      "tracked": 32
     }
   ],
   "scout": {
