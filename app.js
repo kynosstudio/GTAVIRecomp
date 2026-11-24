@@ -145,11 +145,14 @@ let pageData = {};
 let portwatchData = null;
 let repositoryData = [];
 let newsData = null;
+let trackerData = null;
 
 const pageNames = {
-  home: 'Meu PC roda?',
-  repositories: 'Repositórios',
-  news: 'Blog e notícias',
+  home: 'Início',
+  utility: 'Meu PC Roda GTAVI',
+  repositories: 'Corrida dos projetos',
+  news: 'Notícias',
+  tracker: 'Monitoramento',
   discord: 'Comunidades'
 };
 
@@ -202,6 +205,72 @@ const byId = (id) => document.getElementById(id);
 const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const safeUrl = (value = '') => /^https?:\/\//i.test(value) || /^#[\w-]+$/.test(value) ? value : '#';
 const t = (value) => window.KynosI18n.translateText(value, state.language);
+const counterAnimations = new WeakMap();
+
+function counterMarkup(value, kind = 'integer') {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return escapeHtml(value);
+  return `<span class="count-up" data-count-value="${numeric}" data-count-kind="${kind}">0</span>`;
+}
+
+function formatCounter(value, kind) {
+  const locale = { pt: 'pt-BR', en: 'en', es: 'es', zh: 'zh-CN' }[state.language];
+  if (kind === 'percent') return Number(value).toLocaleString(locale, { maximumFractionDigits: 1 });
+  return Math.round(value).toLocaleString(locale);
+}
+
+function animateCounters(root) {
+  if (!root || !root.querySelectorAll) return;
+  root.querySelectorAll('[data-count-value]').forEach((element) => {
+    const value = Number(element.dataset.countValue);
+    if (!Number.isFinite(value)) return;
+    const previousAnimation = counterAnimations.get(element);
+    if (previousAnimation) cancelAnimationFrame(previousAnimation);
+    const kind = element.dataset.countKind || 'integer';
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion || value === 0) {
+      element.textContent = formatCounter(value, kind);
+      counterAnimations.delete(element);
+      return;
+    }
+    element.textContent = formatCounter(0, kind);
+    const duration = 650;
+    const startTime = performance.now();
+    const tick = (now) => {
+      const progress = Math.min(1, (now - startTime) / duration);
+      const eased = 1 - ((1 - progress) ** 3);
+      element.textContent = formatCounter(value * eased, kind);
+      if (progress < 1) counterAnimations.set(element, requestAnimationFrame(tick));
+      else {
+        element.textContent = formatCounter(value, kind);
+        counterAnimations.delete(element);
+      }
+    };
+    counterAnimations.set(element, requestAnimationFrame(tick));
+  });
+}
+
+function animateProgress(root) {
+  if (!root || !root.querySelectorAll) return;
+  root.querySelectorAll('[data-progress-value]').forEach((bar) => {
+    const value = Number(bar.dataset.progressValue);
+    if (!Number.isFinite(value)) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    bar.style.width = reduceMotion ? `${value}%` : '0%';
+    if (!reduceMotion) requestAnimationFrame(() => { bar.style.width = `${value}%`; });
+  });
+}
+
+function attachAvatarFallbacks(root) {
+  root.querySelectorAll('.home-leader-avatar img').forEach((image) => {
+    const showFallback = () => {
+      image.hidden = true;
+      image.nextElementSibling.hidden = false;
+    };
+    image.addEventListener('error', showFallback, { once: true });
+    if (image.complete && !image.naturalWidth) showFallback();
+  });
+}
 
 function readAnalyticsEvents() {
   const raw = localStorage.getItem(ANALYTICS_KEY);
@@ -236,8 +305,8 @@ function trackEvent(type, label, details = {}) {
 function applyLanguage() {
   const htmlLanguage = { pt: 'pt-BR', en: 'en', es: 'es', zh: 'zh-CN' }[state.language];
   document.documentElement.lang = htmlLanguage;
-  document.title = t('Kynos GTA VI Recomp — Kynos Studios');
-  document.querySelector('meta[name="description"]').content = t('Kynos GTA VI Recomp: estimativas técnicas para GTA VI no PC, projetos, notícias e comunidades.');
+  document.title = t('KynosRecompVI — Notícias e corrida por GTA VI');
+  document.querySelector('meta[name="description"]').content = t('KynosRecompVI: notícias em português, acompanhamento da corrida de projetos de GTA VI e utilidade de simulação de PC.');
   const languageSelect = byId('language-select');
   if (languageSelect) languageSelect.value = state.language;
   window.KynosI18n.translateDom(document.body, state.language);
@@ -245,8 +314,12 @@ function applyLanguage() {
     filterHardwareOptions('cpu');
     filterHardwareOptions('gpu');
   }
-  if (repositoryData.length) renderRepositories(repositoryData, portwatchData || PORTWATCH_FALLBACK);
-  if (newsData) renderNews(newsData);
+  if (trackerData) {
+    renderPortalHome(trackerData);
+    renderTrackerProjects(trackerData);
+    renderNews(trackerData);
+    renderTrackerDetails(trackerData);
+  }
   if (xclFeedLoaded && byId('xcl-news-list')) renderXclFeed(xclFeedItems, xclFeedStatusRaw);
 }
 
@@ -696,9 +769,7 @@ function calculate(options = {}) {
           : score >= 75
             ? 'Alguns ajustes podem ajudar a manter a experiência mais estável.'
             : 'Reduza a meta gráfica ou priorize o componente limitante.';
-  const fpsValues = isCompatible
-    ? [target.fps.minimum, target.fps.average, target.fps.low].map((fps) => Math.round(fps * finalRatio))
-    : null;
+  const fpsValues = [target.fps.minimum, target.fps.average, target.fps.low].map((fps) => Math.max(0, Math.round(fps * finalRatio)));
   const evaluation = {
     setup,
     target,
@@ -727,15 +798,22 @@ function calculate(options = {}) {
   };
   if (options.render === false) return evaluation;
 
-  byId('score-value').textContent = score;
+  byId('score-value').innerHTML = counterMarkup(score);
   byId('score-ring').style.setProperty('--score', `${Math.min(score, 100)}%`);
-  byId('status-label').textContent = status;
+  byId('status-label').textContent = t(status);
   byId('status-label').style.color = statusColor;
   byId('result-status-dot').style.background = statusColor;
-  byId('result-headline').innerHTML = `${escapeHtml(target.name)}<br />${score >= 95 && isCompatible ? 'é uma boa meta.' : 'exige ajustes.'}`;
-  byId('result-summary').textContent = summary;
-  byId('fps-values').textContent = fpsValues ? fpsValues.join(' / ') : 'Indisponível';
+  byId('result-headline').textContent = t(target.name);
+  byId('result-summary').textContent = t(summary);
+  byId('fps-average').innerHTML = counterMarkup(fpsValues[1]);
+  byId('fps-resolution').textContent = t(target.name);
+  byId('fps-values').innerHTML = fpsValues.map((fps) => counterMarkup(fps)).join(' / ');
   byId('fps-panel').classList.toggle('fps-incompatible', !isCompatible);
+  byId('summary-cpu').textContent = t(cpu.name);
+  byId('summary-gpu').textContent = `${gpu.integrated ? `${t('GPU integrada')} · ` : ''}${t(gpu.name)}`;
+  byId('summary-ram').textContent = `${ramCapacity} GB ${ramGeneration.name} · ${frequency.mhz.toLocaleString('pt-BR')} MHz · ${t(channel === 'dual' ? 'Canal duplo' : 'Canal único')}`;
+  byId('summary-storage').textContent = `${t(storage.name)} · ${freeSpace} GB ${t('livres')}`;
+  byId('summary-os').textContent = `${t(os.name)} · ${t(background.name)}`;
   byId('bandwidth-value').textContent = `${bandwidth.toFixed(1).replace('.', ',')} GB/s`;
   byId('memory-detail').textContent = reference ? `${ramCapacity} GB ${ramGeneration.name} · ${Math.round(bandwidth)} GB/s · console` : `${ramCapacity} GB ${ramGeneration.name} · ${frequency.mhz.toLocaleString('pt-BR')} MHz · ${channel === 'dual' ? 'canal duplo' : 'canal único'}`;
   byId('factor-list').innerHTML = factors.map((factor) => {
@@ -761,6 +839,8 @@ function calculate(options = {}) {
           ? `${bottleneck.label}: ${Math.round(bottleneck.score * 100)}% da referência escolhida para a meta.`
           : 'Nenhum componente está significativamente abaixo da referência escolhida.';
   renderRecommendations({ gpu, cpu, ramCapacity, ramGeneration, frequency, referenceMhz, memoryCompatible, storage, storageRatio, freeSpace, target, targetStorage, factors, bottleneckLabel, isCompatible, channel, backgroundId: setup.backgroundId });
+  window.KynosI18n.translateDom(byId('result-panel'), state.language);
+  animateCounters(byId('result-panel'));
   if (options.trackSimulation !== false) {
     trackEvent('simulation', target.name, {
       target: target.name,
@@ -852,7 +932,7 @@ function defaultPresets() {
 
 function validatePresetCollection(value) {
   if (!value || value.version !== 1 || !Array.isArray(value.presets) || value.presets.length > 50) {
-    throw new Error(t('O arquivo não contém uma lista de presets Kynos válida.'));
+    throw new Error(t('O arquivo não contém uma lista de presets KynosRecompVI válida.'));
   }
   const ids = new Set();
   const presets = value.presets.map((preset) => {
@@ -1168,7 +1248,7 @@ function buildShareSummary() {
   const background = hardware.backgroundUsage.find((item) => item.id === setup.backgroundId);
   const disclaimer = 'Aviso: estimativa baseada em equivalência de consoles; a Rockstar Games ainda não divulgou requisitos oficiais para PC.';
   return [
-    `Kynos GTA VI Recomp · ${t('Meta de desempenho')}: ${t(result.target.name)}`,
+    `KynosRecompVI · ${t('Meta de desempenho')}: ${t(result.target.name)}`,
     `${t('Processador')}: ${t(cpu.name)}`,
     `${t('Placa de vídeo')}: ${t(gpu.name)}`,
     `${t('Memória RAM')}: ${setup.ramGb} GB ${t(setup.ramGeneration.toUpperCase())} · ${setup.ramMhz.toLocaleString('pt-BR')} MHz · ${t(setup.channel === 'dual' ? 'Canal duplo' : 'Canal único')}`,
@@ -1290,7 +1370,7 @@ function initAdvancedTools() {
   byId('preset-list').addEventListener('submit', commitPresetRename);
   byId('preset-export').addEventListener('click', () => {
     try {
-      downloadJsonFile('kynos-pc-presets.json', { version: 1, exportedAt: new Date().toISOString(), presets: getPresets() });
+      downloadJsonFile('kynosrecompvi-presets-pc.json', { version: 1, exportedAt: new Date().toISOString(), presets: getPresets() });
       byId('preset-status').textContent = t('Presets exportados em JSON.');
     } catch (error) {
       console.error('Não foi possível exportar os presets:', error);
@@ -1626,35 +1706,166 @@ function renderRepositories(items, progressData = portwatchData || PORTWATCH_FAL
 }
 
 function formatNewsDate(value) {
-  const date = new Date(`${value}T12:00:00`);
+  const date = new Date(/^\d{4}-\d{2}-\d{2}$/.test(String(value)) ? `${value}T12:00:00` : value);
   if (Number.isNaN(date.getTime())) return String(value || '');
   const locale = { pt: 'pt-BR', en: 'en', es: 'es', zh: 'zh-CN' }[state.language];
   return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
 }
 
-function renderNews(data) {
-  const headline = data.headline;
-  const headlineUrl = safeUrl(headline.url);
-  const sourceUrl = safeUrl(data.sourceUrl);
-  const sourceNote = localizedValue(data, 'sourceNote');
-  byId('news-source-note').innerHTML = `${escapeHtml(sourceNote || '')} <span>· ${escapeHtml(t('Atualizado em'))} ${escapeHtml(formatNewsDate(data.updatedAt))} ·</span> <a href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('PortWatch VI'))} ↗</a>`;
-  byId('news-feature').innerHTML = `
+function formatPercent(value) {
+  return Number(value).toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+}
+
+function renderStoryFeature(story, target) {
+  target.innerHTML = `
     <div class="news-feature-content">
-      <div class="news-feature-meta"><span class="news-feature-kicker">${escapeHtml(t('Manchete principal'))}</span><span class="news-category">${escapeHtml(t(localizedValue(headline, 'category')))}</span><time>${escapeHtml(formatNewsDate(headline.date))}</time></div>
-      <h3>${escapeHtml(t(localizedValue(headline, 'title')))}</h3>
-      <p>${escapeHtml(t(localizedValue(headline, 'summary')))}</p>
-      <a class="text-link" href="${escapeHtml(headlineUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t(localizedValue(headline, 'linkLabel')))} ↗</a>
+      <div class="news-feature-meta"><span class="news-feature-kicker">${escapeHtml(t('Manchete em destaque'))}</span><span class="news-category">${escapeHtml(t(story.category))}</span><time>${escapeHtml(formatNewsDate(story.date))}</time></div>
+      <h3>${escapeHtml(story.title)}</h3>
+      <p>${escapeHtml(story.summary)}</p>
+      <div class="news-source-links">${(story.sources || []).map((source) => `<a class="text-link" href="${escapeHtml(safeUrl(source.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(source.title)}">${escapeHtml(source.outlet)} ↗</a>`).join('')}</div>
     </div>
-    <div class="news-feature-stamp" aria-hidden="true"><span>PORTWATCH VI</span><strong>LEONIDA</strong><small>23 · 11 · 2026</small></div>`;
-  byId('news-list').innerHTML = (Array.isArray(data.topThree) ? data.topThree : []).map((item) => `
-    <article class="news-card">
-      <div class="news-card-top"><span class="news-category">${escapeHtml(t(localizedValue(item, 'category')))}</span><time>${escapeHtml(formatNewsDate(item.date))}</time></div>
-      <h3>${escapeHtml(t(localizedValue(item, 'title')))}</h3><p>${escapeHtml(t(localizedValue(item, 'summary')))}</p>
-      <a class="text-link" href="${escapeHtml(safeUrl(item.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t(localizedValue(item, 'linkLabel') || 'Ver repositório'))} ↗</a>
-    </article>`).join('');
-  window.KynosI18n.translateDom(byId('news-feature'), state.language);
+    <div class="news-feature-stamp" aria-hidden="true"><span>KYNOSRECOMPVI</span><strong>LEONIDA</strong><small>${escapeHtml(formatNewsDate(story.date))}</small></div>`;
+  window.KynosI18n.translateDom(target, state.language);
+}
+
+function renderStoryCard(story, featured = false) {
+  return `<article class="news-card ${featured ? 'news-card--featured' : ''}">
+    <div class="news-card-top"><span class="news-category">${escapeHtml(t(story.category))}</span><time>${escapeHtml(formatNewsDate(story.date))}</time></div>
+    <h3>${escapeHtml(story.title)}</h3>
+    <p>${escapeHtml(story.summary)}</p>
+    <div class="news-source-links">${(story.sources || []).map((source) => `<a class="text-link" href="${escapeHtml(safeUrl(source.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(source.title)}">${escapeHtml(source.outlet)} ↗</a>`).join('')}</div>
+  </article>`;
+}
+
+function renderPortalHome(data) {
+  const lead = data.news.find((story) => story.id === '2026-11-23-leonida-nuked') || data.news[0];
+  if (lead) renderStoryFeature(lead, byId('home-feature'));
+  const latest = data.news.filter((story) => story !== lead).slice(0, 3);
+  byId('home-news-list').innerHTML = latest.map((story) => renderStoryCard(story)).join('');
+  window.KynosI18n.translateDom(byId('home-news-list'), state.language);
+
+  const projects = data.efforts.filter((project) => project.status !== 'offline')
+    .slice().sort((left, right) => right.percent - left.percent || left.name.localeCompare(right.name));
+  const leader = projects[0];
+  const owner = leader && leader.repo ? leader.repo.split('/')[0] : '';
+  const avatarUrl = /^[\w-]+$/.test(owner) ? `https://github.com/${encodeURIComponent(owner)}.png?size=96` : '';
+  const initials = leader ? leader.name.slice(0, 2).toUpperCase() : '—';
+  byId('home-progress-summary').innerHTML = leader ? `
+    <article class="home-leader">
+      <div class="home-leader-heading">
+        <div class="home-leader-identity">
+          <span class="home-leader-avatar">${avatarUrl ? `<img src="${escapeHtml(avatarUrl)}" alt="" loading="lazy" decoding="async">` : ''}<span class="home-leader-avatar-fallback" ${avatarUrl ? 'hidden' : ''}>${escapeHtml(initials)}</span></span>
+          <div><span class="section-kicker">${escapeHtml(t('Projeto mais avançado'))}</span><h3>${escapeHtml(leader.name)}</h3><span class="repo-slug">${escapeHtml(leader.repo)}</span></div>
+        </div>
+        <strong class="home-leader-percent">${counterMarkup(leader.percent, 'percent')}%</strong>
+      </div>
+      <div class="home-leader-progress" role="progressbar" aria-label="${escapeHtml(`${leader.name}: ${formatPercent(leader.percent)}%`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Number(leader.percent) || 0}"><span data-progress-value="${Number(leader.percent) || 0}"></span></div>
+      <div class="home-leader-milestone"><span>${escapeHtml(t('Marco atual'))}</span><strong>${escapeHtml(t(leader.stage))}</strong></div>
+      <p class="home-leader-verification">${escapeHtml(leader.verification)}</p>
+      ${leader.url ? `<a class="text-link" href="${escapeHtml(safeUrl(leader.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Repositório original'))} ↗</a>` : ''}
+    </article>
+    <p class="tracker-data-note">${escapeHtml(t('Relatos autodeclarados; percentuais conforme o snapshot do tracker.'))}</p>` : `<p>${escapeHtml(t('Sem dados de projetos'))}</p>`;
+  window.KynosI18n.translateDom(byId('home-progress-summary'), state.language);
+  attachAvatarFallbacks(byId('home-progress-summary'));
+  animateCounters(byId('home-progress-summary'));
+  animateProgress(byId('home-progress-summary'));
+}
+
+function renderTrackerProjectCard(project, rank, leaderId) {
+  const inactive = project.status === 'offline';
+  const featured = !inactive && project.id === leaderId;
+  const badge = inactive ? t('Fora do ar') : `${formatPercent(project.percent)}% · ${t(project.stage)}`;
+  const stats = [
+    project.stars != null ? `${counterMarkup(project.stars)} ${escapeHtml(t('estrelas'))}` : '',
+    project.forks != null ? `${counterMarkup(project.forks)} ${escapeHtml(t('forks'))}` : ''
+  ].filter(Boolean).join(' · ');
+  return `<article class="repo-card tracker-project-card ${inactive ? 'repo-card--inactive' : ''} ${featured ? 'tracker-project--featured' : ''}">
+    <div class="rank-badge ${inactive ? 'inactive-badge' : ''}">${inactive ? t('FORA') : `#${rank}`}</div>
+    <div class="repo-main">
+      <div class="repo-title-row"><div><h3>${escapeHtml(project.name)}</h3><span class="repo-slug">${escapeHtml(project.repo)}</span></div></div>
+      <div class="badge-row"><span class="status-badge ${featured || inactive ? 'warning' : 'accent'}">${escapeHtml(featured ? t('Projeto mais avançado') : badge)}</span><span class="status-badge">${escapeHtml(t(project.tier === 'tracked' ? 'Projeto acompanhado' : 'Em observação'))}</span><span class="status-badge">${escapeHtml(t('Relato não verificado independentemente'))}</span></div>
+      <p class="repo-description">${escapeHtml(project.summary)}</p>
+      ${inactive ? `<p class="repo-inactive-note">${escapeHtml(t('Registro histórico: fora do ar e excluído do ranking ativo.'))}</p>` : ''}
+      ${stats ? `<p class="repo-author">${escapeHtml(stats)} · ${escapeHtml(t('snapshot, não ao vivo'))}</p>` : ''}
+      <div class="repo-links">${project.url ? `<a class="button primary-link" href="${escapeHtml(safeUrl(project.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Repositório original'))} ↗</a>` : ''}</div>
+    </div>
+    <div class="repo-progress">
+    <div class="progress-label"><span>${escapeHtml(t(inactive ? 'Último marco' : 'Marco atual'))} · ${escapeHtml(t(project.stage))}</span><b>${counterMarkup(project.percent, 'percent')}%</b></div>
+    <div class="progress-track" role="progressbar" aria-label="${escapeHtml(`${project.name}: ${formatPercent(project.percent)}%`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${project.percent}"><span data-progress-value="${Number(project.percent) || 0}"></span></div>
+      <small>${escapeHtml(project.verification)}</small>
+    </div>
+  </article>`;
+}
+
+function renderTrackerProjects(data) {
+  const projects = data.efforts.slice().sort((left, right) => right.percent - left.percent || left.name.localeCompare(right.name));
+  const active = projects.filter((project) => project.status !== 'offline');
+  const inactive = projects.filter((project) => project.status === 'offline');
+  const top = active.slice(0, 5);
+  const leader = active[0];
+  const runnerUp = active[1];
+  byId('repo-count').innerHTML = counterMarkup(active.length);
+  byId('tracker-race-summary').innerHTML = `
+    <article class="panel race-summary-card race-summary-card--featured"><span class="section-kicker">${escapeHtml(t('Projeto mais avançado'))}</span><strong>${leader ? `${escapeHtml(leader.name)} · ${counterMarkup(leader.percent, 'percent')}%` : '—'}</strong><p>${leader ? escapeHtml(t(leader.stage)) : escapeHtml(t('Sem dados de projetos'))}</p></article>
+    <article class="panel race-summary-card"><span class="section-kicker">${escapeHtml(t('Segundo projeto ativo'))}</span><strong>${runnerUp ? `${escapeHtml(runnerUp.name)} · ${counterMarkup(runnerUp.percent, 'percent')}%` : '—'}</strong><p>${runnerUp ? escapeHtml(t(runnerUp.stage)) : ''}</p></article>
+    <article class="panel race-summary-card"><span class="section-kicker">${escapeHtml(t('Projetos acompanhados'))}</span><strong>${counterMarkup(projects.length)}</strong><p>${inactive.length} ${escapeHtml(t('fora do ar, sem contar no ranking ativo'))}</p></article>`;
+  byId('repository-list').innerHTML = top.map((project, index) => renderTrackerProjectCard(project, index + 1, leader && leader.id)).join('');
+  byId('tracker-all-projects').innerHTML = active.slice(top.length).map((project, index) => renderTrackerProjectCard(project, top.length + index + 1, leader && leader.id)).join('');
+  byId('tracked-project-count').textContent = `${active.length - top.length} ${t('outros projetos')}`;
+  byId('inactive-repositories').hidden = inactive.length === 0;
+  byId('inactive-repository-list').innerHTML = inactive.map((project) => renderTrackerProjectCard(project, 0, leader && leader.id)).join('');
+  window.KynosI18n.translateDom(byId('tracker-race-summary'), state.language);
+  window.KynosI18n.translateDom(byId('repository-list'), state.language);
+  window.KynosI18n.translateDom(byId('tracker-all-projects'), state.language);
+  window.KynosI18n.translateDom(byId('inactive-repositories'), state.language);
+  animateCounters(byId('tracker-race-summary'));
+  animateCounters(byId('repository-list'));
+  animateCounters(byId('tracker-all-projects'));
+  animateCounters(byId('inactive-repositories'));
+  animateProgress(byId('repository-list'));
+  animateProgress(byId('tracker-all-projects'));
+  animateProgress(byId('inactive-repositories'));
+}
+
+function renderNews(data) {
+  const headline = data.news.find((story) => story.id === '2026-11-23-leonida-nuked') || data.news[0];
+  const sourceNote = t('Resumos em PT-BR preparados a partir do tracker; consulte as fontes originais em cada notícia.');
+  byId('news-source-note').innerHTML = `${escapeHtml(sourceNote)} <span>· ${escapeHtml(t('Atualizado em'))} ${escapeHtml(formatNewsDate(data.updatedAt))} ·</span> <a href="data/tracker-pt-BR.json" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Dados localizados'))} ↗</a>`;
+  if (headline) renderStoryFeature(headline, byId('news-feature'));
+  byId('news-list').innerHTML = data.news.filter((story) => story !== headline).map((story) => renderStoryCard(story)).join('');
   window.KynosI18n.translateDom(byId('news-source-note'), state.language);
   window.KynosI18n.translateDom(byId('news-list'), state.language);
+}
+
+function renderTrackerDetails(data) {
+  const exe = data.exe;
+  byId('tracker-exe').innerHTML = `
+    <span class="section-kicker">${escapeHtml(t('STATUS DO EXECUTÁVEL'))}</span>
+    <h2>${escapeHtml(t(exe.status))}</h2>
+    <p>${escapeHtml(exe.summary)}</p>
+    <p class="tracker-safety-warning"><b>${escapeHtml(t('Alerta de segurança'))}</b> ${escapeHtml(exe.safety)}</p>
+    <a class="text-link" href="${escapeHtml(safeUrl(exe.source))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Ler fonte citada'))} ↗</a>`;
+  byId('tracker-scout').innerHTML = `
+    <span class="section-kicker">${escapeHtml(t('VIGILÂNCIA COMUNITÁRIA'))}</span>
+    <h2>${escapeHtml(t('Scout e triagem'))}</h2>
+    <p>${escapeHtml(exe ? data.scout.summary : '')}</p>
+    <div class="tracker-tags">${data.scout.sources.map((source) => `<span>${escapeHtml(source)}</span>`).join('')}</div>
+    <small>${escapeHtml(t('Última varredura'))}: ${escapeHtml(formatNewsDate(data.scout.lastRun))} · ${data.candidates} ${escapeHtml(t('novos candidatos aguardam confirmação'))}</small>`;
+  byId('tracker-changes').innerHTML = data.changes.slice().reverse().map((change) => `
+    <article class="tracker-change panel"><span class="tracker-change-kind">${escapeHtml(t(change.kind))}</span><time>${escapeHtml(formatNewsDate(change.date))}</time><p>${escapeHtml(change.summary)}</p></article>`).join('');
+  byId('tracker-tools').innerHTML = data.tools.map((tool) => `
+    <article class="tracker-tool panel"><span class="section-kicker">${escapeHtml(t(tool.kind))}</span><h3>${escapeHtml(tool.name)}</h3><p>${escapeHtml(tool.description)}</p><a class="text-link" href="${escapeHtml(safeUrl(tool.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(tool.repo)} ↗</a></article>`).join('');
+  byId('tracker-flagged').innerHTML = data.flagged.map((item) => `
+    <article class="tracker-alert panel"><span class="status-badge warning">${item.count ? `${item.count} ${escapeHtml(t('itens sinalizados'))}` : escapeHtml(t('Alerta'))}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.summary)}</p>${item.examples.length ? `<small>${escapeHtml(t('Exemplos'))}: ${item.examples.map(escapeHtml).join(' · ')}</small>` : ''}</article>`).join('');
+  byId('tracker-ignored').innerHTML = `<span class="section-kicker">${escapeHtml(t('TRIAGEM'))}</span><strong>${data.ignored.count} ${escapeHtml(t('itens ignorados ou não confirmados'))}</strong><p>${escapeHtml(data.ignored.summary)}</p>`;
+  byId('tracker-dmca').innerHTML = data.dmca.map((item) => `
+    <article class="tracker-dmca panel"><span class="section-kicker">${escapeHtml(formatNewsDate(item.date))}</span><strong>${item.repositories} ${escapeHtml(t('repositórios de GTA VI associados'))}</strong><p>${escapeHtml(item.summary)}</p><a class="text-link" href="${escapeHtml(safeUrl(item.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Abrir registro público'))} ↗</a></article>`).join('');
+  byId('tracker-headlines').innerHTML = data.headlines.slice(0, 12).map((headline) => `
+    <article class="tracker-headline panel"><span>${escapeHtml(headline.outlet)} · ${escapeHtml(formatNewsDate(headline.date))}</span><h3>${escapeHtml(headline.title)}</h3><a class="text-link" href="${escapeHtml(safeUrl(headline.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Fonte original'))} ↗</a></article>`).join('');
+  byId('tracker-updated').textContent = formatNewsDate(data.updatedAt);
+  document.querySelectorAll('#tracker .tracker-content > *, #tracker .tracker-content article').forEach((element) => {
+    window.KynosI18n.translateDom(element, state.language);
+  });
 }
 
 function renderXclFeed(items, statusMessage) {
@@ -1855,7 +2066,7 @@ function setupXclFeed() {
   });
   byId('xcl-feed-refresh').addEventListener('click', () => refreshXclFeed(true));
   byId('xcl-feed-export').addEventListener('click', () => {
-    downloadJsonFile('xcl-news-summary.json', xclFeedItems.map(xclItemToNews));
+    downloadJsonFile('kynosrecompvi-xcl-news.json', xclFeedItems.map(xclItemToNews));
     trackEvent('click', 'Exportar resumo JSON do XCL', { count: xclFeedItems.length });
   });
   byId('xcl-news-list').addEventListener('click', async (event) => {
@@ -2028,7 +2239,7 @@ function bindAnalyticsControls() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `kynos-analytics-${new Date().toISOString().slice(0, 10)}.json`;
+      link.download = `kynosrecompvi-analytics-${new Date().toISOString().slice(0, 10)}.json`;
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
       byId('analytics-status').textContent = t('Relatório JSON exportado.');
@@ -2047,7 +2258,7 @@ function bindAnalyticsControls() {
         const report = JSON.parse(String(reader.result));
         if (report.version !== 1 || !Array.isArray(report.events) || report.events.some((item) =>
           !item || typeof item.type !== 'string' || typeof item.label !== 'string' || typeof item.timestamp !== 'string')) {
-          throw new Error(t('O JSON não contém um relatório Kynos válido.'));
+          throw new Error(t('O JSON não contém um relatório KynosRecompVI válido.'));
         }
         const events = report.events.slice(-MAX_ANALYTICS_EVENTS);
         localStorage.setItem(ANALYTICS_KEY, JSON.stringify({ version: 1, events }));
@@ -2103,40 +2314,38 @@ async function init() {
   initializeTheme();
   applyLanguage();
   setupLogoFallback();
-  const progressTask = (window.location.protocol === 'file:'
-    ? Promise.resolve(PORTWATCH_FALLBACK)
-    : loadJson('data/portwatch-progress.json'))
-    .then((data) => {
-      portwatchData = data;
-      renderPortwatchProgress(data);
-      if (repositoryData.length) renderRepositories(repositoryData, data);
-    })
-    .catch(renderPortwatchError);
   try {
-    const [hardwareData, repositories, news, discords] = await Promise.all([
-      loadJson('data/hardware.json'),
-      loadJson('data/repositories.json'),
-      window.location.protocol === 'file:' ? Promise.resolve(NEWS_FALLBACK) : loadJson('data/news.json'),
-      loadJson('data/discords.json')
-    ]);
-    hardware = hardwareData;
+    let data;
+    if (window.location.protocol === 'file:') {
+      await window.KynosFileDataReady;
+      data = window.KynosFileData;
+      if (!data) throw new Error('O fallback local não foi inicializado.');
+    } else {
+      const [hardwareData, discords, tracker] = await Promise.all([
+        loadJson('data/hardware.json'),
+        loadJson('data/discords.json'),
+        loadJson('data/tracker-pt-BR.json')
+      ]);
+      data = { hardware: hardwareData, discords, tracker };
+    }
+    hardware = data.hardware;
+    trackerData = data.tracker;
     renderHardware();
-    repositoryData = repositories;
-    renderRepositories(repositories, portwatchData || PORTWATCH_FALLBACK);
-    newsData = news;
-    renderNews(news);
+    renderPortalHome(trackerData);
+    renderTrackerProjects(trackerData);
+    renderNews(trackerData);
+    renderTrackerDetails(trackerData);
     setupXclFeed();
-    renderDiscords(discords);
+    renderDiscords(data.discords);
     initAdvancedTools();
     loadSharedSetup();
     const initialPage = window.location.hash.slice(1);
     setPage(initialPage || 'home', false);
   } catch (error) {
     console.error(error);
-    document.querySelector('main').insertAdjacentHTML('afterbegin', '<p class="load-error">Não foi possível carregar o conteúdo. Abra o site em um servidor local e confira os arquivos da pasta data/.</p>');
+    document.querySelector('main').insertAdjacentHTML('afterbegin', '<p class="load-error">Não foi possível carregar o conteúdo. Confira os arquivos JSON da pasta data/ e, ao abrir com file://, gere data/file-fallback.js com scripts/build_tracker_ptbr.py.</p>');
     applyLanguage();
   }
-  await progressTask;
 }
 
 document.body.addEventListener('click', (event) => {
