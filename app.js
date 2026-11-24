@@ -604,7 +604,7 @@ function filterHardwareOptions(kind) {
   clearButton.hidden = !activeFilter;
   count.textContent = matchingOptions.length
     ? `${matchingOptions.length} ${t(matchingOptions.length === 1 ? 'modelo encontrado' : 'modelos encontrados')}`
-    : t('Nenhum modelo encontrado. A seleção atual foi mantida.');
+    : t('Nenhum modelo encontrado. Limpe a busca ou ajuste os filtros.');
   select.disabled = !matchingOptions.length;
   if (previousValue !== select.value) {
     select.dispatchEvent(new Event('change', { bubbles: true }));
@@ -1456,6 +1456,17 @@ function progressPercent(value) {
 }
 
 function portwatchMilestone(project, milestones) {
+  const projectProgress = Number(project && project.percent);
+  if (Number.isFinite(projectProgress)) {
+    const reached = milestones
+      .filter((milestone) => progressPercent(milestone.percent) <= progressPercent(projectProgress))
+      .sort((left, right) => progressPercent(right.percent) - progressPercent(left.percent))[0];
+    return {
+      ...(reached || milestones.find((milestone) => progressPercent(milestone.percent) === 0) || { label: 'Preparação', percent: 0 }),
+      percent: progressPercent(projectProgress),
+      label: project.stage || (reached && reached.label) || 'Preparação'
+    };
+  }
   const gta = project.gta || {};
   return milestones
     .filter((milestone) => !milestone.statusField || gta[milestone.statusField] === milestone.statusValue)
@@ -1465,7 +1476,9 @@ function portwatchMilestone(project, milestones) {
 }
 
 function portwatchProjectProgress(project, milestones) {
-  return progressPercent(portwatchMilestone(project, milestones).percent);
+  return progressPercent(project && project.percent != null
+    ? project.percent
+    : portwatchMilestone(project, milestones).percent);
 }
 
 function isInactiveProject(project) {
@@ -1474,52 +1487,71 @@ function isInactiveProject(project) {
     || Boolean(project && (project.nuked || project.removed || project.takedown));
 }
 
-function renderPortwatchProgress(data) {
+function renderPortwatchProgress(data, snapshot = trackerData) {
   const section = byId('portwatch-progress');
-  const projects = Array.isArray(data.projects) ? data.projects : [];
   const milestones = Array.isArray(data.milestones) ? data.milestones : [];
+  const legacyProjects = Array.isArray(data.projects) ? data.projects : [];
+  const legacyById = new Map(legacyProjects.map((project) => [project.id, project]));
+  const sourceProjects = snapshot && Array.isArray(snapshot.efforts) && snapshot.efforts.length
+    ? snapshot.efforts
+    : legacyProjects;
+  const projects = sourceProjects.map((project) => {
+    const legacy = legacyById.get(project.id) || {};
+    const owner = String(project.repo || legacy.repo || '').split('/')[0];
+    const avatarUrl = legacy.avatarUrl || (/^[\w-]+$/.test(owner) ? `https://github.com/${encodeURIComponent(owner)}.png?size=88` : '');
+    return {
+      ...legacy,
+      ...project,
+      author: project.author || legacy.author || owner,
+      avatar: project.avatar || legacy.avatar || String(project.name || '').slice(0, 2).toUpperCase(),
+      avatarUrl,
+      status: isInactiveProject(project) || isInactiveProject(legacy) ? 'offline' : project.status || legacy.status || ''
+    };
+  }).filter((project) => project.name);
   const rankedProjects = projects.filter((project) => !isInactiveProject(project)).slice()
-    .sort((left, right) => portwatchProjectProgress(right, milestones) - portwatchProjectProgress(left, milestones));
-  const leaderProject = projects.find((project) => project.id === data.leaderId && !isInactiveProject(project)) || rankedProjects[0];
+    .sort((left, right) => portwatchProjectProgress(right, milestones) - portwatchProjectProgress(left, milestones)
+      || left.name.localeCompare(right.name));
+  const leaderProject = rankedProjects[0];
   const leaderMilestone = leaderProject ? portwatchMilestone(leaderProject, milestones) : null;
-  const progress = progressPercent(data.overallProgress ?? (leaderProject ? leaderMilestone.percent : 0));
+  const progress = leaderProject ? portwatchProjectProgress(leaderProject, milestones) : 0;
   const leader = leaderProject ? { ...leaderProject, milestone: leaderMilestone.label } : null;
   const topThree = rankedProjects.slice(0, 3);
   const topThreeAverage = topThree.length
-    ? Math.round(topThree.reduce((total, project) => total + portwatchProjectProgress(project, milestones), 0) / topThree.length)
+    ? Math.round((topThree.reduce((total, project) => total + portwatchProjectProgress(project, milestones), 0) / topThree.length) * 10) / 10
     : 0;
   const latestMilestone = milestones
     .filter((milestone) => progressPercent(milestone.percent) <= progress)
     .sort((left, right) => progressPercent(right.percent) - progressPercent(left.percent))[0];
   const latestMilestoneLabel = latestMilestone ? latestMilestone.label : 'Preparação';
-  const providedStats = data.stats || {};
+  const launchThreshold = milestones.find((milestone) => progressPercent(milestone.percent) > 0);
+  const launchingCount = launchThreshold
+    ? rankedProjects.filter((project) => portwatchProjectProgress(project, milestones) >= progressPercent(launchThreshold.percent)).length
+    : 0;
   const stats = [
-    { label: 'Marco mais avançado', value: providedStats.furthestMilestone || latestMilestoneLabel },
-    { label: 'Média do top 3', value: providedStats.top3Average || `${topThreeAverage}%` },
-    { label: 'Iniciam o GTA VI', value: providedStats.launchesCount || `${projects.filter((project) => Number(project.gta && project.gta.menu) > 0).length} / ${projects.length}` },
-    { label: 'Projetos acompanhados', value: providedStats.trackedProjects || projects.length }
+    { label: 'Marco mais avançado', value: leader ? leader.milestone : latestMilestoneLabel },
+    { label: 'Média do top 3', markup: `${counterMarkup(topThreeAverage, 'percent')}%` },
+    { label: 'Iniciam o GTA VI', markup: `${counterMarkup(launchingCount)} / ${counterMarkup(rankedProjects.length)}` },
+    { label: 'Projetos acompanhados', markup: counterMarkup(projects.length) }
   ];
-  const timelineProjects = rankedProjects.filter((project) => portwatchProjectProgress(project, milestones) > 0);
+  const timelineProjects = rankedProjects.slice(0, 5).filter((project) => portwatchProjectProgress(project, milestones) > 0);
   const lines = timelineProjects.map((project, index) => {
     const x = portwatchProjectProgress(project, milestones) * 10;
-    const lane = Math.max(0, Math.min(5, index));
-    const y = 19 + lane * 40;
-    return `<line x1="${x}" y1="${y}" x2="${x}" y2="248" /><circle cx="${x}" cy="248" r="3.5" />`;
+    const lane = index;
+    const y = 24 + lane * 48;
+    return `<line x1="${x}" y1="${y}" x2="${x}" y2="276" /><circle cx="${x}" cy="276" r="4" />`;
   }).join('');
   const markerCards = timelineProjects.map((project, index) => {
     const projectProgress = portwatchProjectProgress(project, milestones);
-    const lane = Math.max(0, Math.min(5, index));
+    const lane = index;
     const edge = projectProgress <= 7 ? 'left' : projectProgress >= 93 ? 'right' : 'center';
     const avatar = String(project.avatar || project.name.slice(0, 2)).slice(0, 3);
     const stage = portwatchMilestone(project, milestones).label;
-    const progressLabel = Number.isInteger(projectProgress) ? String(projectProgress) : projectProgress.toLocaleString('pt-BR');
+    const progressLabel = formatPercent(projectProgress);
     const avatarMarkup = project.avatarUrl
-      ? `<span class="pw-avatar" aria-hidden="true"><img class="pw-avatar-image" width="26" height="26" src="${escapeHtml(safeUrl(project.avatarUrl))}" alt="" /><span class="pw-avatar-fallback" hidden>${escapeHtml(avatar)}</span></span>`
+      ? `<span class="pw-avatar" aria-hidden="true"><img class="pw-avatar-image" width="34" height="34" src="${escapeHtml(safeUrl(project.avatarUrl))}" alt="" loading="lazy" decoding="async" /><span class="pw-avatar-fallback" hidden>${escapeHtml(avatar)}</span></span>`
       : `<span class="pw-avatar" aria-hidden="true">${escapeHtml(avatar)}</span>`;
-    return `<button class="pw-project-marker align-${edge}" type="button" style="--marker-x:${projectProgress}%;--marker-lane:${lane}" data-tooltip="${escapeHtml(`${project.name}: ${progressLabel}% · ${stage}`)}" title="${escapeHtml(`${project.name}: ${progressLabel}% · ${stage}`)}" aria-label="${escapeHtml(`${project.name}, ${progressLabel}%, marco: ${stage}`)}">
-      ${avatarMarkup}
-      <span class="pw-project-marker-copy"><b>${escapeHtml(project.name)}</b><small>${projectProgress}% · ${escapeHtml(stage)}</small></span>
-    </button>`;
+    const tooltip = `${project.name}: ${progressLabel}% · ${stage}`;
+    return `<button class="pw-project-marker align-${edge}" type="button" style="--marker-x:${projectProgress}%;--marker-lane:${lane}" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(tooltip)}">${avatarMarkup}</button>`;
   }).join('');
   const projectList = projects.slice()
     .sort((left, right) => Number(isInactiveProject(left)) - Number(isInactiveProject(right))
@@ -1532,24 +1564,38 @@ function renderPortwatchProgress(data) {
       const stageText = inactive
         ? `${t('Fora do ranking ativo')} · ${t('Último marco')}: ${t(stage)}`
         : `${projectProgress}% · ${t(stage)}`;
+      const avatarMarkup = project.avatarUrl
+        ? `<img class="pw-avatar-image" width="28" height="28" src="${escapeHtml(safeUrl(project.avatarUrl))}" alt="" loading="lazy" decoding="async" /><span class="pw-avatar-fallback" hidden>${escapeHtml(avatar)}</span>`
+        : escapeHtml(avatar);
       return `<li class="pw-project-progress-item ${projectProgress ? 'is-progressing' : ''} ${inactive ? 'is-inactive' : ''}">
-        <span class="pw-project-list-avatar" aria-hidden="true">${escapeHtml(avatar)}</span>
+        <span class="pw-project-list-avatar" aria-hidden="true">${avatarMarkup}</span>
         <span class="pw-project-progress-copy"><b>${escapeHtml(project.name)}</b><small>${escapeHtml(stageText)}</small></span>
-        <strong>${projectProgress}%</strong>
+        <strong>${counterMarkup(projectProgress, 'percent')}%</strong>
       </li>`;
     }).join('');
   const milestoneButtons = milestones.map((milestone) => {
     const milestoneProgress = progressPercent(milestone.percent);
     const isReached = milestoneProgress <= progress;
+    const isCurrent = latestMilestone && milestoneProgress === progressPercent(latestMilestone.percent);
     const label = String(milestone.label || '');
     const tooltip = `${label}: ${milestone.description || ''}`;
-    return `<button class="pw-milestone ${isReached ? 'reached' : ''} ${milestoneProgress === progress ? 'current' : ''}" type="button" style="--milestone-x:${milestoneProgress}%" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(`${milestoneProgress}% ${label}. ${milestone.description || ''}`)}" ${milestoneProgress === progress ? 'aria-current="step"' : ''}>
+    return `<button class="pw-milestone ${isReached ? 'reached' : ''} ${isCurrent ? 'current' : ''}" type="button" style="--milestone-x:${milestoneProgress}%" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(`${milestoneProgress}% ${label}. ${milestone.description || ''}`)}" ${isCurrent ? 'aria-current="step"' : ''}>
       <b>${milestoneProgress}%</b><span>${escapeHtml(label)}</span>
     </button>`;
   }).join('');
 
-  const sourceNotice = `<p class="pw-data-note">${escapeHtml(data.sourceNote || 'Os dados são atualizados manualmente retirados do site oficial PortWatch VI.')} <small>Atualizado em ${escapeHtml(data.updatedAt || '—')} · <code>data/portwatch-progress.json</code> · sem sincronização automática.</small></p>`;
-  
+  const changes = snapshot && Array.isArray(snapshot.changes) ? snapshot.changes.slice(0, 4) : [];
+  const changeStrip = changes.length ? `
+    <section class="pw-changes" aria-labelledby="pw-changes-title">
+      <div class="pw-changes-heading"><span class="section-kicker">${escapeHtml(t('O que mudou'))}</span><h3 id="pw-changes-title">${escapeHtml(t('Atualizações recentes do tracker'))}</h3></div>
+      <div class="pw-change-track">${changes.map((change) => `
+        <article class="pw-change-item">
+          <div><span class="pw-change-kind">${escapeHtml(t(change.kind))}</span><time datetime="${escapeHtml(change.date || '')}">${escapeHtml(formatNewsDate(change.date))}</time></div>
+          <p>${escapeHtml(localizedChangeSummary(change.summary))}</p>
+        </article>`).join('')}
+      </div>
+    </section>` : '';
+
   section.setAttribute('aria-busy', 'false');
   section.innerHTML = `
     <div class="pw-panel panel" id="overall">
@@ -1558,47 +1604,64 @@ function renderPortwatchProgress(data) {
           <span class="section-kicker">PROGRESSO GERAL · PROJETO MAIS PERTO DE SER JOGÁVEL</span>
           <h2 id="portwatch-title">Acompanhamento da <span>portabilidade.</span></h2>
           <div class="pw-headline">
-            <strong class="pw-overall-value">${Math.round(progress)}<span>%</span></strong>
-            <p><b>Líder:</b> ${leader ? `${escapeHtml(leader.name)}${leader.author ? ` <span>de</span> ${escapeHtml(leader.author)}` : ''}<span>.</span> <span>Chegou a</span> “${escapeHtml(leader.milestone || latestMilestoneLabel)}”<span>.</span>` : 'Ainda sem projetos.'}</p>
+            <strong class="pw-overall-value">${counterMarkup(progress, 'percent')}<span>%</span></strong>
+            <p><b>${escapeHtml(t('Líder:'))}</b> ${leader ? `${escapeHtml(leader.name)}${leader.author ? ` <span>${escapeHtml(t('de'))}</span> ${escapeHtml(leader.author)}` : ''}<span>.</span> <span>${escapeHtml(t('Chegou a'))}</span> “${escapeHtml(t(leader.milestone || latestMilestoneLabel))}”<span>.</span>` : escapeHtml(t('Ainda sem projetos'))}</p>
           </div>
-          ${sourceNotice}
         </div>
-        <div class="pw-stats">${stats.map((stat) => `<article class="pw-stat"><span>${escapeHtml(stat.label)}</span><strong>${escapeHtml(stat.value)}</strong></article>`).join('')}</div>
+        <div class="pw-stats">${stats.map((stat) => `<article class="pw-stat"><span>${escapeHtml(t(stat.label))}</span><strong>${stat.markup || escapeHtml(t(stat.value))}</strong></article>`).join('')}</div>
       </div>
       <div class="pw-divider"></div>
-      <div class="pw-timeline-heading"><div><span class="section-kicker">TRILHA DE MARCOS</span><h3>Do primeiro executável à estabilidade.</h3></div><span class="pw-updated">ATUALIZADO EM ${escapeHtml(data.updatedAt || '—')}</span></div>
+      <div class="pw-timeline-heading"><div><span class="section-kicker">${escapeHtml(t('TRILHA DE MARCOS'))}</span><h3>${escapeHtml(t('Do primeiro executável à estabilidade.'))}</h3></div></div>
       <div class="pw-timeline-viewport" tabindex="0" aria-label="Trilha de progresso; deslize horizontalmente para ver todos os marcos">
         <div class="pw-timeline">
-          <svg class="pw-connectors" viewBox="0 0 1000 250" preserveAspectRatio="none" aria-hidden="true">${lines}</svg>
+          <svg class="pw-connectors" viewBox="0 0 1000 278" preserveAspectRatio="none" aria-hidden="true">${lines}</svg>
           ${markerCards}
-          <div class="pw-progress-track" role="progressbar" aria-label="Progresso geral da portabilidade" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(progress)}">
-            <span class="pw-progress-fill" style="width:${progress}%"></span>
+          <div class="pw-progress-track" role="progressbar" aria-label="${escapeHtml(t('Progresso geral da portabilidade'))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}">
+            <span class="pw-progress-fill" data-progress-value="${progress}"></span>
           </div>
           <div class="pw-milestones">${milestoneButtons}</div>
         </div>
       </div>
-      <p class="pw-scroll-hint">Deslize a trilha para conferir todos os marcos.</p>
+      <p class="pw-scroll-hint">${escapeHtml(t('Deslize a trilha para conferir todos os marcos.'))}</p>
       <details class="pw-project-list">
-        <summary><span>Progresso por projeto</span><span class="pw-project-list-action">Ver progresso de todos os projetos (${projects.length})</span></summary>
+        <summary><span>${escapeHtml(t('Progresso por projeto'))}</span><span class="pw-project-list-action">${escapeHtml(t('Ver progresso de todos os projetos'))} (${projects.length})</span></summary>
         <ul class="pw-project-progress-grid">${projectList}</ul>
       </details>
-    </div>`;
-  byId('portwatch-progress').querySelectorAll('.pw-avatar-image').forEach((image) => {
+    </div>${changeStrip}`;
+  section.querySelectorAll('.pw-avatar-image').forEach((image) => {
     image.addEventListener('error', () => {
       image.hidden = true;
       const fallback = image.nextElementSibling;
       if (fallback) fallback.hidden = false;
     }, { once: true });
+    if (image.complete && !image.naturalWidth) {
+      image.hidden = true;
+      if (image.nextElementSibling) image.nextElementSibling.hidden = false;
+    }
   });
-  applyLanguage();
+  window.KynosI18n.translateDom(section, state.language);
+  animateCounters(section);
+  animateProgress(section);
+}
+
+function localizedChangeSummary(summary) {
+  const scoutMatch = String(summary || '').match(/^O scout encontrou um possível esforço em (.+)\.$/);
+  if (!scoutMatch) return t(summary || '');
+  const repository = scoutMatch[1];
+  const translations = {
+    en: `Scout found a possible project at ${repository}.`,
+    es: `Scout encontró un posible proyecto en ${repository}.`,
+    zh: `Scout 在 ${repository} 发现了一个可能的项目。`
+  };
+  return translations[state.language] || String(summary);
 }
 
 function renderPortwatchError(error) {
   console.error(error);
   const section = byId('portwatch-progress');
   section.setAttribute('aria-busy', 'false');
-  section.innerHTML = '<p class="portwatch-error" role="alert">Não foi possível carregar o acompanhamento. Verifique o arquivo <code>data/portwatch-progress.json</code>.</p>';
-  applyLanguage();
+  section.innerHTML = '<p class="portwatch-error" role="alert">Não foi possível carregar o acompanhamento. Verifique o arquivo <code>data/tracker-pt-BR.json</code>.</p>';
+  window.KynosI18n.translateDom(section, state.language);
 }
 
 function localizedValue(item, field) {
@@ -1713,7 +1776,8 @@ function formatNewsDate(value) {
 }
 
 function formatPercent(value) {
-  return Number(value).toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+  const locale = { pt: 'pt-BR', en: 'en', es: 'es', zh: 'zh-CN' }[state.language];
+  return Number(value).toLocaleString(locale, { maximumFractionDigits: 1 });
 }
 
 function renderStoryFeature(story, target) {
@@ -1731,22 +1795,78 @@ function renderStoryFeature(story, target) {
 function renderStoryCard(story, featured = false) {
   return `<article class="news-card ${featured ? 'news-card--featured' : ''}">
     <div class="news-card-top"><span class="news-category">${escapeHtml(t(story.category))}</span><time>${escapeHtml(formatNewsDate(story.date))}</time></div>
-    <h3>${escapeHtml(story.title)}</h3>
-    <p>${escapeHtml(story.summary)}</p>
+    <h3>${escapeHtml(localizedValue(story, 'title') || story.title)}</h3>
+    <p>${escapeHtml(localizedValue(story, 'summary') || story.summary)}</p>
     <div class="news-source-links">${(story.sources || []).map((source) => `<a class="text-link" href="${escapeHtml(safeUrl(source.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(source.title)}">${escapeHtml(source.outlet)} ↗</a>`).join('')}</div>
   </article>`;
+}
+
+function homeProjectStory(project, rank, date) {
+  const percent = formatPercent(project.percent);
+  const stage = t(project.stage);
+  const copy = {
+    pt: {
+      category: 'Snapshot do tracker',
+      title: `#${rank} · ${project.name} no acompanhamento`,
+      summary: `O snapshot de ${date} registra ${project.name} em ${percent}% no marco “${stage}”. Percentual editorial do tracker; o avanço não foi verificado de forma independente.`
+    },
+    en: {
+      category: 'Tracker snapshot',
+      title: `#${rank} · ${project.name} in the tracker`,
+      summary: `The ${date} snapshot records ${project.name} at ${percent}% at the “${stage}” milestone. This is the tracker’s editorial estimate; progress has not been independently verified.`
+    },
+    es: {
+      category: 'Snapshot del tracker',
+      title: `#${rank} · ${project.name} en el seguimiento`,
+      summary: `El snapshot del ${date} registra ${project.name} con un ${percent}% en el hito “${stage}”. Es una estimación editorial del tracker; el avance no se ha verificado de forma independiente.`
+    },
+    zh: {
+      category: '跟踪器快照',
+      title: `第 ${rank} 名 · ${project.name} 跟踪进度`,
+      summary: `${date} 的快照记录 ${project.name} 在“${stage}”里程碑达到 ${percent}%。这是跟踪器的编辑估值，进度尚未经过独立验证。`
+    }
+  };
+  const localized = copy[state.language] || copy.pt;
+  return {
+    id: `tracker-${project.id}`,
+    date: trackerData && trackerData.updatedAt || '',
+    category: localized.category,
+    title: localized.title,
+    summary: localized.summary,
+    sources: project.url ? [{ outlet: state.language === 'en' ? 'Repository' : state.language === 'es' ? 'Repositorio' : state.language === 'zh' ? '代码库' : 'Repositório', title: project.repo || project.name, url: project.url }] : []
+  };
 }
 
 function renderPortalHome(data) {
   const lead = data.news.find((story) => story.id === '2026-11-23-leonida-nuked') || data.news[0];
   if (lead) renderStoryFeature(lead, byId('home-feature'));
-  const latest = data.news.filter((story) => story !== lead).slice(0, 3);
+  const projects = data.efforts.filter((project) => project.status !== 'offline')
+    .slice().sort((left, right) => right.percent - left.percent || left.name.localeCompare(right.name));
+  const assignedStories = new Set(lead ? [lead] : []);
+  const latest = projects.slice(0, 3).map((project, index) => {
+    const projectName = normalizeHardwareSearch(project.name);
+    const projectRepo = normalizeHardwareSearch(project.repo || '');
+    const matchingStory = data.news.find((story) => {
+      if (assignedStories.has(story)) return false;
+      const storyContent = normalizeHardwareSearch([
+        story.title,
+        story.summary,
+        ...(story.sources || []).map((source) => `${source.url || ''} ${source.title || ''}`)
+      ].join(' '));
+      return (projectName && storyContent.includes(projectName))
+        || (projectRepo && storyContent.includes(projectRepo));
+    });
+    if (matchingStory) {
+      assignedStories.add(matchingStory);
+      return matchingStory;
+    }
+    return homeProjectStory(project, index + 1, formatNewsDate(data.updatedAt));
+  });
   byId('home-news-list').innerHTML = latest.map((story) => renderStoryCard(story)).join('');
   window.KynosI18n.translateDom(byId('home-news-list'), state.language);
 
-  const projects = data.efforts.filter((project) => project.status !== 'offline')
-    .slice().sort((left, right) => right.percent - left.percent || left.name.localeCompare(right.name));
   const leader = projects[0];
+  renderPortwatchProgress(PORTWATCH_FALLBACK, data);
   const owner = leader && leader.repo ? leader.repo.split('/')[0] : '';
   const avatarUrl = /^[\w-]+$/.test(owner) ? `https://github.com/${encodeURIComponent(owner)}.png?size=96` : '';
   const initials = leader ? leader.name.slice(0, 2).toUpperCase() : '—';
