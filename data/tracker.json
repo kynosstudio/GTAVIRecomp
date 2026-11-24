@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-24T19:30:25.000Z",
+  "updated": "2026-11-24T20:10:10.000Z",
   "site": {
     "title": "PortWatch VI",
     "heroImage": "assets/img/hero-miami.jpg"
@@ -21,11 +21,13 @@
       "category": "Port",
       "title": "GTA VI's shaders start loading on omonkey's build, streamed live on Rumble",
       "dek": "A player can walk slowly around the opening prison scene, at about 5 frames per second. All of the work goes out live, on a Rumble channel run by someone else.",
+      "updatedAt": "2026-11-24",
       "body": [
         "A developer called omonkey has GTA VI running on PC with its shaders starting to load properly. It runs at about 5 frames per second and is stuck in the opening scene, Lucia's prison, but a player can move around in it, slowly.",
         "That puts omonkey ahead of every project we track. CGBJ, which we added earlier on Tuesday, also has a player moving, but on a black screen, and a video of it shows the opening in flat colours without lighting.",
         "omonkey streams all of his development work on Rumble, but not on a channel of his own. The streams go out on Swaggely, a channel with about 1,800 followers that belongs to a separate person. It isn't clear why the two work this way.",
-        "We've added omonkey to the tracker at 76%, at our In-game stage, which puts him first. Because the work has been streamed live the whole time, we're confident it's real. We haven't found any public code from him, though, so nobody can test it outside the streams yet."
+        "We've added omonkey to the tracker at 76%, at our In-game stage, which puts him first. Because the work has been streamed live the whole time, we're confident it's real. We haven't found any public code from him, though, so nobody can test it outside the streams yet.",
+        "Update, 20:10 UTC: omonkey's build is based on victory-gta6, fxceless's public fork of VIctory, which we've now added to the race at 74%. Our race now ranks only projects with public code, so omonkey's private build is listed below it without a rank. At 76% it still leads our overall progress number, and it shows on victory-gta6's card as a build on that code."
       ],
       "sources": [
         {
@@ -43,11 +45,13 @@
       "category": "Port",
       "title": "Exclusive: CGBJ gets GTA VI in game, walking and talking in an unlit world",
       "dek": "A private build based on VIctory and XCL lets a player walk around and talk to NPCs, very slowly. A video shows the opening scenes in flat colours, without lighting.",
+      "updatedAt": "2026-11-24",
       "body": [
         "A group called CGBJ has got GTA VI into its game world on PC, and a player can move in it. With a controller they walk around, talk to NPCs and open the in-game menu. PortWatch has verified that it gets in game. No public project has shown a player moving yet.",
         "It is far from playable, and it runs very slowly. In the run where a player walked around, the screen was black. A 77-second video posted on X on Tuesday shows more: GTA VI's opening scenes in flat colours with no lighting, from a car's interior to a street of waving NPCs, a guard and a prison yard.",
         "CGBJ's code is private. It builds on VIctory, the open-source layer whose author first showed GTA VI's menus on a livestream on Monday, and also takes some of XCL's work. Both are public on GitHub; CGBJ's changes aren't, so nobody outside the group can test them.",
-        "We've added CGBJ to the tracker at 72%, at our In-game stage, which puts it first. That rests on our own check: the video doesn't name the project, and nobody outside the group can reproduce the result yet."
+        "We've added CGBJ to the tracker at 72%, at our In-game stage, which puts it first. That rests on our own check: the video doesn't name the project, and nobody outside the group can reproduce the result yet.",
+        "Update, 20:10 UTC: our race now ranks only projects with public code, so CGBJ's private build is listed below it without a rank, still at 72%. It counts toward our overall progress number, which omonkey's private build now leads at 76%, and it shows on the cards of VIctory and XCL as a build on their code."
       ],
       "sources": [
         {
@@ -615,9 +619,14 @@
       "id": "omonkey",
       "name": "omonkey",
       "manualScore": 76,
+      "avatar": "assets/img/efforts/omonkey.jpg",
       "repo": null,
+      "basedOn": [
+        "victory-gta6"
+      ],
+      "evidence": "Live streams on Rumble",
       "link": "news/2026-11-24-omonkey-shaders-prison.html",
-      "byline": "Streamed on Rumble by Swaggely",
+      "byline": "Streamed on Rumble by Swaggely · built on victory-gta6, a VIctory fork",
       "tier": "tracked",
       "summary": "A developer who streams all his work live on Rumble, through Swaggely's channel. GTA VI's shaders have started loading properly, and a player moves slowly around the opening prison scene at about 5 fps. No public code.",
       "highlights": [
@@ -649,6 +658,11 @@
       "id": "cgbj",
       "name": "CGBJ",
       "repo": null,
+      "basedOn": [
+        "marvis",
+        "xcl"
+      ],
+      "evidence": "Checked by PortWatch with the group",
       "link": "news/2026-11-24-cgbj-in-game.html",
       "byline": "Private code · based on VIctory and XCL",
       "tier": "tracked",
@@ -676,6 +690,48 @@
       },
       "verification": "self-reported",
       "stats": {},
+      "assessedAt": "2026-11-24",
+      "assessedBy": "manual",
+      "claims": []
+    },
+    {
+      "id": "victory-gta6",
+      "name": "victory-gta6",
+      "manualScore": 74,
+      "repo": "fxceless/victory-gta6",
+      "branch": "main",
+      "tier": "tracked",
+      "approach": "Compatibility layer",
+      "target": "GTA VI only",
+      "summary": "fxceless's fork of VIctory, with about 35,000 lines of its own rendering and speed fixes. Its README reports the prologue rendering with HUD, pause menu and pad input at 2-4 fps; shadowed areas are black. Self-reported.",
+      "highlights": [
+        "README reports the first gameplay scene rendering: characters, textures, sky, sunlit exterior",
+        "HUD, pause menu and pad input work; the opening cutscene plays through, lit",
+        "Its own fixes to meshlet culling, descriptor tables and untranslated shaders, on top of VIctory"
+      ],
+      "blockers": [
+        "2-4 fps, and everything in shadow is black: ray-traced lighting doesn't run yet",
+        "Tested on one PC (RTX 4070); not reproduced by others yet",
+        "Some fixes are shortcuts specific to this game and GPU, by its own account"
+      ],
+      "provenOn": null,
+      "gta": {
+        "loads": 1,
+        "boots": 1,
+        "menu": 1,
+        "ingame": 1,
+        "fps": 3,
+        "stability": "unknown"
+      },
+      "verification": "self-reported",
+      "stats": {
+        "stars": 179,
+        "forks": 24,
+        "openIssues": 11,
+        "pushedAt": "2026-11-24T19:32:07Z",
+        "archived": false,
+        "missing": false
+      },
       "assessedAt": "2026-11-24",
       "assessedBy": "manual",
       "claims": []
@@ -3153,7 +3209,7 @@
       "id": "copies",
       "pattern": "Re-uploads of tracked projects under other accounts",
       "label": "",
-      "count": 61,
+      "count": 60,
       "reason": "Copies can be quietly modified to bundle malware. Only use the original repositories linked in the race above.",
       "members": [
         "FaelSemW/RafaVI",
@@ -3210,7 +3266,6 @@
         "Hellomyfriend19/Leonida",
         "17765152890/xcl",
         "xhqss/Leonida",
-        "fxceless/victory-gta6",
         "CaseReed/AnyBox",
         "amirshaker000/PAG6Port",
         "nullroot200-arch/Leonida",
@@ -5602,11 +5657,6 @@
       "pushedAt": "2026-11-24T15:08:55.334Z"
     },
     {
-      "repo": "fxceless/victory-gta6",
-      "reason": "copy of Marvisak/VIctory (100% same README)",
-      "seenAt": "2026-11-24"
-    },
-    {
       "repo": "CaseReed/AnyBox",
       "reason": "copy of Dark3581/AnyBox",
       "seenAt": "2026-11-24"
@@ -6061,6 +6111,16 @@
       "date": "2026-11-24",
       "kind": "up",
       "text": "Five Star Recomp reaches “Main menu”: its README reports GTA VI answering its first-run screens, loading story mode and showing the story intro's title card (self-reported, no capture). Score 47.5% → 55%."
+    },
+    {
+      "date": "2026-11-24",
+      "kind": "flag",
+      "text": "The race now ranks public code only. Private builds (omonkey, CGBJ) are listed below it without a rank and credited to the public projects they build on."
+    },
+    {
+      "date": "2026-11-24",
+      "kind": "new",
+      "text": "victory-gta6, fxceless's public fork of VIctory, joins at #1 with 74% (“In-game”): its README reports the prologue rendering with HUD, pause menu and pad input at 2-4 fps, with shadowed areas black (self-reported). omonkey's private build is based on it."
     }
   ],
   "history": [
@@ -6090,11 +6150,11 @@
     },
     {
       "date": "2026-11-24",
-      "leader": 72,
-      "leaderId": "cgbj",
-      "top3": 67.2,
+      "leader": 76,
+      "leaderId": "omonkey",
+      "top3": 74,
       "furthest": "ingame",
-      "tracked": 30
+      "tracked": 32
     }
   ],
   "scout": {

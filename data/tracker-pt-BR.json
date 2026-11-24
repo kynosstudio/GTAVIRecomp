@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-24T04:13:54.192Z",
+  "updatedAt": "2026-11-24T20:10:10.000Z",
   "lastSyncedAt": "2026-11-24T05:07:48.307Z",
   "sourceFile": "data/tracker.json",
   "authorMessage": {
@@ -81,6 +81,54 @@
     }
   },
   "news": [
+    {
+      "id": "2026-11-24-omonkey-shaders-prison",
+      "date": "2026-11-24",
+      "category": "Progresso",
+      "title": "omonkey carrega shaders de GTA VI e movimenta personagem na cena da prisão",
+      "summary": "O snapshot registra omonkey em 76%, no marco Dentro do jogo: os shaders começaram a carregar e o personagem se move lentamente pela cena inicial da prisão, a cerca de 5 FPS. O desenvolvimento foi transmitido ao vivo no canal Swaggely, mas não há código público nem build para testes externos.",
+      "body": [
+        "O snapshot do tracker registra omonkey em 76%, no marco Dentro do jogo. Os shaders de GTA VI começaram a carregar e o personagem pode se mover lentamente pela cena inicial da prisão, a cerca de 5 FPS.",
+        "O desenvolvimento foi transmitido ao vivo pelo canal Swaggely, que pertence a outra pessoa. Não há código público nem build para testes externos.",
+        "O projeto é baseado no fork público victory-gta6, de VIctory. O resultado segue como relato próprio e ainda não foi reproduzido por terceiros."
+      ],
+      "sources": [
+        {
+          "outlet": "Rumble",
+          "title": "Canal Swaggely, onde o desenvolvimento foi transmitido",
+          "url": "https://rumble.com/user/Swaggely"
+        }
+      ]
+    },
+    {
+      "id": "2026-11-24-cgbj-in-game",
+      "date": "2026-11-24",
+      "category": "Progresso",
+      "title": "CGBJ chega a 75%: cut-scenes a 4 FPS e cenas ainda sem iluminação",
+      "summary": "O tracker registra o CGBJ em 75%, no marco Dentro do jogo · cut-scenes a 4 FPS. Na build privada, o personagem se move com controle, anda pelo mapa, conversa com NPCs e abre menus. O vídeo mostra cenas em cores chapadas e sem iluminação; o resultado não pode ser reproduzido externamente porque o código não é público.",
+      "body": [
+        "O snapshot registra o CGBJ em 75%, no marco Dentro do jogo · cut-scenes a 4 FPS. Na build privada, o personagem se move com controle, anda pelo mapa, conversa com NPCs e abre menus.",
+        "O vídeo de 77 segundos mostra cenas de abertura em cores chapadas, sem iluminação completa. O projeto é baseado em VIctory e incorpora trabalho do XCL.",
+        "O código do CGBJ não é público. O resultado foi registrado pelo tracker, mas não pode ser reproduzido externamente."
+      ],
+      "sources": [
+        {
+          "outlet": "X",
+          "title": "Vídeo de 77 segundos da build",
+          "url": "https://x.com/raul_bs3/status/2125172278975729688/video/1"
+        },
+        {
+          "outlet": "GitHub",
+          "title": "VIctory",
+          "url": "https://github.com/Marvisak/VIctory"
+        },
+        {
+          "outlet": "GitHub",
+          "title": "XCL",
+          "url": "https://github.com/ivall/xcl"
+        }
+      ]
+    },
     {
       "id": "2026-11-24-xcl-30fps-in-game",
       "date": "2026-11-24",
@@ -506,6 +554,17 @@
     }
   ],
   "efforts": [
+    {
+      "id": "omonkey",
+      "name": "omonkey",
+      "repo": null,
+      "tier": "tracked",
+      "status": "acompanhado",
+      "percent": 76,
+      "stage": "Dentro do jogo · cerca de 5 FPS",
+      "summary": "Build privada baseada no fork victory-gta6. Os shaders de GTA VI começaram a carregar e o personagem se move lentamente pela cena inicial da prisão, a cerca de 5 FPS. O desenvolvimento foi transmitido ao vivo, mas não há código público nem build para testes externos.",
+      "verification": "Relato transmitido ao vivo, sem código público para reprodução independente."
+    },
     {
       "id": "cgbj",
       "name": "CGBJ",

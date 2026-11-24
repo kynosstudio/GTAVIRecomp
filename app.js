@@ -418,7 +418,6 @@ function applyLanguage() {
     renderNews(trackerData);
     renderTrackerDetails(trackerData);
     renderXlaunchPage(trackerData);
-    renderAuthorMessage(trackerData);
     if (quickProjects.length) updateQuickProjectStatus();
     if (byId('quick-safety-query') && byId('quick-safety-query').value.trim()) updateFakeRadar(trackerData);
     if (notificationPreferences) renderNotificationCenter(trackerData);
@@ -581,19 +580,13 @@ function mergeTrackerPayloads(portwatch, localized, fallback) {
   merged.efforts = rawEfforts.map((rawItem) => {
     const local = effortMap.get(rawItem.id);
     if (!local) return { ...rawItem };
-    const remotePercent = rawItem.percent != null && Number.isFinite(Number(rawItem.percent));
+    const remoteScore = rawItem.manualScore ?? rawItem.percent;
+    const remotePercent = remoteScore != null && Number.isFinite(Number(remoteScore));
     return {
       ...rawItem,
       ...local,
-      percent: rawItem.id === 'xlaunchvi'
-        ? 55
-        : (remotePercent ? Number(rawItem.percent) : (local.percent != null ? Number(local.percent) : undefined)),
-      stage: rawItem.id === 'xlaunchvi'
-        ? 'Menu principal a 30 FPS (sem texturas)'
-        : (rawItem.stage || local.stage),
-      gta: rawItem.id === 'xlaunchvi'
-        ? { loads: 1, boots: 1, menu: 1, ingame: 0, fps: 1, stability: 'unknown' }
-        : (rawItem.gta || local.gta),
+      percent: remotePercent ? Number(remoteScore) : (local.percent != null ? Number(local.percent) : undefined),
+      stage: local.stage || rawItem.stage,
       status: rawItem.id === 'xlaunchvi'
         ? 'acompanhado'
         : (rawItem.nuked || rawItem.missing || rawItem.status === 'offline' ? 'offline' : rawItem.status),
@@ -619,7 +612,7 @@ function mergeTrackerPayloads(portwatch, localized, fallback) {
     return {
       ...rawItem,
       ...local,
-      body: Array.isArray(rawItem.body) ? rawItem.body : (Array.isArray(local.body) ? local.body : []),
+      body: Array.isArray(local.body) ? local.body : (Array.isArray(rawItem.body) ? rawItem.body : []),
       image: rawItem.image !== undefined ? rawItem.image : (local.image ?? null),
       sources: Array.isArray(rawItem.sources) ? rawItem.sources : (Array.isArray(local.sources) ? local.sources : []),
       summary: local.summary || rawItem.dek || rawItem.summary,
@@ -1237,7 +1230,6 @@ function updateMemoryPressure(evaluation) {
     <p>${escapeHtml(t('Indicadores relativos às referências do simulador; não são leitura do uso real do sistema.'))}</p>`;
   window.KynosI18n.translateDom(section, state.language);
   animateCounters(section);
-  animateProgress(section);
   requestAnimationFrame(() => {
     recalculateProgressConnectors(section);
     setTimeout(() => recalculateProgressConnectors(section), 700);
@@ -2048,8 +2040,10 @@ function progressPercent(value) {
 }
 
 function portwatchEffortScore(project) {
-  if (project && project.id === 'cgbj') return 75;
-  if (project && project.id === 'xlaunchvi') return 55;
+  const explicitScore = project && (project.manualScore ?? project.percent);
+  if (explicitScore !== undefined && explicitScore !== null && Number.isFinite(Number(explicitScore))) {
+    return progressPercent(explicitScore);
+  }
   const gta = project && project.gta && typeof project.gta === 'object' ? project.gta : {};
   const groundwork = project && project.groundwork && typeof project.groundwork === 'object'
     ? project.groundwork
@@ -2477,23 +2471,22 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
   if (xlaunchReportProject && !timelineProjects.some((project) => project.id === xlaunchReportProject.id)) {
     timelineProjects.push(xlaunchReportProject);
   }
-  const markerLayout = [];
+  const markerLayout = new Map();
   const laneGroups = new Map();
   timelineProjects.forEach((project) => {
     const percent = portwatchProjectProgress(project, milestones);
     const bucket = Math.round(percent / 5) * 5;
     if (!laneGroups.has(bucket)) laneGroups.set(bucket, []);
-    laneGroups.get(bucket).push({ project, percent });
+    laneGroups.get(bucket).push(project);
   });
   laneGroups.forEach((items) => {
-    items.sort((left, right) => left.project.name.localeCompare(right.project.name));
-    items.forEach((item, itemIndex) => {
-      markerLayout.push({ ...item, lane: itemIndex % 3, offset: (itemIndex - ((items.length - 1) / 2)) * 18 });
+    items.sort((left, right) => left.name.localeCompare(right.name));
+    items.forEach((project, itemIndex) => {
+      markerLayout.set(project, itemIndex % 3);
     });
   });
   const markerCards = timelineProjects.map((project) => {
-    const marker = markerLayout.find((item) => item.project === project);
-    const lane = marker ? marker.lane : 0;
+    const lane = markerLayout.get(project) || 0;
     const projectProgress = portwatchProjectProgress(project, milestones);
     const edge = projectProgress <= 7 ? 'left' : projectProgress >= 93 ? 'right' : 'center';
     const avatar = String(project.avatar || project.name.slice(0, 2)).slice(0, 3);
@@ -2510,13 +2503,12 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
       ? ` · ${t('estimativa editorial da equipe')}; ${t('snapshot GitHub/tracker')}: ${snapshotPercent}%`
       : reportStage ? ` · ${t('Relato do Discord')}: ${reportStage}; ${t('snapshot GitHub/tracker')}: ${snapshotPercent}%` : '';
     const tooltip = `${project.name}: ${progressLabel}% · ${stage}${estimateLabel}`;
-    const markerOffset = marker ? marker.offset : 0;
     const repositoryUrl = project.repo ? `https://github.com/${encodeURIComponent(String(project.repo).split('/')[0])}/${encodeURIComponent(String(project.repo).split('/')[1] || '')}` : '';
     const publicUrl = project.id !== 'cgbj' && safeUrl(repositoryUrl) !== '#' ? repositoryUrl : '';
     const markerLabel = publicUrl
       ? `Abrir repositório público de ${project.name}`
       : project.id === 'cgbj' ? 'CGBJ · repositório privado' : `Sem repositório público: ${project.name}`;
-    return `<button class="pw-project-marker align-${edge} ${project.teamReport ? 'pw-project-marker--xlaunch' : ''} ${projectProgress <= progress ? 'is-reached' : ''}" type="button" style="--marker-x:${projectProgress}%;--marker-lane:${lane};--marker-offset:${markerOffset}px" data-marker-progress="${projectProgress}" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(publicUrl ? `${markerLabel}: ${tooltip}` : `${markerLabel}. ${tooltip}`)}" ${publicUrl ? `data-repository-url="${escapeHtml(publicUrl)}"` : 'data-private-repository="true"'}>
+    return `<button class="pw-project-marker align-${edge} ${project.teamReport ? 'pw-project-marker--xlaunch' : ''} ${projectProgress <= progress ? 'is-reached' : ''}" type="button" style="--marker-x:${projectProgress}%;--marker-lane:${lane}" data-marker-progress="${projectProgress}" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(publicUrl ? `${markerLabel}: ${tooltip}` : `${markerLabel}. ${tooltip}`)}" ${publicUrl ? `data-repository-url="${escapeHtml(publicUrl)}"` : 'data-private-repository="true"'}>
       ${avatarMarkup}
     </button>`;
   }).join('');
@@ -2600,7 +2592,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
           <svg class="pw-connectors" aria-hidden="true"></svg>
           ${markerCards}
           <div class="pw-progress-track" role="progressbar" aria-label="${escapeHtml(t('Progresso geral da portabilidade'))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}">
-            <span class="pw-progress-fill" data-progress-value="${progress}"></span>
+            <span class="pw-progress-fill" style="width:${progress}%"></span>
           </div>
           <div class="pw-milestones">${milestoneButtons}</div>
         </div>
@@ -2624,10 +2616,8 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
   });
   window.KynosI18n.translateDom(section, state.language);
   animateCounters(section);
-  animateProgress(section);
   requestAnimationFrame(() => {
     recalculateProgressConnectors(section);
-    setTimeout(() => recalculateProgressConnectors(section), 700);
   });
   if (typeof ResizeObserver !== 'undefined') {
     if (section._pwConnectorObserver) section._pwConnectorObserver.disconnect();
@@ -3245,42 +3235,6 @@ function renderStoryCard(story, featured = false) {
   </article>`;
 }
 
-function homeProjectStory(project, rank, date) {
-  const percent = formatPercent(project.percent);
-  const stage = t(project.stage);
-  const copy = {
-    pt: {
-      category: 'Snapshot do tracker',
-      title: `#${rank} · ${project.name} no acompanhamento`,
-      summary: `O snapshot de ${date} registra ${project.name} em ${percent}% no marco “${stage}”. Percentual editorial do tracker; o avanço não foi verificado de forma independente.`
-    },
-    en: {
-      category: 'Tracker snapshot',
-      title: `#${rank} · ${project.name} in the tracker`,
-      summary: `The ${date} snapshot records ${project.name} at ${percent}% at the “${stage}” milestone. This is the tracker’s editorial estimate; progress has not been independently verified.`
-    },
-    es: {
-      category: 'Snapshot del tracker',
-      title: `#${rank} · ${project.name} en el seguimiento`,
-      summary: `El snapshot del ${date} registra ${project.name} con un ${percent}% en el hito “${stage}”. Es una estimación editorial del tracker; el avance no se ha verificado de forma independiente.`
-    },
-    zh: {
-      category: '跟踪器快照',
-      title: `第 ${rank} 名 · ${project.name} 跟踪进度`,
-      summary: `${date} 的快照记录 ${project.name} 在“${stage}”里程碑达到 ${percent}%。这是跟踪器的编辑估值，进度尚未经过独立验证。`
-    }
-  };
-  const localized = copy[state.language] || copy.pt;
-  return {
-    id: `tracker-${project.id}`,
-    date: trackerData && trackerData.updatedAt || '',
-    category: localized.category,
-    title: localized.title,
-    summary: localized.summary,
-    sources: project.url ? [{ outlet: state.language === 'en' ? 'Repository' : state.language === 'es' ? 'Repositorio' : state.language === 'zh' ? '代码库' : 'Repositório', title: project.repo || project.name, url: project.url }] : []
-  };
-}
-
 function renderXlaunchSpotlight(project, team, snapshot, modifier = '') {
   if (!project) return '';
   const report = project.teamReport || (team && team.latestReport);
@@ -3343,71 +3297,7 @@ function renderXlaunchReportPanel(report, team) {
 
 function renderPortalHome(data) {
   renderHeaderFreshness(data);
-  const lead = selectFeaturedStory(data);
-  if (lead) renderStoryFeature(lead, byId('home-feature'));
-  const projects = data.efforts.filter((project) => !isInactiveProject(project))
-    .map((project) => ({
-      ...project,
-      percent: portwatchEffortScore(project),
-      stage: portwatchMilestone(project, PORTWATCH_FALLBACK.milestones).label
-    }))
-    .slice().sort((left, right) => right.percent - left.percent || left.name.localeCompare(right.name));
-  const assignedStories = new Set(lead ? [lead] : []);
-  const teamReportStory = data.news.find((story) => story.id === 'xlaunchvi-loading-screen-team-report');
-  if (teamReportStory) assignedStories.add(teamReportStory);
-  const latestProjects = projects.filter((project) => project.id !== 'xlaunchvi').slice(0, teamReportStory ? 2 : 3);
-  const latest = [
-    ...(teamReportStory ? [teamReportStory] : []),
-    ...latestProjects.map((project, index) => {
-    const projectName = normalizeHardwareSearch(project.name);
-    const projectRepo = normalizeHardwareSearch(project.repo || '');
-    const matchingStory = data.news.find((story) => {
-      if (assignedStories.has(story)) return false;
-      const storyContent = normalizeHardwareSearch([
-        story.title,
-        story.summary,
-        ...(story.sources || []).map((source) => `${source.url || ''} ${source.title || ''}`)
-      ].join(' '));
-      return (projectName && storyContent.includes(projectName))
-        || (projectRepo && storyContent.includes(projectRepo));
-    });
-    if (matchingStory) {
-      assignedStories.add(matchingStory);
-      return matchingStory;
-    }
-    return homeProjectStory(project, index + 1, formatNewsDate(data.updatedAt));
-    })
-  ];
-  byId('home-news-list').innerHTML = latest.map((story) => renderStoryCard(story)).join('');
-  window.KynosI18n.translateDom(byId('home-news-list'), state.language);
-
-  const leader = projects[0];
   renderPortwatchProgress(PORTWATCH_FALLBACK, data);
-  const xlaunch = data.efforts.find((project) => project.id === 'xlaunchvi');
-  const xlaunchTeam = data.teams && data.teams.xlaunchvi;
-  const owner = leader && leader.repo ? leader.repo.split('/')[0] : '';
-  const avatarUrl = /^[\w-]+$/.test(owner) ? `https://github.com/${encodeURIComponent(owner)}.png?size=96` : '';
-  const initials = leader ? leader.name.slice(0, 2).toUpperCase() : '—';
-  byId('home-progress-summary').innerHTML = leader ? `
-    <article class="home-leader">
-      <div class="home-leader-heading">
-        <div class="home-leader-identity">
-          <span class="home-leader-avatar">${avatarUrl ? `<img src="${escapeHtml(avatarUrl)}" alt="" loading="lazy" decoding="async">` : ''}<span class="home-leader-avatar-fallback" ${avatarUrl ? 'hidden' : ''}>${escapeHtml(initials)}</span></span>
-          <div><span class="section-kicker">${escapeHtml(t('Projeto mais avançado'))}</span><h3>${escapeHtml(leader.name)}</h3><span class="repo-slug">${escapeHtml(leader.repo)}</span></div>
-        </div>
-        <strong class="home-leader-percent">${counterMarkup(leader.percent, 'percent')}%</strong>
-      </div>
-      <div class="home-leader-progress" role="progressbar" aria-label="${escapeHtml(`${leader.name}: ${formatPercent(leader.percent)}%`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Number(leader.percent) || 0}"><span data-progress-value="${Number(leader.percent) || 0}"></span></div>
-      <div class="home-leader-milestone"><span>${escapeHtml(t('Marco atual'))}</span><strong>${escapeHtml(t(leader.stage))}</strong></div>
-      <p class="home-leader-verification">${escapeHtml(leader.verification)}</p>
-      ${leader.url ? `<a class="text-link" href="${escapeHtml(safeUrl(leader.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Repositório original'))} ↗</a>` : ''}
-    </article>
-    ${renderXlaunchSpotlight(xlaunch, xlaunchTeam, data, 'xlaunch-spotlight--home')}
-    <p class="tracker-data-note">${escapeHtml(t('Relatos autodeclarados; percentuais conforme o snapshot do tracker.'))}</p>` : `<p>${escapeHtml(t('Sem dados de projetos'))}</p>`;
-  window.KynosI18n.translateDom(byId('home-progress-summary'), state.language);
-  attachAvatarFallbacks(byId('home-progress-summary'));
-  animateCounters(byId('home-progress-summary'));
-  animateProgress(byId('home-progress-summary'));
 }
 
 function trackerTimestamp(data) {
@@ -3623,9 +3513,7 @@ function renderTrackerProjects(data) {
   const projects = data.efforts.map((project) => ({
     ...project,
     percent: portwatchEffortScore(project),
-    stage: project.id === 'xlaunchvi'
-      ? 'Menu principal a 30 FPS (sem texturas)'
-      : portwatchMilestone(project, PORTWATCH_FALLBACK.milestones).label
+    stage: project.stage || portwatchMilestone(project, PORTWATCH_FALLBACK.milestones).label
   })).sort((left, right) => right.percent - left.percent || left.name.localeCompare(right.name));
   const active = projects.filter((project) => !isInactiveProject(project));
   const inactive = projects.filter((project) => isInactiveProject(project));
@@ -3645,21 +3533,35 @@ function renderTrackerProjects(data) {
   byId('tracked-project-count').textContent = `${active.length - top.length} ${t('outros projetos')}`;
   byId('inactive-repositories').hidden = inactive.length === 0;
   byId('inactive-repository-list').innerHTML = inactive.map((project) => renderTrackerProjectCard(project, 0, leader && leader.id)).join('');
-  window.KynosI18n.translateDom(byId('tracker-race-summary'), state.language);
-  window.KynosI18n.translateDom(byId('repository-list'), state.language);
-  window.KynosI18n.translateDom(byId('xlaunch-race-spotlight'), state.language);
-  window.KynosI18n.translateDom(byId('tracker-all-projects'), state.language);
-  window.KynosI18n.translateDom(byId('inactive-repositories'), state.language);
+  const homeTargets = [
+    ['tracker-race-summary', 'home-tracker-race-summary'],
+    ['xlaunch-race-spotlight', 'home-xlaunch-race-spotlight'],
+    ['repository-list', 'home-repository-list'],
+    ['tracker-all-projects', 'home-tracker-all-projects'],
+    ['inactive-repository-list', 'home-inactive-repository-list']
+  ];
+  homeTargets.forEach(([sourceId, targetId]) => {
+    byId(targetId).innerHTML = byId(sourceId).innerHTML;
+  });
+  byId('home-repo-count').innerHTML = byId('repo-count').innerHTML;
+  byId('home-tracked-project-count').textContent = byId('tracked-project-count').textContent;
+  byId('home-inactive-repositories').hidden = byId('inactive-repositories').hidden;
+  const translatedTargets = [
+    'tracker-race-summary', 'repository-list', 'xlaunch-race-spotlight',
+    'tracker-all-projects', 'inactive-repositories',
+    'home-tracker-race-summary', 'home-repository-list', 'home-xlaunch-race-spotlight',
+    'home-tracker-all-projects', 'home-inactive-repositories'
+  ];
+  translatedTargets.forEach((id) => window.KynosI18n.translateDom(byId(id), state.language));
   attachAvatarFallbacks(byId('xlaunch-race-spotlight'));
-  animateCounters(byId('tracker-race-summary'));
-  animateCounters(byId('repository-list'));
-  animateCounters(byId('xlaunch-race-spotlight'));
-  animateCounters(byId('tracker-all-projects'));
-  animateCounters(byId('inactive-repositories'));
-  animateProgress(byId('repository-list'));
-  animateProgress(byId('xlaunch-race-spotlight'));
-  animateProgress(byId('tracker-all-projects'));
-  animateProgress(byId('inactive-repositories'));
+  attachAvatarFallbacks(byId('home-xlaunch-race-spotlight'));
+  ['repo-count', 'tracker-race-summary', 'repository-list', 'xlaunch-race-spotlight',
+    'tracker-all-projects', 'inactive-repositories', 'home-repo-count', 'home-tracker-race-summary',
+    'home-repository-list', 'home-xlaunch-race-spotlight', 'home-tracker-all-projects',
+    'home-inactive-repositories'].forEach((id) => animateCounters(byId(id)));
+  ['repository-list', 'xlaunch-race-spotlight', 'tracker-all-projects', 'inactive-repositories',
+    'home-repository-list', 'home-xlaunch-race-spotlight', 'home-tracker-all-projects',
+    'home-inactive-repositories'].forEach((id) => animateProgress(byId(id)));
 }
 
 function renderNews(data) {
@@ -4150,28 +4052,6 @@ function bindAnalyticsControls() {
   });
 }
 
-function renderAuthorMessage(data) {
-  const container = byId('kynos-author-message');
-  if (!container) return;
-  const message = data && data.authorMessage && typeof data.authorMessage === 'object'
-    ? data.authorMessage
-    : { active: false, title: 'Nota do autor', text: 'Sem avisos ativos no momento.' };
-  if (!message.active) {
-    container.hidden = false;
-    container.innerHTML = `<span class="section-kicker">${escapeHtml(t('MENSAGEM DO KYNOS'))}</span>
-      <h3>${escapeHtml(t(message.title || 'Nota do autor'))}</h3>
-      <p>${escapeHtml(t(message.text || 'Sem avisos ativos no momento.'))}</p>`;
-    window.KynosI18n.translateDom(container, state.language);
-    return;
-  }
-  container.hidden = false;
-  container.innerHTML = `<span class="section-kicker">${escapeHtml(t('MENSAGEM DO KYNOS'))}</span>
-    ${message.date ? publicationTimeMarkup(message.date) : ''}
-    <h3>${escapeHtml(localizedValue(message, 'title') || message.title || t('Aviso do autor'))}</h3>
-    <p>${escapeHtml(localizedValue(message, 'text') || message.text || '')}</p>`;
-  window.KynosI18n.translateDom(container, state.language);
-}
-
 function watchLiveViewers() {
   const pill = byId('watching-now');
   if (!pill || window.location.protocol === 'file:') {
@@ -4266,7 +4146,6 @@ async function init() {
     renderNews(trackerData);
     renderTrackerDetails(trackerData);
     renderXlaunchPage(trackerData);
-    renderAuthorMessage(trackerData);
     watchLiveViewers();
     setupNotificationCenter(trackerData);
     setupXclFeed();

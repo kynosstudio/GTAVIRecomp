@@ -200,18 +200,7 @@ h1, h2, h3, p { margin-top: 0; }
 .pw-progress-fill {
   background: linear-gradient(90deg, #7a5cff 0%, #ff4f86 52%, #ff9d58 100%);
   box-shadow: none;
-  transition: width 1.8s cubic-bezier(.2,.85,.2,1);
 }
-.pw-progress-fill::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.38) 50%, transparent 80%);
-  background-size: 220px 100%;
-  background-repeat: no-repeat;
-  animation: pw-shimmer 2.8s infinite;
-}
-@keyframes pw-shimmer { from { background-position: -240px 0; } to { background-position: calc(100% + 240px) 0; } }
 .pw-timeline-viewport { overflow-y: visible; }
 .pw-timeline { height: 255px; }
 .pw-connectors { height: 218px; }
@@ -225,9 +214,6 @@ h1, h2, h3, p { margin-top: 0; }
   overflow: visible;
 }
 .pw-project-marker .pw-avatar { width: 24px; height: 24px; flex-basis: 24px; }
-.pw-project-marker {
-  margin-left: var(--marker-offset, 0);
-}
 .pw-curve-path {
   stroke: rgba(255, 161, 122, .58);
   stroke-width: 1.6;
@@ -767,19 +753,8 @@ body { font-size: 16px; }
 .pw-connectors { position: absolute; z-index: 0; inset: 0 auto auto; width: 100%; height: 248px; overflow: visible; pointer-events: none; }
 .pw-connectors line { stroke: rgba(255, 161, 122, .52); stroke-width: 1.35; stroke-dasharray: 4 5; }
 .pw-connectors circle { fill: #ffc08f; filter: drop-shadow(0 0 5px rgba(255, 123, 71, .8)); }
-.pw-project-marker { position: absolute; z-index: 2; top: calc(var(--marker-lane) * 22px); left: var(--marker-x); transform: translateX(-50%); width: 152px; min-height: 38px; padding: 3px 6px; display: flex; align-items: center; gap: 7px; color: #f7f0f8; text-align: left; border: 1px solid #4a3a55; border-radius: 8px; background: rgba(25, 19, 37, .98); box-shadow: 0 6px 18px rgba(0, 0, 0, .24); cursor: help; transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease; }
-.pw-project-marker.is-reached { border-color: rgba(255, 192, 143, .72); box-shadow: 0 6px 18px rgba(0, 0, 0, .24), 0 0 14px rgba(255, 123, 71, .24); animation: pw-marker-pulse 2.4s ease-in-out infinite; }
-.pw-project-marker.is-crossing { border-color: #ffe09b; transform: translateX(-50%) scale(1.08); box-shadow: 0 6px 18px rgba(0, 0, 0, .24), 0 0 24px rgba(255, 192, 123, .9); animation: pw-marker-crossing 260ms ease-in-out infinite alternate; }
-.pw-project-marker.align-left.is-crossing { transform: scale(1.08); }
-.pw-project-marker.align-right.is-crossing { transform: translateX(-100%) scale(1.08); }
-@keyframes pw-marker-pulse {
-  0%, 100% { box-shadow: 0 6px 18px rgba(0, 0, 0, .24), 0 0 8px rgba(255, 123, 71, .18); }
-  50% { box-shadow: 0 6px 18px rgba(0, 0, 0, .24), 0 0 18px rgba(255, 123, 71, .48); }
-}
-@keyframes pw-marker-crossing {
-  from { filter: brightness(.9); }
-  to { filter: brightness(1.35); }
-}
+.pw-project-marker { position: absolute; z-index: 2; top: calc(var(--marker-lane) * 22px); left: var(--marker-x); transform: translateX(-50%); width: 152px; min-height: 38px; padding: 3px 6px; display: flex; align-items: center; gap: 7px; color: #f7f0f8; text-align: left; border: 1px solid #4a3a55; border-radius: 8px; background: rgba(25, 19, 37, .98); box-shadow: 0 6px 18px rgba(0, 0, 0, .24); cursor: help; transition: border-color .25s ease, box-shadow .25s ease; }
+.pw-project-marker.is-reached { border-color: rgba(255, 192, 143, .72); box-shadow: 0 6px 18px rgba(0, 0, 0, .24), 0 0 14px rgba(255, 123, 71, .24); }
 .pw-project-marker.align-left { transform: none; }
 .pw-project-marker.align-right { transform: translateX(-100%); }
 .pw-avatar { position: relative; width: 26px; height: 26px; flex: 0 0 26px; display: grid; place-items: center; overflow: hidden; border: 1px solid rgba(255, 194, 139, .5); border-radius: 50%; color: #1b1221; background: linear-gradient(145deg, #ffd17a, #ff754d 56%, #d875f1); font: 700 10px var(--display); }
@@ -1606,6 +1581,116 @@ html[data-theme="light"] .pw-changes-heading h3 { color: var(--white); }
 @media (max-width: 680px) {
   .portal-hero .hero-content { width: 100%; min-width: 0; }
   .portal-hero h1 { font-size: clamp(34px, 10.5vw, 48px); letter-spacing: -1.6px; overflow-wrap: anywhere; }
+
+  .home-race-ranking {
+    margin-top: 40px;
+  }
+
+  .portwatch-section .pw-panel .pw-stat {
+    height: auto;
+    min-height: 82px;
+    padding: 10px 12px;
+    gap: 7px;
+  }
+  .portwatch-section .pw-panel .pw-stat span {
+    min-height: 0;
+    font-size: 12px;
+    line-height: 1.3;
+  }
+  .portwatch-section .pw-panel .pw-stat strong,
+  .portwatch-section .pw-panel .pw-stat .count-up {
+    overflow: visible;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.15;
+    white-space: normal;
+  }
+  .portwatch-section .pw-panel .pw-stat:first-child strong {
+    font-size: 16px;
+    overflow-wrap: anywhere;
+  }
+  .portwatch-section .pw-panel .pw-progress-fill {
+    transition: none;
+    animation: none;
+  }
+  .portwatch-section .pw-panel .pw-progress-fill::after {
+    display: none;
+    animation: none;
+  }
+  .portwatch-section .pw-panel .pw-project-marker,
+  .portwatch-section .pw-panel .pw-project-marker:hover,
+  .portwatch-section .pw-panel .pw-project-marker:focus-visible,
+  .portwatch-section .pw-panel .pw-project-marker.is-reached,
+  .portwatch-section .pw-panel .pw-project-marker.is-crossing {
+    animation: none;
+  }
+  .portwatch-section .pw-panel .pw-project-marker {
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .portwatch-section .pw-panel .pw-project-marker:hover,
+  .portwatch-section .pw-panel .pw-project-marker:focus-visible,
+  .portwatch-section .pw-panel .pw-project-marker.is-crossing {
+    transform: translateX(-50%);
+  }
+  .portwatch-section .pw-panel .pw-project-marker.align-left:hover,
+  .portwatch-section .pw-panel .pw-project-marker.align-left:focus-visible,
+  .portwatch-section .pw-panel .pw-project-marker.align-left.is-crossing {
+    transform: none;
+  }
+  .portwatch-section .pw-panel .pw-project-marker.align-right:hover,
+  .portwatch-section .pw-panel .pw-project-marker.align-right:focus-visible,
+  .portwatch-section .pw-panel .pw-project-marker.align-right.is-crossing {
+    transform: translateX(-100%);
+  }
+
+  .br-support-banner {
+    margin-bottom: 18px;
+    padding: 14px 18px;
+    grid-template-columns: minmax(0, 1fr) minmax(190px, 240px);
+    gap: 12px;
+  }
+  .br-support-copy h2 {
+    margin: 4px 0 5px;
+    font-size: clamp(18px, 2vw, 23px);
+  }
+  .br-support-copy p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .br-support-actions {
+    gap: 5px;
+  }
+  .br-support-actions .button {
+    min-height: 34px;
+    font-size: 12px;
+  }
+  .br-support-pix-key {
+    padding: 5px 7px;
+    font-size: 9px;
+  }
+  .br-support-status {
+    min-height: 13px;
+    font-size: 10px;
+  }
+  @media (max-width: 680px) {
+    .home-race-ranking { margin-top: 28px; }
+    .portwatch-section .pw-panel .pw-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .portwatch-section .pw-panel .pw-stat { min-height: 76px; padding: 9px; }
+    .portwatch-section .pw-panel .pw-stat span { font-size: 11px; }
+    .portwatch-section .pw-panel .pw-stat strong,
+    .portwatch-section .pw-panel .pw-stat .count-up { font-size: 18px; }
+    .portwatch-section .pw-panel .pw-stat:first-child strong { font-size: 15px; }
+    .br-support-banner {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 9px;
+      margin-bottom: 16px;
+      padding: 12px;
+    }
+    .br-support-copy h2 { font-size: 19px; }
+  }
   .portal-hero .hero-meta { flex-wrap: wrap; }
   .pw-changes { padding: 14px; }
   .pw-change-track { grid-auto-columns: minmax(225px, 82%); }
@@ -2667,7 +2752,6 @@ html[data-theme="light"] .xlaunch-repository-warning { color: #70520b; backgroun
   overflow: visible;
   text-align: center;
   top: calc(12px + var(--marker-lane) * 24px);
-  margin-left: var(--marker-offset, 0);
 }
 .portwatch-section .pw-panel .pw-project-marker-copy {
   display: none;
@@ -2693,18 +2777,7 @@ html[data-theme="light"] .xlaunch-repository-warning { color: #70520b; backgroun
   left: 100%;
   transform: translate(-100%, -4px);
 }
-.portwatch-section .pw-panel .pw-project-marker.is-crossing {
-  transform: translateX(-50%) scale(1.12);
-}
-.portwatch-section .pw-panel .pw-project-marker.align-left.is-crossing {
-  transform: scale(1.12);
-}
-.portwatch-section .pw-panel .pw-project-marker.align-right.is-crossing {
-  transform: translateX(-100%) scale(1.12);
-}
-
 .pw-project-progress-item,
-.pw-project-marker,
 .nav-link,
 .tracker-accordion,
 .tracker-accordion summary,
@@ -2717,7 +2790,6 @@ html[data-theme="light"] .xlaunch-repository-warning { color: #70520b; backgroun
   transition: transform .18s ease, opacity .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease, color .18s ease;
 }
 .pw-project-progress-item:hover,
-.pw-project-marker:hover,
 .nav-link:hover,
 .tracker-accordion summary:hover,
 .button:hover,
@@ -3061,4 +3133,47 @@ html[data-theme="light"] .br-support-pix-key { color: #315b3b; border-color: #d9
   .header-actions { gap: 3px; }
   .menu-toggle, .header-actions .notification-toggle, .header-actions .theme-toggle { width: 38px; min-width: 38px; flex-basis: 38px; }
   .header-actions .language-picker select { width: 50px; min-width: 50px; font-size: 10px; }
+}
+
+.br-support-banner {
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: clamp(12px, 1.8vw, 20px);
+}
+.br-support-kicker { font-size: 9px; }
+.br-support-copy h2 {
+  margin: 4px 0 5px;
+  font-size: clamp(18px, 2.1vw, 24px);
+}
+.br-support-copy p { font-size: 12px; line-height: 1.45; }
+.br-support-actions { gap: 5px; }
+.br-support-actions .button { min-height: 34px; padding: 6px 10px; font-size: 12px; }
+.br-support-pix-key { padding: 5px 7px; font-size: 9px; }
+.br-support-status { min-height: 14px; font-size: 10px; }
+
+.portwatch-section .pw-panel .pw-stats .pw-stat span {
+  font-size: 12px;
+  font-weight: 600;
+}
+.portwatch-section .pw-panel .pw-stats .pw-stat strong {
+  font-size: 19px;
+  font-weight: 700;
+}
+.portwatch-section .pw-panel .pw-stats .count-up {
+  font-size: inherit;
+  font-weight: inherit;
+}
+.portwatch-section .pw-panel .pw-progress-fill,
+.portwatch-section .pw-panel .pw-progress-fill::after,
+.portwatch-section .pw-panel .pw-project-marker,
+.portwatch-section .pw-panel .pw-project-marker .pw-avatar {
+  animation: none;
+}
+.portwatch-section .pw-panel .pw-progress-fill { transition: none; }
+
+@media (max-width: 680px) {
+  .br-support-banner { gap: 9px; padding: 12px 10px; }
+  .br-support-copy h2 { font-size: 18px; }
+  .portwatch-section .pw-panel .pw-stats .pw-stat span { font-size: 10px; }
+  .portwatch-section .pw-panel .pw-stats .pw-stat strong { font-size: 16px; }
 }
