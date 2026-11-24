@@ -229,7 +229,8 @@ function formatCounter(value, kind) {
 
 function animateCounters(root) {
   if (!root || !root.querySelectorAll) return;
-  root.querySelectorAll('[data-count-value]').forEach((element) => {
+  const elements = [...root.querySelectorAll('[data-count-value]')];
+  const start = () => elements.forEach((element) => {
     const value = Number(element.dataset.countValue);
     if (!Number.isFinite(value)) return;
     const previousAnimation = counterAnimations.get(element);
@@ -256,17 +257,67 @@ function animateCounters(root) {
     };
     counterAnimations.set(element, requestAnimationFrame(tick));
   });
+  const rect = root.getBoundingClientRect ? root.getBoundingClientRect() : null;
+  if (rect && rect.bottom >= 0 && rect.top <= window.innerHeight) start();
+  else if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        start();
+        observer.disconnect();
+      }
+    }, { threshold: 0.08 });
+    observer.observe(root);
+  } else start();
 }
 
 function animateProgress(root) {
   if (!root || !root.querySelectorAll) return;
-  root.querySelectorAll('[data-progress-value]').forEach((bar) => {
+  const bars = [...root.querySelectorAll('[data-progress-value]')];
+  const start = () => bars.forEach((bar) => {
     const value = Number(bar.dataset.progressValue);
     if (!Number.isFinite(value)) return;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    bar.style.width = reduceMotion ? `${value}%` : '0%';
-    if (!reduceMotion) requestAnimationFrame(() => { bar.style.width = `${value}%`; });
+    if (reduceMotion) {
+      bar.style.width = `${value}%`;
+      return;
+    }
+    bar.style.width = '0%';
+    const duration = 650;
+    const startTime = performance.now();
+    const tick = (now) => {
+      const linear = Math.min(1, (now - startTime) / duration);
+      const eased = 1 - ((1 - linear) ** 3);
+      const current = value * eased;
+      bar.style.width = `${current}%`;
+      root.querySelectorAll('.pw-project-marker[data-marker-progress]').forEach((marker) => {
+        const markerValue = Number(marker.dataset.markerProgress);
+        const crossing = Number.isFinite(markerValue) && markerValue <= current && markerValue >= current - 5;
+        marker.classList.toggle('is-crossing', crossing);
+        if (Number.isFinite(markerValue) && markerValue <= current) marker.classList.add('is-reached');
+      });
+      if (linear < 1) requestAnimationFrame(tick);
+      else {
+        bar.style.width = `${value}%`;
+        root.querySelectorAll('.pw-project-marker[data-marker-progress]').forEach((marker) => {
+          const markerValue = Number(marker.dataset.markerProgress);
+          marker.classList.remove('is-crossing');
+          if (Number.isFinite(markerValue) && markerValue <= value) marker.classList.add('is-reached');
+        });
+      }
+    };
+    requestAnimationFrame(tick);
   });
+  const rect = root.getBoundingClientRect ? root.getBoundingClientRect() : null;
+  if (rect && rect.bottom >= 0 && rect.top <= window.innerHeight) start();
+  else if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        start();
+        observer.disconnect();
+      }
+    }, { threshold: 0.08 });
+    observer.observe(root);
+  } else start();
 }
 
 function attachAvatarFallbacks(root) {
@@ -496,11 +547,14 @@ function mergeTrackerPayloads(portwatch, localized, fallback) {
       ...rawItem,
       ...local,
       percent: rawItem.id === 'xlaunchvi'
-        ? 50
+        ? 55
         : (remotePercent ? Number(rawItem.percent) : (local.percent != null ? Number(local.percent) : undefined)),
       stage: rawItem.id === 'xlaunchvi'
-        ? 'Tela de carregamento'
+        ? 'Menu principal a 30 FPS (sem texturas)'
         : (rawItem.stage || local.stage),
+      gta: rawItem.id === 'xlaunchvi'
+        ? { loads: 1, boots: 1, menu: 1, ingame: 0, fps: 1, stability: 'unknown' }
+        : (rawItem.gta || local.gta),
       status: rawItem.id === 'xlaunchvi'
         ? 'acompanhado'
         : (rawItem.nuked || rawItem.missing || rawItem.status === 'offline' ? 'offline' : rawItem.status),
@@ -593,8 +647,8 @@ function mergeTrackerPayloads(portwatch, localized, fallback) {
     const xlaunch = merged.efforts[xlaunchIndex];
     merged.efforts[xlaunchIndex] = {
       ...xlaunch,
-      percent: 50,
-      stage: 'Tela de carregamento',
+      percent: 55,
+      stage: 'Menu principal a 30 FPS (sem texturas)',
       progressBasis: 'team-report-estimate',
       portwatchPercent: Number.isFinite(Number(xlaunch.portwatchPercent)) ? Number(xlaunch.portwatchPercent) : 0,
       portwatchMilestonePercent: 0,
@@ -606,13 +660,13 @@ function mergeTrackerPayloads(portwatch, localized, fallback) {
       name: 'XlaunchVI',
       repo: 'JPTuba9/xlaunch-vi',
       tier: 'watchlist',
-      percent: 50,
-      stage: 'Tela de carregamento',
+      percent: 55,
+      stage: 'Menu principal a 30 FPS (sem texturas)',
       progressBasis: 'team-report-estimate',
       portwatchPercent: 0,
       portwatchMilestonePercent: 0,
       status: 'acompanhado',
-      summary: 'A equipe relata a tela de carregamento; o portal mantém a estimativa editorial local de 50%.',
+      summary: 'Os menus do XLaunchVI abrem a 30 FPS sem texturas; o próximo foco é otimizar memória e shaders sem textura. O portal mantém 55% como estimativa editorial local.',
       verification: 'Relato da equipe não verificado independentemente'
     });
   }
@@ -1945,7 +1999,7 @@ function progressPercent(value) {
 }
 
 function portwatchEffortScore(project) {
-  if (project && project.id === 'xlaunchvi') return 50;
+  if (project && project.id === 'xlaunchvi') return 55;
   const gta = project && project.gta && typeof project.gta === 'object' ? project.gta : {};
   const groundwork = project && project.groundwork && typeof project.groundwork === 'object'
     ? project.groundwork
@@ -2126,85 +2180,72 @@ function renderHeroRaceClock(snapshot, leader, milestones, progress) {
     clearInterval(heroCountdownTimer);
     heroCountdownTimer = null;
   }
-  const exe = snapshot && snapshot.exe && typeof snapshot.exe === 'object' ? snapshot.exe : {};
-  const releasedTimestamp = exe.status === 'released'
-    ? Date.parse(exe.releasedAt || '')
-    : NaN;
-  const expectedTimestamp = Date.parse(exe.expectedAt || (exe.expected ? `${exe.expected}T00:00:00Z` : ''));
-  const factualReference = Number.isFinite(releasedTimestamp)
-    ? releasedTimestamp
-    : Number.isFinite(expectedTimestamp) ? expectedTimestamp : NaN;
-  const isReleased = Number.isFinite(releasedTimestamp);
-  const isPastExpected = !isReleased && Number.isFinite(expectedTimestamp) && expectedTimestamp <= Date.now();
-  const isFutureExpected = !isReleased && Number.isFinite(expectedTimestamp) && expectedTimestamp > Date.now();
-  const remaining = isFutureExpected
-    ? countdownParts(expectedTimestamp)
-    : Number.isFinite(factualReference)
-      ? elapsedParts(factualReference)
-      : null;
-  const hasProjection = Boolean(remaining);
+  const history = snapshot && Array.isArray(snapshot.history) ? snapshot.history.slice()
+    .filter((entry) => Number.isFinite(Number(entry.leader)) && Number.isFinite(Date.parse(entry.date || '')))
+    .sort((left, right) => Date.parse(left.date) - Date.parse(right.date)) : [];
+  const baseTimestamp = Date.parse(snapshot && (snapshot.updatedAt || snapshot.updated || snapshot.lastSyncedAt) || '');
+  const projectionBase = Number.isFinite(baseTimestamp) ? baseTimestamp : Date.now();
+  const nextMilestone = milestones
+    .map((milestone) => ({ ...milestone, percent: progressPercent(milestone.percent) }))
+    .filter((milestone) => milestone.percent > progress)
+    .sort((left, right) => left.percent - right.percent)[0] || null;
+  let rate = null;
+  if (history.length >= 2) {
+    const first = history[0];
+    const latest = history[history.length - 1];
+    const elapsedDays = (Date.parse(latest.date) - Date.parse(first.date)) / 86400000;
+    if (elapsedDays > 0) {
+      const calculatedRate = (Number(latest.leader) - Number(first.leader)) / elapsedDays;
+      if (Number.isFinite(calculatedRate) && calculatedRate > 0) rate = calculatedRate;
+    }
+  }
+  const targetTimestamp = rate && nextMilestone
+    ? projectionBase + Math.max(0, Math.ceil((progressPercent(nextMilestone.percent) - progress) / rate)) * 86400000
+    : null;
+  const hasProjection = Number.isFinite(targetTimestamp);
+  const remaining = hasProjection ? countdownParts(targetTimestamp) : null;
   const units = [
     { key: 'days', label: 'dias' },
     { key: 'hours', label: 'horas' },
     { key: 'minutes', label: 'minutos' },
     { key: 'seconds', label: 'segundos' }
   ];
-  const targetDate = isReleased
-    ? exe.releasedAt
-    : isFutureExpected
-      ? (exe.expectedAt || `${exe.expected}T00:00:00Z`)
-      : isPastExpected
-        ? (exe.expectedAt || `${exe.expected}T00:00:00Z`)
-        : '';
-  const status = isReleased
-    ? `${t('Executável divulgado')}${exe.by ? ` ${t('por')} ${exe.by}` : ''}. ${t('Contagem factual desde a referência registrada no tracker.')}`
-    : isFutureExpected
-      ? t('Prazo factual informado pelo tracker; ainda não consta como executável lançado.')
-      : isPastExpected
-        ? t('O prazo factual informado pelo tracker passou; o status ainda não confirma o lançamento.')
-        : t('O tracker não informa data de release nem prazo factual para esta referência.');
-  const title = isReleased
-    ? t('Tempo desde o release do executável')
-    : isFutureExpected
-      ? t('Tempo até o prazo informado')
-      : t('Referência factual do executável');
+  const targetDate = hasProjection ? new Date(targetTimestamp).toISOString() : '';
+  const status = hasProjection
+    ? `${t('Contagem estimada por')} ${escapeHtml(t(nextMilestone.label))}${leader ? ` · ${escapeHtml(leader.name)}` : ''}. ${t('Baseada no ritmo dos snapshots históricos e no progresso atual do tracker.')}`
+    : t('Não há amostras históricas suficientes para calcular uma contagem factual de próximo marco.');
+  const title = hasProjection
+    ? t('Estimativa até o próximo marco')
+    : t('Contagem indisponível');
 
-  panel.dataset.state = isReleased ? 'released' : isFutureExpected ? 'active' : isPastExpected ? 'elapsed' : 'unavailable';
-  panel.innerHTML = `<span class="section-kicker">${escapeHtml(t('REFERÊNCIA FÁTICA DO TRACKER'))}</span>
+  panel.dataset.state = hasProjection ? (targetTimestamp > Date.now() ? 'active' : 'elapsed') : 'unavailable';
+  panel.innerHTML = `<span class="section-kicker">${escapeHtml(t('ESTIMATIVA FÁTICA DO TRACKER'))}</span>
     <h2>${escapeHtml(title)}</h2>
-    <p class="hero-clock-target">${isReleased ? escapeHtml(t('Release registrado no tracker')) : isFutureExpected ? escapeHtml(t('Prazo registrado no tracker')) : escapeHtml(t('Sem prazo ou release confirmado'))}</p>
+    <p class="hero-clock-target">${hasProjection && nextMilestone ? `${escapeHtml(t('Próximo marco:'))} <b>${escapeHtml(t(nextMilestone.label))}</b>` : escapeHtml(t('Sem projeção disponível'))}</p>
     <div class="hero-clock-units" aria-label="${escapeHtml(t('Contagem regressiva em dias, horas, minutos e segundos'))}" aria-live="off">
       ${units.map((unit) => `<span class="hero-clock-unit"><strong data-clock-unit="${unit.key}">${hasProjection ? counterMarkup(remaining[unit.key]) : '—'}</strong><small>${escapeHtml(t(unit.label))}</small></span>`).join('')}
     </div>
-    ${targetDate ? `<time class="hero-clock-date" datetime="${escapeHtml(targetDate)}">${escapeHtml(isReleased ? t('Divulgado em:') : t('Referência factual:'))} ${escapeHtml(formatNewsDate(targetDate))}</time>` : ''}
+    ${targetDate ? `<time class="hero-clock-date" datetime="${escapeHtml(targetDate)}">${escapeHtml(t('Estimativa:'))} ${escapeHtml(formatNewsDate(targetDate))}</time>` : ''}
     <p class="hero-clock-status" role="status">${escapeHtml(status)}</p>
-    <small class="hero-clock-disclaimer">${escapeHtml(t('Esta referência usa somente datas presentes no tracker; não é uma previsão oficial de lançamento para PC.'))}</small>`;
+    <small class="hero-clock-disclaimer">${escapeHtml(t('Contagem estimada com base em notícias, datas e marcos registrados no tracker. Não é data oficial de lançamento da Rockstar para PC.'))}</small>`;
   window.KynosI18n.translateDom(panel, state.language);
   if (!hasProjection) return;
 
   animateCounters(panel);
-  if (isFutureExpected) {
+  if (targetTimestamp > Date.now()) {
     heroCountdownTimer = setInterval(() => {
-      const parts = countdownParts(expectedTimestamp);
+      const parts = countdownParts(targetTimestamp);
       units.forEach((unit) => {
         const number = panel.querySelector(`[data-clock-unit="${unit.key}"] .count-up`);
         if (number) number.textContent = formatCounter(parts[unit.key], 'integer');
       });
-      if (expectedTimestamp <= Date.now()) {
+      if (targetTimestamp <= Date.now()) {
         const statusElement = panel.querySelector('.hero-clock-status');
-        if (statusElement) statusElement.textContent = t('O prazo factual informado pelo tracker passou; o status ainda não confirma o lançamento.');
+        if (statusElement) statusElement.textContent = t('A estimativa passou, mas o tracker ainda não confirmou o próximo marco.');
         panel.dataset.state = 'elapsed';
         clearInterval(heroCountdownTimer);
         heroCountdownTimer = null;
       }
-    }, 1000);
-  } else if (isReleased || isPastExpected) {
-    heroCountdownTimer = setInterval(() => {
-      const parts = elapsedParts(factualReference);
-      units.forEach((unit) => {
-        const number = panel.querySelector(`[data-clock-unit="${unit.key}"] .count-up`);
-        if (number) number.textContent = formatCounter(parts[unit.key], 'integer');
-      });
     }, 1000);
   }
 }
@@ -2383,7 +2424,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
     { label: 'Iniciam o GTA VI', markup: `${counterMarkup(launchingCount)} / ${counterMarkup(rankedProjects.length)}` },
     { label: 'Projetos acompanhados', markup: counterMarkup(projects.length) }
   ];
-  const timelineProjects = rankedProjects.slice(0, 5).filter((project) => portwatchProjectProgress(project, milestones) > 0);
+  const timelineProjects = rankedProjects.slice(0, 8).filter((project) => portwatchProjectProgress(project, milestones) >= 0);
   const xlaunchReportProject = projects.find((project) => project.id === 'xlaunchvi' && project.teamReport);
   if (xlaunchReportProject && !timelineProjects.some((project) => project.id === xlaunchReportProject.id)) {
     timelineProjects.push(xlaunchReportProject);
@@ -2391,8 +2432,8 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
   const lines = timelineProjects.map((project, index) => {
     const x = portwatchProjectProgress(project, milestones) * 10;
     const lane = index;
-    const y = 24 + lane * 48;
-    return `<line x1="${x}" y1="${y}" x2="${x}" y2="306" /><circle cx="${x}" cy="306" r="4" />`;
+    const y = 18 + lane * 22;
+    return `<line x1="${x}" y1="${y}" x2="${x}" y2="248" /><circle cx="${x}" cy="248" r="4" />`;
   }).join('');
   const markerCards = timelineProjects.map((project, index) => {
     const projectProgress = portwatchProjectProgress(project, milestones);
@@ -2412,7 +2453,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
       ? ` · ${t('estimativa editorial da equipe')}; ${t('snapshot GitHub/tracker')}: ${snapshotPercent}%`
       : reportStage ? ` · ${t('Relato do Discord')}: ${reportStage}; ${t('snapshot GitHub/tracker')}: ${snapshotPercent}%` : '';
     const tooltip = `${project.name}: ${progressLabel}% · ${stage}${estimateLabel}`;
-    return `<button class="pw-project-marker align-${edge} ${project.teamReport ? 'pw-project-marker--xlaunch' : ''}" type="button" style="--marker-x:${projectProgress}%;--marker-lane:${lane}" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(tooltip)}">${avatarMarkup}</button>`;
+    return `<button class="pw-project-marker align-${edge} ${project.teamReport ? 'pw-project-marker--xlaunch' : ''} ${projectProgress <= progress ? 'is-reached' : ''}" type="button" style="--marker-x:${projectProgress}%;--marker-lane:${lane}" data-marker-progress="${projectProgress}" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(tooltip)}">${avatarMarkup}</button>`;
   }).join('');
   const projectList = projects.slice()
     .sort((left, right) => Number(isInactiveProject(left)) - Number(isInactiveProject(right))
@@ -3492,7 +3533,7 @@ function renderTrackerProjects(data) {
     ...project,
     percent: portwatchEffortScore(project),
     stage: project.id === 'xlaunchvi'
-      ? 'Tela de carregamento'
+      ? 'Menu principal a 30 FPS (sem texturas)'
       : portwatchMilestone(project, PORTWATCH_FALLBACK.milestones).label
   })).sort((left, right) => right.percent - left.percent || left.name.localeCompare(right.name));
   const active = projects.filter((project) => !isInactiveProject(project));
