@@ -1,0 +1,56 @@
+name: Sync KynosRecompVI tracker
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-tracker
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Sync tracker from upstream
+        run: node scripts/sync-tracker.mjs
+
+      - name: Validate tracker JSON and local translations
+        run: node -e "const fs=require('fs'); const tracker=JSON.parse(fs.readFileSync('data/tracker.json','utf8')); const pt=JSON.parse(fs.readFileSync('data/tracker-pt-BR.json','utf8')); if(!tracker||typeof tracker!== 'object') throw new Error('tracker.json invalido'); if(!Array.isArray(tracker.efforts)||!Array.isArray(tracker.news)) throw new Error('Arrays principais ausentes'); const x=pt.teams?.xlaunchvi?.latestReport; if(!x) throw new Error('Customizacao XLaunchVI ausente'); if(x.estimatedPercent!==50) throw new Error('XLaunchVI deve permanecer em 50%'); console.log('JSON validado:',tracker.efforts.length,'projetos,',tracker.news.length,'noticias');"
+
+      - name: Detect real tracker changes
+        id: changes
+        shell: bash
+        run: |
+          if git diff --quiet -- data/tracker.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push tracker snapshot
+        if: steps.changes.outputs.changed == 'true'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/tracker.json
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: sync tracker snapshot" -m "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+          git push

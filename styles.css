@@ -2179,3 +2179,69 @@ html[data-theme="light"] .xlaunch-repository-warning { color: #70520b; backgroun
   }
   .language-picker select { width: 50px; min-width: 50px; min-height: 44px; }
 }
+
+.news-card-full,
+.news-full-content {
+  margin-top: 12px;
+}
+
+.news-card-full summary,
+.news-full-content summary {
+  cursor: pointer;
+  color: var(--orange);
+  font-weight: 700;
+}
+
+.news-card-full p,
+.news-full-content p {
+  margin-top: 10px;
+  line-height: 1.65;
+}
+
+.news-feature-image,
+.news-card-image {
+  margin: 14px 0 0;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+
+.news-feature-image img,
+.news-card-image img {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+}
+
+.news-feature-image figcaption,
+.news-card-image figcaption {
+  padding: 8px 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.tracker-history-grid,
+.tracker-candidate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.tracker-history-item,
+.tracker-candidate {
+  min-width: 0;
+}
+
+.tracker-history-item strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 26px;
+  color: var(--orange);
+}
+
+.repo-card--inactive,
+.repo-card--inactive .repo-progress {
+  filter: saturate(.72);
+  border-color: rgba(255, 192, 111, .28);
+}

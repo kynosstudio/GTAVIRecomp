@@ -387,6 +387,36 @@ async function loadOptionalJson(path) {
   }
 }
 
+const TRACKER_REMOTE_URL = 'https://raw.githubusercontent.com/4lwayz/portwatch-vi/main/data/tracker.json';
+
+async function fetchJsonWithTimeout(url, timeoutMs = 5000) {
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timeout = controller ? window.setTimeout(() => controller.abort(), timeoutMs) : null;
+  try {
+    const response = await fetch(`${url}${url.includes('?') ? '&' : '?'}t=${Date.now()}`, {
+      cache: 'no-store',
+      ...(controller ? { signal: controller.signal } : {})
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } finally {
+    if (timeout) window.clearTimeout(timeout);
+  }
+}
+
+async function loadTrackerSourceChain() {
+  if (window.location.protocol !== 'file:') {
+    try {
+      return { payload: await fetchJsonWithTimeout(TRACKER_REMOTE_URL), source: 'github-remote' };
+    } catch (error) {
+      console.warn('Tracker remoto indisponível; tentando o snapshot local.', error);
+    }
+  }
+  const local = await loadOptionalJson('data/tracker.json');
+  if (local) return { payload: local, source: 'local' };
+  return { payload: null, source: 'memory' };
+}
+
 async function ensureEmbeddedFallback() {
   if (window.KynosFileData) return window.KynosFileData;
   if (window.location.protocol === 'file:' && window.KynosFileDataReady) {
@@ -422,15 +452,103 @@ function mergeTrackerPayloads(portwatch, localized, fallback) {
   const fallbackPortwatch = fallback && fallback.portwatch && typeof fallback.portwatch === 'object'
     ? fallback.portwatch
     : {};
+  const raw = isTrackerPayload(portwatch) ? portwatch : {};
   const base = isTrackerPayload(fallbackTracker) ? fallbackTracker : {};
   const translated = isTrackerPayload(localized) ? localized : {};
-  const merged = { ...base, ...translated };
-  const arrayFields = ['news', 'efforts', 'tools', 'flagged', 'changes', 'headlines', 'dmca'];
-  arrayFields.forEach((field) => {
-    merged[field] = Array.isArray(translated[field])
-      ? translated[field]
-      : Array.isArray(base[field]) ? base[field] : [];
+  const merged = { ...base, ...raw, ...translated };
+
+  const itemKey = (item) => item && (item.id || item.repo || item.name || item.title || item.url || item.path);
+  const mergeArrayByKey = (field) => {
+    const rawItems = Array.isArray(raw[field]) ? raw[field] : [];
+    const baseItems = Array.isArray(base[field]) ? base[field] : [];
+    const translatedItems = Array.isArray(translated[field]) ? translated[field] : [];
+    const source = rawItems.length ? rawItems : baseItems;
+    const translatedMap = new Map(translatedItems.map((item) => [itemKey(item), item]).filter(([key]) => key));
+    const result = source.map((item) => {
+      const translation = translatedMap.get(itemKey(item));
+      return translation ? { ...item, ...translation, translations: { ...(item.translations || {}), ...(translation.translations || {}) } } : { ...item };
+    });
+    const knownKeys = new Set(result.map(itemKey).filter(Boolean));
+    translatedItems.forEach((item) => {
+      const key = itemKey(item);
+      if (key && !knownKeys.has(key)) {
+        result.push({ ...item });
+        knownKeys.add(key);
+      }
+    });
+    return result;
+  };
+
+  ['tools', 'candidates', 'flagged', 'changes', 'headlines', 'dmca', 'history'].forEach((field) => {
+    merged[field] = mergeArrayByKey(field);
   });
+  merged.candidateList = merged.candidates;
+
+  const rawEfforts = Array.isArray(raw.efforts) ? raw.efforts : (Array.isArray(base.efforts) ? base.efforts : []);
+  const localizedEfforts = Array.isArray(translated.efforts) ? translated.efforts : [];
+  const effortMap = new Map(localizedEfforts.map((item) => [item.id, item]).filter(([key]) => key));
+  merged.efforts = rawEfforts.map((rawItem) => {
+    const local = effortMap.get(rawItem.id);
+    if (!local) return { ...rawItem };
+    const remotePercent = rawItem.percent != null && Number.isFinite(Number(rawItem.percent));
+    return {
+      ...rawItem,
+      ...local,
+      percent: remotePercent ? Number(rawItem.percent) : (local.percent ?? rawItem.percent),
+      stage: rawItem.stage || local.stage,
+      gta: rawItem.gta || local.gta,
+      groundwork: rawItem.groundwork || local.groundwork,
+      stats: rawItem.stats || local.stats,
+      nuked: rawItem.nuked || local.nuked,
+      missing: rawItem.missing || rawItem.stats?.missing || local.missing,
+      technicalDetails: local.technicalDetails || rawItem.technicalDetails,
+      translations: { ...(rawItem.translations || {}), ...(local.translations || {}) }
+    };
+  });
+  localizedEfforts.forEach((item) => {
+    if (item && item.id && !merged.efforts.some((effort) => effort.id === item.id)) merged.efforts.push({ ...item });
+  });
+
+  const rawNews = Array.isArray(raw.news) ? raw.news : (Array.isArray(base.news) ? base.news : []);
+  const localizedNews = Array.isArray(translated.news) ? translated.news : [];
+  const newsMap = new Map(localizedNews.map((item) => [item.id, item]).filter(([key]) => key));
+  merged.news = rawNews.map((rawItem) => {
+    const local = newsMap.get(rawItem.id);
+    if (!local) return { ...rawItem };
+    return {
+      ...rawItem,
+      ...local,
+      body: Array.isArray(rawItem.body) ? rawItem.body : (Array.isArray(local.body) ? local.body : []),
+      image: rawItem.image !== undefined ? rawItem.image : (local.image ?? null),
+      sources: Array.isArray(rawItem.sources) ? rawItem.sources : (Array.isArray(local.sources) ? local.sources : []),
+      summary: local.summary || rawItem.dek || rawItem.summary,
+      translations: { ...(rawItem.translations || {}), ...(local.translations || {}) }
+    };
+  });
+  localizedNews.forEach((item) => {
+    if (item && item.id && !merged.news.some((story) => story.id === item.id)) merged.news.push({ ...item, summary: item.summary || item.dek });
+  });
+
+  merged.news = merged.news.slice().sort((left, right) => Date.parse(right.date || right.updatedAt || 0) - Date.parse(left.date || left.updatedAt || 0));
+  merged.changes = (Array.isArray(merged.changes) ? merged.changes : []).slice()
+    .sort((left, right) => Date.parse(right.date || right.updatedAt || 0) - Date.parse(left.date || left.updatedAt || 0));
+  merged.headlines = (Array.isArray(merged.headlines) ? merged.headlines : []).slice()
+    .sort((left, right) => Date.parse(right.date || 0) - Date.parse(left.date || 0));
+  merged.ignored = {
+    ...(base.ignored && typeof base.ignored === 'object' ? base.ignored : {}),
+    ...(raw.ignored && typeof raw.ignored === 'object' ? raw.ignored : {}),
+    ...(translated.ignored && typeof translated.ignored === 'object' ? translated.ignored : {})
+  };
+  merged.exe = {
+    ...(base.exe && typeof base.exe === 'object' ? base.exe : {}),
+    ...(raw.exe && typeof raw.exe === 'object' ? raw.exe : {}),
+    ...(translated.exe && typeof translated.exe === 'object' ? translated.exe : {})
+  };
+  merged.scout = {
+    ...(base.scout && typeof base.scout === 'object' ? base.scout : {}),
+    ...(raw.scout && typeof raw.scout === 'object' ? raw.scout : {}),
+    ...(translated.scout && typeof translated.scout === 'object' ? translated.scout : {})
+  };
   const rawUpdated = portwatch && (portwatch.updated || portwatch.updatedAt);
   const rawSynced = portwatch && portwatch.lastSyncedAt;
   const candidates = [merged.lastSyncedAt, rawSynced, merged.updatedAt, rawUpdated, fallbackPortwatch.lastSyncedAt, fallbackPortwatch.updated]
@@ -452,6 +570,43 @@ function mergeTrackerPayloads(portwatch, localized, fallback) {
       latestReport: translatedTeam.latestReport || baseTeam.latestReport || null,
       repositoryCheck: translatedTeam.repositoryCheck || baseTeam.repositoryCheck || null
     };
+  }
+  const xlaunchTeam = merged.teams && merged.teams.xlaunchvi;
+  if (xlaunchTeam) {
+    merged.teams.xlaunchvi = {
+      ...xlaunchTeam,
+      pixKey: xlaunchTeam.pixKey || 'galinhafritadubs@gmail.com',
+      discordUrl: xlaunchTeam.discordUrl || 'https://discord.gg/R5T6zeQuPY',
+      kickUrl: xlaunchTeam.kickUrl || 'https://kick.com/myleouss'
+    };
+  }
+  const xlaunchIndex = merged.efforts.findIndex((item) => item && item.id === 'xlaunchvi');
+  if (xlaunchIndex >= 0) {
+    const xlaunch = merged.efforts[xlaunchIndex];
+    merged.efforts[xlaunchIndex] = {
+      ...xlaunch,
+      percent: 50,
+      stage: 'Tela de carregamento',
+      progressBasis: 'team-report-estimate',
+      portwatchPercent: Number.isFinite(Number(xlaunch.portwatchPercent)) ? Number(xlaunch.portwatchPercent) : 0,
+      portwatchMilestonePercent: 0,
+      status: 'acompanhado'
+    };
+  } else {
+    merged.efforts.push({
+      id: 'xlaunchvi',
+      name: 'XlaunchVI',
+      repo: 'JPTuba9/xlaunch-vi',
+      tier: 'watchlist',
+      percent: 50,
+      stage: 'Tela de carregamento',
+      progressBasis: 'team-report-estimate',
+      portwatchPercent: 0,
+      portwatchMilestonePercent: 0,
+      status: 'acompanhado',
+      summary: 'A equipe relata a tela de carregamento; o portal mantém a estimativa editorial local de 50%.',
+      verification: 'Relato da equipe não verificado independentemente'
+    });
   }
   merged.portwatchSource = {
     updatedAt: rawUpdated || fallbackPortwatch.updated || '',
@@ -1794,11 +1949,18 @@ function portwatchMilestone(project, milestones) {
     };
   }
   const gta = project.gta || {};
-  return milestones
+  const matched = milestones
     .filter((milestone) => !milestone.statusField || gta[milestone.statusField] === milestone.statusValue)
     .sort((left, right) => progressPercent(right.percent) - progressPercent(left.percent))[0]
     || milestones.find((milestone) => progressPercent(milestone.percent) === 0)
     || { percent: 0, label: 'Preparação' };
+  if (Number(gta.ingame) >= 1 && Number(gta.fps) > 0) {
+    return { percent: 77, label: 'Dentro do jogo · FPS reportado', description: 'O projeto entrou no mundo com FPS reportado.' };
+  }
+  if (Number(gta.ingame) >= 1) {
+    return { percent: 70, label: 'Dentro do jogo', description: 'É possível entrar no jogo.' };
+  }
+  return matched;
 }
 
 function portwatchProjectProgress(project, milestones) {
@@ -1977,6 +2139,23 @@ function renderRaceProjection(snapshot, leader, milestones, progress) {
     <ul class="projection-targets">${dates}</ul>
     <p class="projection-warning"><b>${escapeHtml(t('Estimativa especulativa, não uma data oficial.'))}</b> ${escapeHtml(t('Não representa promessa da Rockstar/Take-Two nem data de lançamento para PC; bugs, bloqueios técnicos, limites de hardware e derrubadas podem mudar tudo.'))}</p>
     <p class="projection-method">${escapeHtml(t('A projeção de prazo só aparece com histórico temporal verificável; sem ele, mostramos a distância até os marcos, não uma data inventada.'))}</p>
+  </section>`;
+}
+
+function renderRaceHistory(snapshot) {
+  const history = snapshot && Array.isArray(snapshot.history) ? snapshot.history : [];
+  if (!history.length) return '';
+  const rows = history.slice(-6).reverse().map((entry) => `
+    <li>
+      <time datetime="${escapeHtml(entry.date || '')}">${escapeHtml(formatNewsDate(entry.date || ''))}</time>
+      <span><b>${escapeHtml(entry.leaderName || entry.leaderId || t('Líder não identificado'))}</b><small>${escapeHtml(t('Média do top 3:'))} ${counterMarkup(entry.top3, 'percent')}% · ${escapeHtml(t('Projetos acompanhados:'))} ${counterMarkup(entry.tracked)}</small></span>
+      <strong>${counterMarkup(entry.leader, 'percent')}%</strong>
+    </li>`).join('');
+  return `<section class="race-intel-card panel race-history" aria-labelledby="race-history-title">
+    <span class="section-kicker">${escapeHtml(t('LEITURAS DIÁRIAS DO TRACKER'))}</span>
+    <h3 id="race-history-title">${escapeHtml(t('Snapshots registrados'))}</h3>
+    <p>${escapeHtml(t('Registros diários agregados pelo PortWatch. Não são uma série horária do mesmo projeto e não alimentam a projeção de prazo.'))}</p>
+    <ol>${rows}</ol>
   </section>`;
 }
 
@@ -2200,6 +2379,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
     ${renderRaceProjection(snapshot, leader, milestones, progress)}
     ${renderRaceReversals(snapshot, projects, leader)}
     ${renderRaceControlLog(snapshot, leader, projects)}
+    ${renderRaceHistory(snapshot)}
   </div>` : '';
 
   section.setAttribute('aria-busy', 'false');
@@ -2743,12 +2923,68 @@ function formatPercent(value) {
   return Number(value).toLocaleString(locale, { maximumFractionDigits: 1 });
 }
 
+function selectFeaturedStory(data) {
+  const candidates = [];
+  const addCandidate = (item, sourceType) => {
+    if (!item) return;
+    const dateValue = item.date || item.updatedAt || item.loggedAt || item.foundAt || item.assessedAt || '';
+    const timestamp = Date.parse(dateValue);
+    const ageHours = Number.isFinite(timestamp) ? Math.max(0, (Date.now() - timestamp) / 3600000) : 24 * 365;
+    const recency = Number.isFinite(timestamp) ? Math.max(0, 100 - Math.min(100, ageHours * 2)) : 0;
+    const text = normalizeHardwareSearch([
+      item.title, item.name, item.description, item.summary, item.dek, item.text,
+      ...(item.signals || [])
+    ].join(' '));
+    let impact = 0;
+    if (/nuked|derrubad|takedown|remov|exclu/.test(text)) impact += 45;
+    if (/in.?game|dentro do mundo|dentro do jogo|world/.test(text)) impact += 42;
+    if (/menu|menus|first frame|primeiro quadro|in-game|fps/.test(text)) impact += 34;
+    if (/exe|execut[aá]vel/.test(text)) impact += 28;
+    if (/new project|novo projeto|nova equipe|candidate|candidato/.test(text)) impact += 30;
+    if (sourceType === 'candidate') impact += Math.max(0, Math.min(50, Number(item.substance) || 0)) * 0.55;
+    if (item.status === 'new' || item.kind === 'effort') impact += 20;
+    const score = recency * 0.65 + impact;
+    candidates.push({ item, score, sourceType });
+  };
+
+  (Array.isArray(data.news) ? data.news : []).forEach((item) => addCandidate(item, 'news'));
+  (Array.isArray(data.changes) ? data.changes : []).forEach((item) => addCandidate({
+    id: `change-${item.date || ''}-${item.kind || ''}`,
+    date: item.date,
+    title: item.kind || item.title || 'Atualização do tracker',
+    summary: item.summary || item.text || '',
+    ...item
+  }, 'change'));
+  (Array.isArray(data.candidates) ? data.candidates : []).forEach((item) => {
+    if (item.status === 'new' || Number(item.substance) >= 70) addCandidate({
+      id: `candidate-${item.repo || item.name}`,
+      date: item.foundAt || item.createdAt,
+      title: item.name ? `Novo projeto relevante: ${item.name}` : 'Novo projeto relevante',
+      summary: item.description || 'Candidato identificado pela triagem automática.',
+      sources: item.repo ? [{ outlet: 'GitHub', title: item.repo, url: `https://github.com/${item.repo}` }] : [],
+      ...item
+    }, 'candidate');
+  });
+
+  candidates.sort((left, right) =>
+    right.score - left.score
+    || Date.parse(right.item.date || right.item.updatedAt || right.item.foundAt || 0)
+    - Date.parse(left.item.date || left.item.updatedAt || left.item.foundAt || 0));
+  return candidates[0] ? candidates[0].item : (data.news && data.news[0]) || null;
+}
+
 function renderStoryFeature(story, target) {
+  const image = story.image && typeof story.image === 'object' ? story.image : null;
+  const body = Array.isArray(story.body) ? story.body : [];
+  const articleBody = body.length ? `<details class="news-full-content"><summary>${escapeHtml(t('Ler notícia completa'))}</summary>${body.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('')}${story.sources && story.sources.length ? `<div class="news-source-links">${story.sources.map((source) => `<a class="text-link" href="${escapeHtml(safeUrl(source.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t(source.outlet || 'Fonte original'))} ↗</a>`).join('')}</div>` : ''}</details>` : '';
+  const imageMarkup = image && image.url ? `<figure class="news-feature-image"><img src="${escapeHtml(safeUrl(image.url))}" alt="" loading="lazy" decoding="async">${image.credit ? `<figcaption>${escapeHtml(image.credit)}${image.link ? ` · <a href="${escapeHtml(safeUrl(image.link))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Abrir imagem'))} ↗</a>` : ''}</figcaption>` : ''}</figure>` : '';
   target.innerHTML = `
     <div class="news-feature-content">
       <div class="news-feature-meta"><span class="news-feature-kicker">${escapeHtml(t('Manchete em destaque'))}</span><span class="news-category">${escapeHtml(t(story.category))}</span>${publicationTimeMarkup(story.date)}</div>
-      <h3>${escapeHtml(story.title)}</h3>
-      <p>${escapeHtml(story.summary)}</p>
+      <h3>${escapeHtml(localizedValue(story, 'title') || story.title)}</h3>
+      <p>${escapeHtml(localizedValue(story, 'dek') || localizedValue(story, 'summary') || story.summary || story.dek)}</p>
+      ${imageMarkup}
+      ${articleBody}
       <div class="news-source-links">${(story.sources || []).map((source) => `<a class="text-link" href="${escapeHtml(safeUrl(source.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(t(source.title))}">${escapeHtml(t(source.outlet))} ↗</a>`).join('')}</div>
     </div>
     <div class="news-feature-stamp" aria-hidden="true"><span>KYNOSRECOMPVI</span><strong>LEONIDA</strong><small>${escapeHtml(formatNewsDate(story.date))}</small></div>`;
@@ -2756,11 +2992,20 @@ function renderStoryFeature(story, target) {
 }
 
 function renderStoryCard(story, featured = false) {
+  const body = Array.isArray(story.body) ? story.body : [];
+  const image = story.image && typeof story.image === 'object' ? story.image : null;
+  const fullContent = body.length || (story.sources && story.sources.length)
+    ? `<details class="news-card-full"><summary>${escapeHtml(t('Ler completo'))}</summary>
+      ${image && image.url ? `<figure class="news-card-image"><img src="${escapeHtml(safeUrl(image.url))}" alt="" loading="lazy" decoding="async">${image.credit ? `<figcaption>${escapeHtml(image.credit)}</figcaption>` : ''}</figure>` : ''}
+      ${body.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('')}
+      ${story.sources && story.sources.length ? `<div class="news-source-links">${story.sources.map((source) => `<a class="text-link" href="${escapeHtml(safeUrl(source.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t(source.outlet || 'Fonte original'))} ↗</a>`).join('')}</div>` : ''}
+    </details>` : '';
   return `<article class="news-card ${featured ? 'news-card--featured' : ''}">
     <div class="news-card-top"><span class="news-category">${escapeHtml(t(story.category))}</span>${publicationTimeMarkup(story.date)}</div>
     <h3>${escapeHtml(localizedValue(story, 'title') || story.title)}</h3>
     <p>${escapeHtml(localizedValue(story, 'summary') || story.summary)}</p>
     ${story.loggedAt ? `<p class="news-card-recorded">${escapeHtml(t('Registro editorial no portal:'))} ${publicationTimeMarkup(story.loggedAt)}</p>` : ''}
+    ${fullContent}
     <div class="news-source-links">${(story.sources || []).map((source) => `<a class="text-link" href="${escapeHtml(safeUrl(source.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(t(source.title))}">${escapeHtml(t(source.outlet))} ↗</a>`).join('')}</div>
   </article>`;
 }
@@ -2833,7 +3078,7 @@ function renderXlaunchSpotlight(project, team, snapshot, modifier = '') {
       <div class="progress-label"><span>${escapeHtml(t('Estimativa editorial baseada em relato'))}</span><strong>${counterMarkup(percent, 'percent')}%</strong></div>
       <div class="progress-track" role="progressbar" aria-label="${escapeHtml(`${project.name}: ${formatPercent(percent)}% de estimativa editorial`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><span data-progress-value="${percent}"></span></div>
     </div>
-    <p class="xlaunch-spotlight-check">${escapeHtml(t('Snapshot PortWatch/GitHub:'))} ${formatPercent(project.portwatchPercent)}%${snapshotDate ? ` · ${escapeHtml(formatNewsDate(snapshotDate))}` : ''}</p>
+    <p class="xlaunch-spotlight-check">${escapeHtml(t('Progresso PortWatch/GitHub, incluindo preparação:'))} ${formatPercent(project.portwatchPercent)}% · ${escapeHtml(t('Marco GTA VI no snapshot:'))} ${formatPercent(project.portwatchMilestonePercent)}%${snapshotDate ? ` · ${escapeHtml(formatNewsDate(snapshotDate))}` : ''}</p>
     ${checkMessage ? `<p class="xlaunch-spotlight-check">${escapeHtml(checkMessage)}${checkDate ? ` · ${escapeHtml(formatNewsDate(checkDate))}` : ''}</p>` : ''}
     ${reportDate ? `<p class="xlaunch-spotlight-recorded">${escapeHtml(t('Relato registrado no portal:'))} ${publicationTimeMarkup(reportDate)}</p>` : ''}
     <div class="xlaunch-spotlight-links">
@@ -2863,7 +3108,7 @@ function renderXlaunchReportPanel(report, team) {
 
 function renderPortalHome(data) {
   renderHeaderFreshness(data);
-  const lead = data.news.find((story) => story.id === '2026-11-23-leonida-nuked') || data.news[0];
+  const lead = selectFeaturedStory(data);
   if (lead) renderStoryFeature(lead, byId('home-feature'));
   const projects = data.efforts.filter((project) => project.status !== 'offline')
     .slice().sort((left, right) => right.percent - left.percent || left.name.localeCompare(right.name));
@@ -3060,7 +3305,7 @@ function renderXlaunchPage(data) {
           <div><span>${escapeHtml(t('Alvo'))}</span><strong>${escapeHtml(t(details.target || '—'))}</strong></div>
           <div><span>${escapeHtml(t('Progresso de GTA VI'))}</span><strong>${progressLabel}</strong></div>
           <div><span>${escapeHtml(t('Marco atual'))}</span><strong>${escapeHtml(project.stage ? t(project.stage) : t('Nenhum marco de progresso foi informado no tracker.'))}</strong></div>
-          ${estimatedFromTeam ? `<div><span>${escapeHtml(t('Snapshot PortWatch/GitHub'))}</span><strong>${formatPercent(project.portwatchPercent)}%</strong></div>` : ''}
+          ${estimatedFromTeam ? `<div><span>${escapeHtml(t('Progresso PortWatch (inclui preparação)'))}</span><strong>${formatPercent(project.portwatchPercent)}%</strong></div><div><span>${escapeHtml(t('Marcos de GTA VI no tracker'))}</span><strong>${formatPercent(project.portwatchMilestonePercent)}%</strong></div>` : ''}
         </div>
         ${progress !== null ? `<div class="xlaunch-project-progress" role="progressbar" aria-label="${escapeHtml(`${project.name}: ${formatPercent(progress)}%`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}"><span data-progress-value="${progress}"></span></div>` : ''}
         ${repositoryUpdate ? `<p class="xlaunch-last-update"><span>${escapeHtml(t('Último push registrado'))}:</span> ${publicationTimeMarkup(repositoryUpdate)}</p>` : ''}
@@ -3101,6 +3346,14 @@ function renderXlaunchPage(data) {
 function renderTrackerProjectCard(project, rank, leaderId) {
   const inactive = project.status === 'offline';
   const featured = !inactive && project.id === leaderId;
+  const details = project.technicalDetails && typeof project.technicalDetails === 'object' ? project.technicalDetails : {};
+  const highlights = Array.isArray(details.highlights) ? details.highlights.filter((item) => typeof item === 'string' && item.trim()) : [];
+  const blockers = Array.isArray(details.blockers) ? details.blockers.filter((item) => typeof item === 'string' && item.trim()) : [];
+  const technicalEvidence = highlights.length || blockers.length ? `<details class="tracker-project-evidence">
+    <summary>${escapeHtml(t('Detalhes técnicos do snapshot'))}</summary>
+    ${highlights.length ? `<div><b>${escapeHtml(t('Avanços reportados'))}</b><ul>${highlights.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>` : ''}
+    ${blockers.length ? `<div><b>${escapeHtml(t('Bloqueios conhecidos'))}</b><ul>${blockers.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>` : ''}
+  </details>` : '';
   const badge = inactive ? t('Fora do ar') : `${counterMarkup(project.percent, 'percent')}% · ${t(project.stage)}`;
   const stats = [
     project.stars != null ? `${counterMarkup(project.stars)} ${escapeHtml(t('estrelas'))}` : '',
@@ -3113,6 +3366,7 @@ function renderTrackerProjectCard(project, rank, leaderId) {
       <div class="badge-row"><span class="status-badge ${featured || inactive ? 'warning' : 'accent'}">${featured ? escapeHtml(t('Projeto mais avançado')) : badge}</span><span class="status-badge">${escapeHtml(t(project.tier === 'tracked' ? 'Projeto acompanhado' : 'Em observação'))}</span><span class="status-badge">${escapeHtml(t('Relato não verificado independentemente'))}</span></div>
       <p class="repo-description">${escapeHtml(project.summary)}</p>
       ${inactive ? `<p class="repo-inactive-note">${escapeHtml(t('Registro histórico: fora do ar e excluído do ranking ativo.'))}</p>` : ''}
+      ${technicalEvidence}
       ${stats ? `<p class="repo-author">${escapeHtml(stats)} · ${escapeHtml(t('snapshot, não ao vivo'))}</p>` : ''}
       <div class="repo-links">${project.url ? `<a class="button primary-link" href="${escapeHtml(safeUrl(project.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Repositório original'))} ↗</a>` : ''}</div>
     </div>
@@ -3162,7 +3416,7 @@ function renderTrackerProjects(data) {
 }
 
 function renderNews(data) {
-  const headline = data.news.find((story) => story.id === '2026-11-23-leonida-nuked') || data.news[0];
+  const headline = selectFeaturedStory(data);
   const sourceNote = t('Notícias traduzidas e relatos de equipe em PT-BR; confira fontes e rótulos de verificação em cada item.');
   byId('news-source-note').innerHTML = `${escapeHtml(sourceNote)} <span>· ${escapeHtml(t('Atualizado em'))} ${escapeHtml(formatNewsDate(data.lastSyncedAt || data.updatedAt))} ·</span> <a href="data/tracker-pt-BR.json" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Dados localizados'))} ↗</a>`;
   if (headline) renderStoryFeature(headline, byId('news-feature'));
@@ -3185,18 +3439,43 @@ function renderTrackerDetails(data) {
     <h2>${escapeHtml(t('Scout e triagem'))}</h2>
     <p>${escapeHtml(exe ? data.scout.summary : '')}</p>
     <div class="tracker-tags">${data.scout.sources.map((source) => `<span>${escapeHtml(source)}</span>`).join('')}</div>
-    <small>${escapeHtml(t('Última varredura'))}: ${publicationTimeMarkup(data.scout.lastRun)} · ${data.candidates} ${escapeHtml(t('novos candidatos aguardam confirmação'))}</small>`;
+    <small>${escapeHtml(t('Última varredura'))}: ${publicationTimeMarkup(data.scout.lastRun)} · ${data.candidates} ${escapeHtml(t('candidatos aguardam confirmação'))}</small>
+    ${Array.isArray(data.candidateList) && data.candidateList.length ? `<details class="tracker-candidate-list"><summary>${escapeHtml(t('Ver candidatos sem confirmação'))}</summary><ul>${data.candidateList.map((candidate) => `<li><b>${escapeHtml(candidate.repo || candidate.name)}</b><span>${escapeHtml(t(candidate.kind === 'tool' ? 'Ferramenta em triagem' : 'Possível projeto · aguarda revisão'))}</span></li>`).join('')}</ul></details>` : ''}`;
   byId('tracker-changes').innerHTML = data.changes.slice().reverse().map((change) => `
     <article class="tracker-change panel"><span class="tracker-change-kind">${escapeHtml(t(change.kind))}</span>${publicationTimeMarkup(change.date)}<p>${escapeHtml(change.summary)}</p></article>`).join('');
   byId('tracker-tools').innerHTML = data.tools.map((tool) => `
     <article class="tracker-tool panel"><span class="section-kicker">${escapeHtml(t(tool.kind))}</span><h3>${escapeHtml(tool.name)}</h3><p>${escapeHtml(tool.description)}</p><a class="text-link" href="${escapeHtml(safeUrl(tool.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(tool.repo)} ↗</a></article>`).join('');
   byId('tracker-flagged').innerHTML = data.flagged.map((item) => `
     <article class="tracker-alert panel"><span class="status-badge warning">${item.count ? `${item.count} ${escapeHtml(t('itens sinalizados'))}` : escapeHtml(t('Alerta'))}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.summary)}</p>${item.examples.length ? `<small>${escapeHtml(t('Exemplos'))}: ${item.examples.map(escapeHtml).join(' · ')}</small>` : ''}</article>`).join('');
-  byId('tracker-ignored').innerHTML = `<span class="section-kicker">${escapeHtml(t('TRIAGEM'))}</span><strong>${data.ignored.count} ${escapeHtml(t('itens ignorados ou não confirmados'))}</strong><p>${escapeHtml(data.ignored.summary)}</p>`;
+  const ignoredCategories = data.ignored.categories && typeof data.ignored.categories === 'object' ? data.ignored.categories : {};
+  const ignoredBreakdown = [
+    ['clones', 'Cópias e forks'],
+    ['foraDoEscopo', 'Fora do escopo'],
+    ['semReadme', 'Sem README útil'],
+    ['poucoConteudo', 'Pouco conteúdo técnico'],
+    ['outros', 'Outros motivos']
+  ].filter(([key]) => Number(ignoredCategories[key]) > 0);
+  byId('tracker-ignored').innerHTML = `<span class="section-kicker">${escapeHtml(t('TRIAGEM'))}</span><strong>${data.ignored.count} ${escapeHtml(t('itens ignorados ou não confirmados'))}</strong><p>${escapeHtml(data.ignored.summary)}</p>${ignoredBreakdown.length ? `<ul class="tracker-ignored-breakdown">${ignoredBreakdown.map(([key, label]) => `<li><span>${escapeHtml(t(label))}</span><b>${counterMarkup(ignoredCategories[key])}</b></li>`).join('')}</ul>` : ''}`;
   byId('tracker-dmca').innerHTML = data.dmca.map((item) => `
     <article class="tracker-dmca panel">${publicationTimeMarkup(item.date, 'section-kicker')}<strong>${item.repositories} ${escapeHtml(t('repositórios de GTA VI associados'))}</strong><p>${escapeHtml(item.summary)}</p><a class="text-link" href="${escapeHtml(safeUrl(item.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Abrir registro público'))} ↗</a></article>`).join('');
   byId('tracker-headlines').innerHTML = data.headlines.slice(0, 12).map((headline) => `
     <article class="tracker-headline panel"><span>${escapeHtml(headline.outlet)}</span>${publicationTimeMarkup(headline.date)}<h3>${escapeHtml(headline.title)}</h3><a class="text-link" href="${escapeHtml(safeUrl(headline.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Fonte original'))} ↗</a></article>`).join('');
+  byId('tracker-history').innerHTML = (Array.isArray(data.history) ? data.history : []).slice().sort((left, right) =>
+    Date.parse(right.date || right.timestamp || 0) - Date.parse(left.date || left.timestamp || 0)
+  ).map((entry) => `
+    <article class="tracker-history-item panel">
+      ${publicationTimeMarkup(entry.date || entry.timestamp, 'section-kicker')}
+      <strong>${counterMarkup(entry.leader || entry.percent || 0, 'percent')}%</strong>
+      <p>${escapeHtml(entry.leaderId || entry.project || entry.stage || '')}</p>
+      ${entry.tracked !== undefined ? `<small>${counterMarkup(entry.tracked)} ${escapeHtml(t('projetos acompanhados'))}</small>` : ''}
+    </article>`).join('');
+  byId('tracker-candidates').innerHTML = (Array.isArray(data.candidates) ? data.candidates : []).map((candidate) => `
+    <article class="tracker-candidate panel">
+      <span class="section-kicker">${escapeHtml(t(candidate.kind || 'Candidato'))}</span>
+      <h3>${escapeHtml(candidate.name || candidate.repo || 'Projeto sem nome')}</h3>
+      <p>${escapeHtml(candidate.description || candidate.summary || candidate.reason || '')}</p>
+      ${candidate.url || candidate.repo ? `<a class="text-link" href="${escapeHtml(safeUrl(candidate.url || (candidate.repo && /^https?:/.test(candidate.repo) ? candidate.repo : `https://github.com/${candidate.repo}`)))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Abrir candidato'))} ↗</a>` : ''}
+    </article>`).join('');
   byId('tracker-updated').setAttribute('datetime', data.updatedAt || '');
   byId('tracker-updated').textContent = formatNewsDate(data.updatedAt);
   document.querySelectorAll('#tracker .tracker-content > *, #tracker .tracker-content article').forEach((element) => {
@@ -3657,16 +3936,17 @@ async function init() {
     let data;
     if (window.location.protocol === 'file:') {
       const embedded = await ensureEmbeddedFallback();
+      const localized = await loadOptionalJson('data/tracker-pt-BR.json');
       data = {
         hardware: embedded.hardware,
         discords: embedded.discords,
-        tracker: mergeTrackerPayloads(null, embedded.tracker, embedded)
+        tracker: mergeTrackerPayloads(null, localized || embedded.tracker, embedded)
       };
     } else {
-      const [hardwareData, discords, portwatch, localized] = await Promise.all([
+      const [hardwareData, discords, trackerSource, localized] = await Promise.all([
         loadOptionalJson('data/hardware.json'),
         loadOptionalJson('data/discords.json'),
-        loadOptionalJson('data/tracker.json'),
+        loadTrackerSourceChain(),
         loadOptionalJson('data/tracker-pt-BR.json')
       ]);
       const needsEmbeddedFallback = !hardwareData || !discords
@@ -3675,8 +3955,9 @@ async function init() {
       data = {
         hardware: hardwareData || (embedded && embedded.hardware),
         discords: discords || (embedded && embedded.discords),
-        tracker: mergeTrackerPayloads(portwatch, localized, embedded)
+        tracker: mergeTrackerPayloads(trackerSource.payload, localized, embedded)
       };
+      data.tracker.portwatchSource.source = trackerSource.source;
     }
     if (!data || !data.hardware || !data.discords || !isTrackerPayload(data.tracker)) {
       throw new Error('Os dados do portal e os fallbacks não forneceram o conjunto mínimo para inicializar.');
@@ -3697,6 +3978,36 @@ async function init() {
     setupQuickUtilities(trackerData);
     const initialPage = window.location.hash.slice(1);
     setPage(initialPage || 'home', false);
+    if (window.location.protocol !== 'file:' && !window.__kynosTrackerAutoRefresh) {
+      window.__kynosTrackerAutoRefresh = true;
+      const refreshTracker = async () => {
+        try {
+          const [source, localized] = await Promise.all([
+            loadTrackerSourceChain(),
+            loadOptionalJson(`data/tracker-pt-BR.json?t=${Date.now()}`)
+          ]);
+          if (!source.payload) return;
+          const embedded = await ensureEmbeddedFallback();
+          const unified = mergeTrackerPayloads(source.payload, localized, embedded);
+          unified.portwatchSource.source = source.source;
+          trackerData = unified;
+          renderPortalHome(trackerData);
+          renderTrackerProjects(trackerData);
+          renderNews(trackerData);
+          renderTrackerDetails(trackerData);
+          renderXlaunchPage(trackerData);
+          setupNotificationCenter(trackerData);
+          setupQuickUtilities(trackerData);
+        } catch (error) {
+          console.warn('Atualização automática do tracker ignorada.', error);
+        }
+      };
+      window.setInterval(refreshTracker, 5 * 60 * 1000);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) refreshTracker();
+      });
+      window.addEventListener('focus', refreshTracker);
+    }
   } catch (error) {
     console.error(error);
     document.querySelector('main').insertAdjacentHTML('afterbegin', '<p class="load-error">Não foi possível carregar os dados essenciais. Confira os arquivos da pasta data/ ou gere o fallback com scripts/build_tracker_ptbr.py.</p>');

@@ -140,11 +140,106 @@ PROJECT_SUMMARIES_PT = {
     "xlaunchvi": "A equipe relata a tela de carregamento; o portal registra 50% como estimativa editorial. O contexto do XLaunch Dashboard foi informado ao portal, mas não é confirmado pelo snapshot público.",
     "tuxbox": "Camada voltada a Linux/Proton. Registrou a tela de seleção de jogador em 4K, sem interação; o marco é um primeiro quadro, não um menu.",
     "leonida": "Projeto fora do ar desde 23/11: repositório removido, Discord indisponível e criador afastado. O último marco relatado foi o executável em execução, com quadros pretos.",
-    "xbox2windows": "Pesquisa de recompilação estática. Uma gravação mostra menus instáveis; o projeto ainda não declara o marco como confirmado.",
-    "five-star-recomp": "Relata executar o executável e exibir o vídeo de introdução; ainda não publicou captura que permita confirmar o resultado.",
+    "xbox2windows": "Pesquisa de recompilação estática. O README relata uma introdução e telas de configuração em um executável de diagnóstico modificado; o executável original e os menus continuam sem confirmação.",
+    "five-star-recomp": "O README relata telas iniciais e de configuração respondendo a comandos simulados, mas sem captura pública; o carregamento da história para em memória corrompida.",
     "palmetto": "Continuação aberta da Leonida. Registra a execução do executável até uma interrupção na criação de recursos, sem exibir um quadro.",
     "percyscarlett": "Relata executar o código até uma sequência de quadros pretos antes de a GPU travar; ainda sem imagem utilizável.",
     "gta6-boottest": "Harness de depuração com DLLs substitutas; o projeto afirma chegar à interface, mas não publicou captura do resultado.",
+}
+
+PROJECT_TECHNICAL_PT = {
+    "xcl": {
+        "highlights": [
+            "Vários testers relatam que o jogo chega ao mundo; o estado interno indica execução com pedestres e veículos carregados.",
+            "Os menus rodam a 30 FPS e o vídeo de introdução é reproduzido antes do carregamento do mundo.",
+            "O projeto converte os 26.698 programas RDNA2 do pacote de shaders para HLSL; amostras compilam para DXIL.",
+        ],
+        "blockers": [
+            "No mundo, a imagem continua presa no indicador de carregamento; não há captura de gameplay.",
+            "O watchdog da GPU encerra os testes entre 3 e 14 minutos, tanto em AMD quanto em NVIDIA.",
+            "A compilação de pipelines atrasa no carregamento do mundo e as texturas BCPack ainda não são decodificadas.",
+        ],
+    },
+    "marvis": {
+        "highlights": [
+            "O README relata telas iniciais, vídeo de introdução, tela de início e salvamentos a 30 FPS.",
+            "No mundo, algumas luzes aparecem e a primeira cinemática reproduz áudio.",
+            "O projeto relata chegar ao mundo em cerca de 50 segundos e renderizar o cartão da primeira missão.",
+        ],
+        "blockers": [
+            "Grande parte da cena ainda não aparece, os quadros demoram segundos e GPUs podem travar.",
+            "Teste realizado em um PC com Radeon RX 6700 XT; outras pessoas ainda não reproduziram o resultado.",
+            "O código foi publicado poucas horas após a transmissão e ainda não foi revisado pela PortWatch.",
+        ],
+    },
+    "xbox2windows": {
+        "highlights": [
+            "Uma gravação compartilhada pelo projeto mostra menus instáveis de GTA VI no PC.",
+            "O executável principal chega à criação de pipelines D3D12 nos testes de diagnóstico do mantenedor.",
+            "O projeto relata 851 de 12.101 shaders de pixel comparados com saídas de referência em RTX e WARP.",
+        ],
+        "blockers": [
+            "A introdução e as telas de configuração vêm de um executável de diagnóstico modificado; o executável original não foi confirmado.",
+            "Apenas 865 de 26.503 shaders têm saída verificada pelos testes do próprio projeto.",
+            "Os testes cobrem cerca de um quarto dos formatos de instrução dos shaders.",
+        ],
+    },
+    "tuxbox": {
+        "highlights": [
+            "GTA VI 1.0.2.1 exibe o seletor de jogador em 3840 × 2160 no Proton padrão, com registro da execução.",
+            "The Matrix Awakens chegou à perseguição na estrada e à cidade aberta em testes Linux com ajustes reduzidos.",
+            "Inclui um jogo de teste que usa as bibliotecas gráficas, de memória e de entrada do Xbox.",
+        ],
+        "blockers": [
+            "Ainda não houve entrada de controle em GTA VI; a execução registrada termina após cerca de 97 segundos.",
+            "Apenas 2.755 de 11.429 solicitações de shaders capturadas de GTA VI compilam até agora.",
+            "O suporte a Windows continua em desenvolvimento e os resultados ainda não foram reproduzidos.",
+        ],
+    },
+    "five-star-recomp": {
+        "highlights": [
+            "O README relata telas iniciais e de configuração respondendo a comandos simulados de controle a 30 FPS.",
+            "O projeto identifica o executável e registra cada etapa de inicialização até começar o carregamento da história.",
+            "O tradutor sinaliza instruções sem suporte como falhas, em vez de simular resultados.",
+        ],
+        "blockers": [
+            "O carregamento da história para por causa de dados de memória corrompidos.",
+            "A contagem de 25.908 programas de shader difere dos 26.503 registros relatados por outros projetos.",
+            "Ainda não há captura ou gravação dos menus no repositório.",
+        ],
+    },
+    "leonida": {
+        "highlights": [
+            "Antes de sair do ar, o executável de varejo rodou por até dez minutos sem travar em Windows e Wine.",
+            "O jogo realizou chamadas de desenho e apresentou quadros à própria janela, ainda pretos.",
+            "O projeto relatou traduzir os 26.503 shaders de GTA VI para SPIR-V e validar os resultados.",
+        ],
+        "blockers": [
+            "Projeto fora do ar: repositório e Discord removidos, e o criador se afastou.",
+            "O código sobrevive em forks de colaboradores e em um espelho congelado.",
+            "O último estado relatado ainda apresentava quadros completamente pretos.",
+        ],
+    },
+    "palmetto": {
+        "highlights": [
+            "Continuação aberta da Leonida que preserva o histórico e os créditos.",
+            "Registra as etapas em que o executável de GTA VI passa durante a inicialização.",
+        ],
+        "blockers": [
+            "Ainda não exibe um quadro: a inicialização para em um contêiner vazio da renderização do jogo.",
+            "A contagem de shaders depende da validação SPIR-V, que não comprova que eles funcionam.",
+            "Testado em apenas uma RTX 4090.",
+        ],
+    },
+    "percyscarlett": {
+        "highlights": [
+            "O README relata um loop de quadros com chamadas de apresentação, mas a imagem permanece preta.",
+        ],
+        "blockers": [
+            "A GPU trava poucos segundos após a inicialização; ainda não há imagem utilizável.",
+            "A alegação de novo marco no README aguarda confirmação independente.",
+        ],
+    },
 }
 
 TOOL_DESCRIPTIONS_PT = {
@@ -231,7 +326,8 @@ def translated_xlaunch_report(source, editorial):
         return None
 
     project = next((item for item in source.get("efforts", []) if item.get("id") == "xlaunchvi"), {})
-    portwatch_percent = round(float(snapshot_percent(project.get("gta") or {})), 1)
+    portwatch_percent = snapshot_percent(project)
+    portwatch_milestone_percent = score_effort(project)["milestonePercent"]
     estimated_percent = report.get("estimatedPercent", 50)
     try:
         estimated_percent = round(max(0, min(100, float(estimated_percent))), 1)
@@ -243,7 +339,7 @@ def translated_xlaunch_report(source, editorial):
             "summary": "A report attributed to JPTuba on Discord places XlaunchVI at the loading screen. The team said work paused for about 2–3 hours after its AI usage ran out, then resumed after Claude was recharged. The portal now records 50% as an editorial estimate supplied for this update, not an official measurement or a GitHub milestone. The reported XLaunch Dashboard scope includes game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. The team aims to reach world loading and catch or overtake XCL and VIctory, with support from the Brazilian community.",
             "teaser": "The portal lists 50% as an editorial estimate; the reported milestone is the loading screen.",
             "stage": "Loading screen · editorial estimate (~50%)",
-            "transparency": "The 50% estimate was supplied for this portal update; it is not an official measurement. The loading-screen report is attributed to JPTuba on Discord, but the invite does not link to the original message. The public PortWatch/GitHub snapshot records 0% for GTA VI milestones, and the Dashboard details have not been independently verified there.",
+            "transparency": "The 50% estimate was supplied for this portal update; it is not an official measurement. The loading-screen report is attributed to JPTuba on Discord, but the invite does not link to the original message. The public snapshot gives XlaunchVI 3.5% overall from technical groundwork, with no GTA VI milestone yet; Dashboard details have not been independently verified there.",
             "dashboardContext": "XLaunch Dashboard scope supplied to the portal: game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. These details are not independently confirmed in the public GitHub snapshot.",
         },
         "es": {
@@ -251,7 +347,7 @@ def translated_xlaunch_report(source, editorial):
             "summary": "Un relato atribuido a JPTuba en Discord sitúa a XlaunchVI en la pantalla de carga. El equipo dijo que el trabajo se pausó durante unas 2–3 horas al agotarse el uso de IA y se reanudó después de recargar Claude. El portal registra ahora un 50% como estimación editorial proporcionada para esta actualización; no es una medición oficial ni un hito de GitHub. El alcance informado de XLaunch Dashboard incluye reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y una biblioteca. El objetivo es llegar a la carga del mundo y alcanzar o superar a XCL y VIctory, con apoyo de la comunidad brasileña.",
             "teaser": "El portal registra un 50% como estimación editorial; el hito informado es la pantalla de carga.",
             "stage": "Pantalla de carga · estimación editorial (~50%)",
-            "transparency": "La estimación del 50% se proporcionó para esta actualización del portal; no es una medición oficial. El informe sobre la pantalla de carga se atribuye a JPTuba en Discord, pero la invitación no enlaza al mensaje original. El snapshot público de PortWatch/GitHub registra un 0% en hitos de GTA VI, y esos detalles del Dashboard no se verificaron de forma independiente allí.",
+            "transparency": "La estimación del 50% se proporcionó para esta actualización del portal; no es una medición oficial. El informe sobre la pantalla de carga se atribuye a JPTuba en Discord, pero la invitación no enlaza al mensaje original. El snapshot público asigna a XlaunchVI un 3,5% global por el trabajo técnico previo, sin hitos de GTA VI; los detalles del Dashboard no se verificaron de forma independiente allí.",
             "dashboardContext": "Alcance de XLaunch Dashboard informado al portal: reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y biblioteca. Estos detalles no están confirmados de forma independiente en el snapshot público de GitHub.",
         },
         "zh": {
@@ -259,7 +355,7 @@ def translated_xlaunch_report(source, editorial):
             "summary": "归于 JPTuba 在 Discord 发布的报告称，XlaunchVI 已到达加载画面。团队表示，AI 使用额度耗尽后暂停了约 2–3 小时，补充 Claude 额度后恢复开发。门户在本次更新中将 50% 记录为编辑估算；这不是官方测量，也不是 GitHub 里程碑。获提供的 XLaunch Dashboard 范围包括游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。团队目标是进入世界加载阶段并追赶或超过 XCL 和 VIctory，同时获得巴西社区支持。",
             "teaser": "门户记录的 50% 是编辑估算；报告的里程碑为加载画面。",
             "stage": "加载画面 · 编辑估算（约 50%）",
-            "transparency": "50% 估算是为本次门户更新提供的信息，并非官方测量。加载画面的报告归于 JPTuba 在 Discord 发布，但邀请链接未指向原始消息。公开的 PortWatch/GitHub 快照记录的 GTA VI 里程碑为 0%，且 Dashboard 详情未在该快照中得到独立验证。",
+            "transparency": "50% 估算是为本次门户更新提供的信息，并非官方测量。加载画面的报告归于 JPTuba 在 Discord 发布，但邀请链接未指向原始消息。公开快照根据技术准备工作将 XlaunchVI 的整体进度记为 3.5%，尚无 GTA VI 里程碑；Dashboard 详情未在该快照中得到独立验证。",
             "dashboardContext": "提供给门户的 XLaunch Dashboard 范围：游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。这些详情未在公开 GitHub 快照中得到独立确认。",
         },
     }
@@ -271,10 +367,11 @@ def translated_xlaunch_report(source, editorial):
         "stage": f"Tela de carregamento · estimativa editorial (~{estimated_percent:g}%)",
         "estimatedPercent": estimated_percent,
         "portwatchPercent": portwatch_percent,
+        "portwatchMilestonePercent": portwatch_milestone_percent,
         "title": f"XlaunchVI: estimativa editorial de {estimated_percent:g}% na tela de carregamento",
         "summary": f"Relato atribuído a JPTuba no Discord situa o XlaunchVI na tela de carregamento. A equipe informou uma pausa de cerca de 2–3 horas após esgotar o uso de IA e a retomada depois de recarregar o Claude. O portal registra agora {estimated_percent:g}% como estimativa editorial informada para esta atualização; não é medição oficial nem marco publicado no GitHub. O escopo informado do XLaunch Dashboard inclui reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. A equipe busca chegar ao carregamento do mundo e alcançar ou ultrapassar XCL e VIctory, com apoio da comunidade brasileira.",
         "teaser": f"O portal registra {estimated_percent:g}% como estimativa editorial; o marco relatado é a tela de carregamento.",
-        "transparency": f"Os {estimated_percent:g}% foram informados como estimativa editorial para esta atualização, não como medição oficial. O relato da tela de carregamento é atribuído a JPTuba no Discord, mas o convite não aponta para a mensagem original. O snapshot público PortWatch/GitHub registra {portwatch_percent:g}% nos marcos de GTA VI, e os detalhes do Dashboard não foram verificados de forma independente nesse snapshot.",
+        "transparency": f"Os {estimated_percent:g}% foram informados como estimativa editorial para esta atualização, não como medição oficial. O relato da tela de carregamento é atribuído a JPTuba no Discord, mas o convite não aponta para a mensagem original. O snapshot público PortWatch/GitHub calcula {portwatch_percent:g}% de progresso geral a partir da preparação técnica e registra {portwatch_milestone_percent:g}% em marcos de GTA VI; os detalhes do Dashboard não foram verificados de forma independente nesse snapshot.",
         "dashboardContext": "Escopo do XLaunch Dashboard informado ao portal: reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. Esses detalhes não estão confirmados de forma independente no snapshot público do GitHub.",
         "dashboardFeatures": report.get("dashboardFeatures", []),
         "translations": translations,
@@ -351,6 +448,8 @@ def translated_news(source, editorial):
 
 def translated_change_summary(item):
     text = str(item.get("text") or "")
+    if text.startswith("Five Star Recomp gets half credit"):
+        return "Five Star Recomp avançou de 40% para 47,5% após relatar telas iniciais e de configuração com comandos simulados. Ainda sem captura; o carregamento da história não foi concluído."
     if text.startswith("VIctory moves most of the way"):
         return "VIctory avançou para 67%, após relatar iluminação parcial e áudio no mundo do jogo. É o maior percentual do snapshot, mas segue autodeclarado."
     if text.startswith("Five Star Recomp reports"):
@@ -359,6 +458,9 @@ def translated_change_summary(item):
         return "Palmetto, continuação aberta da Leonida, entrou na lista de observação; registra execução do executável sem quadro visível. Dezesseis cópias foram separadas para revisão."
     if text.startswith("XCL gets half credit"):
         return "XCL avançou para 62,5% após relatos de testers que carregaram o mundo; a tela segue no indicador de carregamento e o watchdog encerra os testes."
+    if text.startswith("Scarlett Windows Compat moved to "):
+        repository = text.removeprefix("Scarlett Windows Compat moved to ").rstrip(".")
+        return f"Scarlett Windows Compat atualizou o repositório para {repository}."
     if text.startswith("PercyScarlett's README"):
         return "O README do PercyScarlett pode alegar um novo marco de inicialização: loop de quadros com imagem preta, seguido por travamento da GPU. Alegação sem confirmação independente."
     kind = item.get("kind")
@@ -387,20 +489,117 @@ def translated_scout_summary(scout):
     )
 
 
-def snapshot_percent(gta):
-    if gta.get("stability") == "stable":
-        return 100
-    if gta.get("fps"):
-        return 85
-    if gta.get("ingame"):
-        return 55 + 15 * float(gta["ingame"])
-    if gta.get("menu"):
-        return 40 + 15 * float(gta["menu"])
-    if gta.get("boots"):
-        return 40
-    if gta.get("loads"):
-        return 25
-    return 0
+def translated_ignored_summary(ignored):
+    categories = {
+        "clones": 0,
+        "foraDoEscopo": 0,
+        "semReadme": 0,
+        "poucoConteudo": 0,
+        "outros": 0,
+    }
+    for item in ignored:
+        reason = str(item.get("reason") or "").lower()
+        if any(token in reason for token in ("copy", "fork", "re-upload", "reupload", "clone")):
+            categories["clones"] += 1
+        elif "off-topic" in reason or "off topic" in reason or "out of scope" in reason:
+            categories["foraDoEscopo"] += 1
+        elif "readme" in reason:
+            categories["semReadme"] += 1
+        elif reason.startswith("thin"):
+            categories["poucoConteudo"] += 1
+        else:
+            categories["outros"] += 1
+    return categories
+
+
+def translated_history(history, efforts):
+    names = {item["id"]: item.get("name", item["id"]) for item in efforts}
+    furthest_labels = {
+        "groundwork": "Preparação",
+        "loads": "Executável em execução",
+        "boots": "Primeiro quadro",
+        "menu": "Menu principal",
+        "ingame": "Dentro do jogo",
+        "fps30": "30 FPS",
+        "stable": "Estável",
+    }
+    rows = []
+    for item in history:
+        try:
+            leader_score = float(item.get("leader"))
+            top3_score = float(item.get("top3"))
+            if not math.isfinite(leader_score) or not math.isfinite(top3_score):
+                continue
+        except (TypeError, ValueError):
+            continue
+        rows.append({
+            "date": str(item.get("date") or ""),
+            "leaderId": str(item.get("leaderId") or ""),
+            "leaderName": names.get(item.get("leaderId"), str(item.get("leaderId") or "Líder não identificado")),
+            "leader": round(leader_score, 1),
+            "top3": round(top3_score, 1),
+            "furthest": furthest_labels.get(item.get("furthest"), "Marco não identificado"),
+            "tracked": int(item.get("tracked") or 0),
+        })
+    return rows
+
+
+def clamp_fraction(value):
+    try:
+        fraction = float(value)
+    except (TypeError, ValueError):
+        return 0
+    return min(1, max(0, fraction)) if math.isfinite(fraction) else 0
+
+
+def score_effort(effort):
+    groundwork = effort.get("groundwork") if isinstance(effort.get("groundwork"), dict) else {}
+    gta = effort.get("gta") if isinstance(effort.get("gta"), dict) else {}
+    weights = {"loader": 0.2, "shaders": 0.28, "graphics": 0.32, "proven": 0.2}
+    groundwork_fraction = sum(weight * clamp_fraction(groundwork.get(key)) for key, weight in weights.items())
+    score = 25 * groundwork_fraction
+    reached = "groundwork"
+    previous_tick = score
+    ticks = {"loads": 25, "boots": 40, "menu": 55, "ingame": 70}
+    for key, tick in ticks.items():
+        value = clamp_fraction(gta.get(key))
+        if value >= 1:
+            score = tick
+            previous_tick = tick
+            reached = key
+            continue
+        if value > 0:
+            score = max(score, previous_tick + value * (tick - previous_tick))
+            break
+
+    milestone_percent = max(0, score - 25 * groundwork_fraction)
+    if reached == "ingame":
+        fps_fraction = clamp_fraction((float(gta.get("fps") or 0) if math.isfinite(float(gta.get("fps") or 0)) else 0) / 30)
+        stability = {
+            "unknown": 0,
+            "constant": 0,
+            "often": 0.25,
+            "sometimes": 0.55,
+            "rarely": 0.8,
+            "stable": 1,
+        }.get(gta.get("stability"), 0)
+        score = 70 + fps_fraction * 15 + stability * 15
+        milestone_percent = score
+        if fps_fraction >= 1:
+            reached = "fps30"
+        if fps_fraction >= 1 and stability >= 1:
+            reached = "stable"
+
+    return {
+        "score": round(score, 1),
+        "groundworkFraction": round(groundwork_fraction, 4),
+        "milestonePercent": round(milestone_percent, 1),
+        "reached": reached,
+    }
+
+
+def snapshot_percent(effort):
+    return score_effort(effort)["score"]
 
 
 def translated_efforts(source, editorial):
@@ -409,6 +608,7 @@ def translated_efforts(source, editorial):
         "xcl": "Carregamento do mundo (relato)",
         "marvis": "Dentro do mundo (relato)",
         "xbox2windows": "Menus parciais (relato)",
+        "five-star-recomp": "Menu principal parcial (relato)",
     }
     editorial_overrides = editorial.get("effortOverrides") if isinstance(editorial.get("effortOverrides"), dict) else {}
     for project_id, override in editorial_overrides.items():
@@ -419,34 +619,62 @@ def translated_efforts(source, editorial):
         if override.get("stage"):
             stage_overrides[project_id] = str(override["stage"])
     milestones = [
-        (100, "Estável"),
-        (85, "30 FPS"),
-        (70, "Dentro do jogo"),
-        (55, "Menu principal"),
-        (40, "Primeiro quadro"),
-        (25, "Executável em execução"),
-        (0, "Preparação"),
+        ("stable", "Estável"),
+        ("fps30", "30 FPS"),
+        ("ingame", "Dentro do jogo"),
+        ("menu", "Menu principal"),
+        ("boots", "Primeiro quadro"),
+        ("loads", "Executável em execução"),
+        ("groundwork", "Preparação"),
     ]
     projects = []
     for item in source["efforts"]:
         gta = item.get("gta") or {}
-        source_percent = round(float(snapshot_percent(gta)), 1)
+        score = score_effort(item)
+        source_percent = score["score"]
         percent = overrides.get(item["id"])
         if percent is None:
             percent = source_percent
         percent = round(float(percent), 1)
-        stage = stage_overrides.get(item["id"]) or next(
-            (label for threshold, label in milestones if percent >= threshold),
-            "Preparação",
-        )
-        status = "offline" if item["id"] == "leonida" else "acompanhado"
+        stage = stage_overrides.get(item["id"]) or dict(milestones).get(score["reached"], "Preparação")
+        status = "offline" if item.get("nuked") else "acompanhado"
         summary = PROJECT_SUMMARIES_PT.get(
             item["id"],
             "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto."
-            if percent == 0 else
+            if score["milestonePercent"] == 0 else
             "O tracker registra atividade de inicialização, mas o resultado é autodeclarado e ainda não foi verificado de forma independente.",
         )
         stats = item.get("stats") or {}
+        groundwork = item.get("groundwork") if isinstance(item.get("groundwork"), dict) else {}
+        gta_milestones = {
+            key: clamp_fraction(gta.get(key))
+            for key in ("loads", "boots", "menu", "ingame")
+        }
+        gta_milestones.update({
+            "fps": gta.get("fps", 0),
+            "stability": str(gta.get("stability") or "unknown"),
+        })
+        groundwork_fields = [
+            ("loader", "Carregador PE e bibliotecas"),
+            ("shaders", "Tradutor de shaders"),
+            ("graphics", "Backend gráfico D3D12"),
+            ("proven", "Execução comprovada"),
+        ]
+        technical = PROJECT_TECHNICAL_PT.get(item["id"], {})
+        technical_details = {
+            "approach": item.get("approach", ""),
+            "target": item.get("target", ""),
+            "highlights": technical.get("highlights", []),
+            "blockers": technical.get("blockers", []),
+            "groundwork": [
+                {
+                    "label": label,
+                    "percent": normalized_groundwork_percent(groundwork.get(field, 0)),
+                }
+                for field, label in groundwork_fields
+            ],
+            "groundworkNote": "Indicadores técnicos do snapshot; não representam progresso de GTA VI.",
+        }
         project = {
             "id": item["id"],
             "name": item["name"],
@@ -454,7 +682,12 @@ def translated_efforts(source, editorial):
             "url": f"https://github.com/{item['repo']}" if item.get("repo") else "",
             "tier": item.get("tier", "watchlist"),
             "status": status,
+            "nuked": item.get("nuked"),
             "percent": percent,
+            "portwatchPercent": source_percent,
+            "portwatchMilestonePercent": score["milestonePercent"],
+            "groundworkFraction": score["groundworkFraction"],
+            "reached": score["reached"],
             "stage": stage,
             "summary": summary,
             "verification": (
@@ -464,44 +697,17 @@ def translated_efforts(source, editorial):
             ),
             "stars": stats.get("stars"),
             "forks": stats.get("forks"),
+            "lastRepositoryUpdate": stats.get("pushedAt"),
+            "repositoryMissing": stats.get("missing") is True,
+            "repositoryHttpStatus": stats.get("missingStatus") if stats.get("missing") is True else None,
+            "repositoryAssessedAt": item.get("assessedAt"),
+            "provenOn": item.get("provenOn"),
+            "gtaMilestones": gta_milestones,
+            "technicalDetails": technical_details,
         }
         if item["id"] == "xlaunchvi":
             project["teamReport"] = translated_xlaunch_report(source, editorial)
             project["progressBasis"] = "team-report-estimate"
-            project["portwatchPercent"] = source_percent
-            project["lastRepositoryUpdate"] = stats.get("pushedAt")
-            project["repositoryMissing"] = stats.get("missing") is True
-            project["repositoryHttpStatus"] = stats.get("missingStatus") if stats.get("missing") is True else None
-            project["repositoryAssessedAt"] = item.get("assessedAt")
-            groundwork = item.get("groundwork") if isinstance(item.get("groundwork"), dict) else {}
-            groundwork_fields = [
-                ("loader", "Carregador PE e bibliotecas"),
-                ("shaders", "Tradutor de shaders"),
-                ("graphics", "Backend gráfico D3D12"),
-                ("proven", "Execução comprovada"),
-            ]
-            project["technicalDetails"] = {
-                "approach": "Camada de compatibilidade",
-                "target": "Qualquer jogo de Xbox Series",
-                "highlights": [
-                    "O projeto relata 12 de 12 shaders de computação compilados pela AMD com resultados idênticos aos de referência de CPU, em testes próprios.",
-                    "O tradutor recusa instruções sem suporte em vez de simular resultados.",
-                    "As tabelas do decodificador foram conferidas com a especificação oficial RDNA2 da AMD.",
-                ],
-                "blockers": [
-                    "O snapshot público consultado não comprova a execução de um jogo de Xbox; a inicialização de Matrix Awakens ainda está em diagnóstico.",
-                    "A maior parte dos recursos está em pull requests abertos; a branch principal contém principalmente documentação.",
-                    "Os testes foram feitos com shaders próprios, não os de GTA VI; ainda não há tiling de texturas de console.",
-                ],
-                "groundwork": [
-                    {
-                        "label": label,
-                        "percent": normalized_groundwork_percent(groundwork.get(field, 0)),
-                    }
-                    for field, label in groundwork_fields
-                ],
-                "groundworkNote": "Indicadores técnicos do snapshot; não representam progresso de GTA VI.",
-            }
         projects.append(project)
     return projects
 
@@ -553,6 +759,7 @@ def build_tracker(source, editorial):
             "count": item.get("count"),
             "summary": summary,
             "examples": (item.get("members") or [])[:5],
+            "membersCount": len(item.get("members") or []),
         })
 
     source_changes = source.get("changes", [])
@@ -608,6 +815,16 @@ def build_tracker(source, editorial):
     xlaunch_stats = xlaunch_source.get("stats") or {}
     repository_missing = xlaunch_stats.get("missing") is True
     team_report = translated_xlaunch_report(source, editorial)
+    candidates = [
+        {
+            "repo": str(item.get("repo") or ""),
+            "name": str(item.get("name") or item.get("repo") or ""),
+            "status": str(item.get("status") or "new"),
+            "kind": str(item.get("kind") or "effort"),
+        }
+        for item in source.get("candidates", [])
+        if isinstance(item, dict) and (item.get("repo") or item.get("name"))
+    ]
     dmca = [
         {
             "date": item.get("date", ""),
@@ -644,12 +861,15 @@ def build_tracker(source, editorial):
         "efforts": translated_efforts(source, editorial),
         "editorial": editorial,
         "tools": tools,
-        "candidates": len(source.get("candidates", [])),
+        "candidates": len(candidates),
+        "candidateList": candidates,
         "flagged": flagged,
         "ignored": {
             "count": len(source.get("ignored", [])),
             "summary": "Itens fora do escopo, cópias, páginas sem código funcional e projetos ainda sem evidência suficiente.",
+            "categories": translated_ignored_summary(source.get("ignored", [])),
         },
+        "history": translated_history(source.get("history", []), source.get("efforts", [])),
         "changes": recent_changes,
         "scout": {
             "since": scout.get("since", ""),
@@ -662,9 +882,13 @@ def build_tracker(source, editorial):
         "dmca": dmca,
         "exe": {
             "status": "Relato de publicação; autenticidade não confirmada",
+            "expected": source["exe"].get("expected", ""),
+            "expectedAt": source["exe"].get("expectedAt", ""),
+            "timeAnnounced": bool(source["exe"].get("timeAnnounced")),
             "releasedAt": source["exe"].get("releasedAt", ""),
             "by": source["exe"].get("by", ""),
-            "summary": "O tracker registra a alegação de que o executável foi publicado. Nenhuma das fontes citadas verificou que o arquivo é genuíno, e a Rockstar não confirmou o vazamento.",
+            "summary": "O tracker registra que Cyberleek anunciou a publicação do executável em 23/11, antes do prazo que havia divulgado. Veículos noticiaram o anúncio, mas nenhum confirmou a autenticidade do arquivo, e a Rockstar não confirmou o vazamento.",
+            "note": "Vários projetos relatam executar código do jogo; dois dizem ter chegado aos menus. Isso não autentica o arquivo nem confirma uma versão para PC.",
             "source": source["exe"].get("source", ""),
             "safety": "Não baixe nem execute arquivos divulgados por desconhecidos. Instaladores falsos podem roubar senhas ou instalar malware. O KynosRecompVI não hospeda nem distribui executáveis.",
         },
