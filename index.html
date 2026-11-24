@@ -26,8 +26,25 @@
         <a class="nav-link" href="#news" data-page-link="news">Notícias</a>
         <a class="nav-link" href="#repositories" data-page-link="repositories">Corrida</a>
         <a class="nav-link nav-utility-link" href="#utility" data-page-link="utility">Meu PC Roda GTAVI</a>
-        <a class="nav-link" href="#tracker" data-page-link="tracker">Monitoramento</a>
-        <a class="nav-link" href="#discord" data-page-link="discord">Comunidades</a>
+        <a class="nav-link" href="#xlaunchvi" data-page-link="xlaunchvi">XlaunchVI</a>
+        <details class="nav-more">
+          <summary class="nav-link nav-more-toggle">Mais <span aria-hidden="true">⌄</span></summary>
+          <div class="nav-more-panel">
+            <div class="nav-more-status">
+              <span class="section-kicker">STATUS DO PORTAL</span>
+              <div class="header-freshness" id="header-freshness" role="group" aria-label="Atualização do tracker" aria-live="off" hidden>
+                <span class="header-freshness-dot" aria-hidden="true"></span>
+                <span class="header-freshness-full" id="header-freshness-full"></span>
+                <span class="header-freshness-short" id="header-freshness-short" aria-hidden="true"></span>
+              </div>
+            </div>
+            <a class="nav-more-link nav-link" href="#tracker" data-page-link="tracker">Monitoramento</a>
+            <a class="nav-more-link nav-link" href="#discord" data-page-link="discord">Comunidades</a>
+            <a class="button button-discord nav-more-cta" data-official-link href="#" aria-label="Participar da comunidade" target="_blank" rel="noopener noreferrer">
+              <span class="discord-icon" aria-hidden="true">◉</span><span>Participar da comunidade</span><span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </details>
       </nav>
       <div class="header-actions">
         <div class="notification-center" id="notification-center">
@@ -333,6 +350,7 @@
         <div class="hero compact-hero"><div class="hero-content"><div class="eyebrow"><span class="eyebrow-dot"></span> CORRIDA DOS PROJETOS <span class="eyebrow-line"></span> MARCOS E EVIDÊNCIAS</div><h1>Progresso da <span>corrida.</span></h1><p class="hero-copy">Percentuais e marcos do snapshot do tracker. Relatos de projeto são identificados como autodeclarados; não há gráfico diário inventado.</p></div></div>
         <div class="content-wrap page-content">
           <div id="tracker-race-summary" class="race-summary-grid"></div>
+          <div id="xlaunch-race-spotlight"></div>
           <div class="section-heading"><div><span class="section-kicker">RANKING DO SNAPSHOT</span><h2>Projetos mais <span>avançados.</span></h2></div><div class="estimate-pill">EM ACOMPANHAMENTO <span id="repo-count" class="count-badge">0</span></div></div>
           <div id="repository-list" class="repository-list"></div>
           <details class="tracked-projects-details">
@@ -368,7 +386,7 @@
             <div id="news-list" class="news-grid news-top-stories"></div>
           </section>
           <div id="xcl-news-list" class="news-grid xcl-news-grid" data-news-panel="xcl" hidden></div>
-          <article class="collab-banner"><div class="collab-symbol">✳</div><div><span class="section-kicker">FEITO PELA COMUNIDADE</span><h2>Tem uma novidade? <span>Conte pra gente.</span></h2><p>Compartilhe notícias, sugira uma pauta ou participe da equipe pelo nosso Discord.</p></div><a class="button button-discord" data-official-link href="#" target="_blank" rel="noreferrer">Entre no Discord <span>↗</span></a></article>
+          <article class="collab-banner"><div class="collab-symbol">✳</div><div><span class="section-kicker">COMUNIDADE BRASILEIRA</span><h2>Em apoio ao <span>XlaunchVI.</span></h2><p>Acompanhe os relatos da equipe e converse com a comunidade brasileira no Discord do projeto. O KynosRecompVI é independente.</p></div><a class="button button-discord" data-official-link href="#" target="_blank" rel="noreferrer">Discord do XlaunchVI <span>↗</span></a></article>
         </div>
       </section>
 
@@ -402,6 +420,17 @@
           </section>
           <p class="tracker-data-note">Snapshot de <time id="tracker-updated"></time> · origem: <code>data/tracker.json</code> · tradução editorial PT-BR em <code>data/tracker-pt-BR.json</code>.</p>
         </div>
+      </section>
+
+      <section class="page-section" id="xlaunchvi" data-page="xlaunchvi">
+        <div class="hero compact-hero xlaunch-hero">
+          <div class="hero-content">
+            <div class="eyebrow"><span class="eyebrow-dot"></span> PROJETO ACOMPANHADO <span class="eyebrow-line"></span> XLAUNCHVI</div>
+            <h1>Equipe <span>XlaunchVI.</span></h1>
+            <p class="hero-copy">Acompanhe o status técnico do projeto e encontre os canais comunitários e as formas de apoio voluntário.</p>
+          </div>
+        </div>
+        <div class="content-wrap page-content xlaunch-page-content" id="xlaunchvi-content" aria-busy="true"></div>
       </section>
 
       <section class="page-section" id="discord" data-page="discord">
@@ -443,6 +472,7 @@
         ? new Promise((resolve, reject) => {
           const fallback = document.createElement('script');
           fallback.src = 'data/file-fallback.js';
+          fallback.dataset.kynosFallback = 'true';
           fallback.onload = resolve;
           fallback.onerror = () => reject(new Error('Não foi possível carregar data/file-fallback.js.'));
           document.head.appendChild(fallback);

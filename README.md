@@ -11,7 +11,12 @@ Portal estático responsivo, sem banco de dados ou dependências. Notícias, cor
 
 ## Dados do tracker em PT-BR
 
-`data/tracker.json` é a fonte original do tracker. Para atualizar a versão editorial traduzida, substitua esse arquivo pela nova exportação e execute:
+Os trackers têm papéis separados:
+
+- `data/tracker.json` recebe o snapshot bruto do PortWatch. Mantenha esse arquivo como fonte de dados do tracker; não misture nele relatos editoriais ou informações de apoio comunitário.
+- `data/tracker-pt-BR.json` é a versão traduzida/editada que o site consome. O gerador atualiza a tradução, mas preserva o objeto `editorial` para relatos próprios, ajustes estimados e notícias escritas em PT-BR.
+
+Para acrescentar ou corrigir um relato editorial, edite `editorial.teams.xlaunchvi` ou `editorial.effortOverrides` dentro de `data/tracker-pt-BR.json` e rode o gerador. Notícias editoriais adicionais podem ser incluídas em `editorial.news`, com `id`, `date`, `category`, `title`, `summary` e fontes HTTP(S):
 
 ```powershell
 python .\scripts\build_tracker_ptbr.py
@@ -19,10 +24,12 @@ python .\scripts\build_tracker_ptbr.py
 
 O gerador valida se todas as notícias e manchetes têm uma tradução revisada e produz:
 
-- `data/tracker-pt-BR.json`: conteúdo enxuto para o site, com resumos em PT-BR, dados de projetos, ferramentas, alertas, mudanças, scout, DMCA e manchetes. Os links originais são preservados.
-- `data/file-fallback.js`: pacote local de fallback para `file://`, com os dados do simulador e da comunidade junto ao tracker traduzido. Em HTTP, o portal carrega os JSONs normalmente e não baixa esse pacote.
+- `data/tracker-pt-BR.json`: conteúdo em PT-BR para o site, incluindo projetos, notícias, ferramentas, alertas, mudanças, scout, DMCA, manchetes e o bloco de dados editoriais. Os links originais são preservados.
+- `data/file-fallback.js`: fallback gerado com hardware, comunidades, tracker PT-BR e timestamps do PortWatch. É carregado diretamente em `file://` e sob demanda em HTTP quando a fonte traduzida ou os dados essenciais falham.
 
-As traduções editoriais ficam no dicionário `scripts/build_tracker_ptbr.py`. Se o tracker trouxer IDs de notícias ou títulos de manchetes novos, o gerador interrompe com erro até que a tradução seja adicionada. Datas sem hora são exibidas como “horário não informado”; timestamps completos aparecem no fuso local do navegador, com o fuso indicado e o valor UTC disponível no detalhe.
+O XlaunchVI aparece com **50%** e marco “Tela de carregamento” como estimativa editorial informada para esta atualização; não é medição oficial nem marco publicado no GitHub. O relato anterior sobre a tela é atribuído a JPTuba no Discord, mas o convite não aponta para a mensagem original. O percentual bruto do snapshot PortWatch permanece separado em `portwatchPercent` (0% para marcos de GTA VI neste snapshot). O escopo do XLaunch Dashboard (reconhecimento de jogos e mídia física, detecção de build, controles, login/perfis e biblioteca) foi informado ao portal e não foi verificado independentemente no snapshot público. Informe `date` apenas se a data do relato for conhecida e use `loggedAt` para o registro editorial no portal, não como horário original da mensagem.
+
+O carregador HTTP consulta `tracker.json` e `tracker-pt-BR.json` de forma independente; o arquivo traduzido contém os dados completos necessários à interface, enquanto o bruto fornece metadados de origem e sincronização. Se a tradução estiver ausente/inválida, ou se outros dados essenciais falharem, o fallback é carregado sob demanda. Em `file://`, o fallback já é carregado diretamente. Rode o gerador após atualizar o conteúdo para sincronizar a saída traduzida e o pacote local. O convite da comunidade fica em `data/discords.json` e direciona ao Discord do XlaunchVI, não a um servidor oficial do KynosRecompVI. Traduções de interface ficam em `i18n.js`; os textos PT-BR das notícias do PortWatch ficam em `scripts/build_tracker_ptbr.py`. Se IDs de notícias ou títulos de manchetes mudarem, o gerador interrompe até que haja tradução revisada. Datas sem hora são exibidas como “horário não informado”; timestamps completos usam o fuso local, com o fuso indicado e UTC disponível no detalhe. HTTP 404 em consulta anônima não confirma se um repositório está privado, removido ou temporariamente indisponível.
 
 A projeção de prazo da corrida só é calculada se `history` contiver ao menos duas amostras do mesmo projeto, com timestamps ISO 8601 completos e percentuais comparáveis nos últimos 30 dias. Formatos aceitos incluem `{ "projectId": "xcl", "timestamp": "2026-11-24T01:00:00Z", "percent": 62.5 }` e snapshots `{ "timestamp": "...Z", "efforts": [{ "id": "xcl", "percent": 62.5 }] }`. Sem essa série, a interface mostra a distância até os marcos e informa que não há prazo calculável; não cria datas nem ritmo artificial. A previsão é especulativa e não representa uma data oficial de lançamento para PC.
 

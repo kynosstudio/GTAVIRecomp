@@ -151,6 +151,8 @@ let notificationPreferences = null;
 let notificationItems = [];
 let quickProjects = [];
 let heroCountdownTimer = null;
+let headerFreshnessTimestamp = null;
+let headerFreshnessTimer = null;
 
 const pageNames = {
   home: 'Início',
@@ -158,6 +160,7 @@ const pageNames = {
   repositories: 'Corrida dos projetos',
   news: 'Notícias',
   tracker: 'Monitoramento',
+  xlaunchvi: 'Equipe XlaunchVI',
   discord: 'Comunidades'
 };
 
@@ -324,6 +327,7 @@ function applyLanguage() {
     renderTrackerProjects(trackerData);
     renderNews(trackerData);
     renderTrackerDetails(trackerData);
+    renderXlaunchPage(trackerData);
     if (quickProjects.length) updateQuickProjectStatus();
     if (byId('quick-safety-query') && byId('quick-safety-query').value.trim()) updateFakeRadar(trackerData);
     if (notificationPreferences) renderNotificationCenter(trackerData);
@@ -372,6 +376,89 @@ async function loadJson(path) {
   const response = await fetch(path, { cache: 'no-store' });
   if (!response.ok) throw new Error(`Não foi possível carregar ${path} (${response.status})`);
   return response.json();
+}
+
+async function loadOptionalJson(path) {
+  try {
+    return await loadJson(path);
+  } catch (error) {
+    console.warn(`Fonte de dados indisponível (${path}); a inicialização tentará usar o fallback.`, error);
+    return null;
+  }
+}
+
+async function ensureEmbeddedFallback() {
+  if (window.KynosFileData) return window.KynosFileData;
+  if (window.location.protocol === 'file:' && window.KynosFileDataReady) {
+    try {
+      await window.KynosFileDataReady;
+    } catch (error) {
+      console.error('O fallback local inicial falhou; tentando carregá-lo novamente:', error);
+    }
+    if (window.KynosFileData) return window.KynosFileData;
+  }
+  if (!window.KynosFallbackLoading) {
+    window.KynosFallbackLoading = new Promise((resolve, reject) => {
+      const fallback = document.createElement('script');
+      fallback.src = 'data/file-fallback.js';
+      fallback.dataset.kynosFallback = 'true';
+      fallback.onload = () => window.KynosFileData
+        ? resolve(window.KynosFileData)
+        : reject(new Error('O script de fallback carregou sem inicializar os dados.'));
+      fallback.onerror = () => reject(new Error('Não foi possível carregar data/file-fallback.js.'));
+      document.head.appendChild(fallback);
+    });
+  }
+  return window.KynosFallbackLoading;
+}
+
+function isTrackerPayload(value) {
+  return Boolean(value && typeof value === 'object'
+    && (Array.isArray(value.news) || Array.isArray(value.efforts)));
+}
+
+function mergeTrackerPayloads(portwatch, localized, fallback) {
+  const fallbackTracker = fallback && isTrackerPayload(fallback.tracker) ? fallback.tracker : fallback;
+  const fallbackPortwatch = fallback && fallback.portwatch && typeof fallback.portwatch === 'object'
+    ? fallback.portwatch
+    : {};
+  const base = isTrackerPayload(fallbackTracker) ? fallbackTracker : {};
+  const translated = isTrackerPayload(localized) ? localized : {};
+  const merged = { ...base, ...translated };
+  const arrayFields = ['news', 'efforts', 'tools', 'flagged', 'changes', 'headlines', 'dmca'];
+  arrayFields.forEach((field) => {
+    merged[field] = Array.isArray(translated[field])
+      ? translated[field]
+      : Array.isArray(base[field]) ? base[field] : [];
+  });
+  const rawUpdated = portwatch && (portwatch.updated || portwatch.updatedAt);
+  const rawSynced = portwatch && portwatch.lastSyncedAt;
+  const candidates = [merged.lastSyncedAt, rawSynced, merged.updatedAt, rawUpdated, fallbackPortwatch.lastSyncedAt, fallbackPortwatch.updated]
+    .filter((timestamp) => typeof timestamp === 'string' && Number.isFinite(Date.parse(timestamp)));
+  const latestTimestamp = candidates.sort((left, right) => Date.parse(right) - Date.parse(left))[0];
+  if (!merged.updatedAt) merged.updatedAt = rawUpdated || fallbackPortwatch.updated || '';
+  if (!merged.lastSyncedAt) merged.lastSyncedAt = rawSynced || fallbackPortwatch.lastSyncedAt || '';
+  if (latestTimestamp) merged.lastSyncedAt = latestTimestamp;
+
+  const baseTeams = base.teams && typeof base.teams === 'object' ? base.teams : {};
+  const translatedTeams = translated.teams && typeof translated.teams === 'object' ? translated.teams : {};
+  merged.teams = { ...baseTeams, ...translatedTeams };
+  const baseTeam = baseTeams.xlaunchvi && typeof baseTeams.xlaunchvi === 'object' ? baseTeams.xlaunchvi : {};
+  const translatedTeam = translatedTeams.xlaunchvi && typeof translatedTeams.xlaunchvi === 'object' ? translatedTeams.xlaunchvi : {};
+  if (Object.keys(baseTeam).length || Object.keys(translatedTeam).length) {
+    merged.teams.xlaunchvi = {
+      ...baseTeam,
+      ...translatedTeam,
+      latestReport: translatedTeam.latestReport || baseTeam.latestReport || null,
+      repositoryCheck: translatedTeam.repositoryCheck || baseTeam.repositoryCheck || null
+    };
+  }
+  merged.portwatchSource = {
+    updatedAt: rawUpdated || fallbackPortwatch.updated || '',
+    lastSyncedAt: rawSynced || fallbackPortwatch.lastSyncedAt || '',
+    sourceFile: 'data/tracker.json'
+  };
+  return merged;
 }
 
 function renderTargets() {
@@ -1987,11 +2074,13 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
     : legacyProjects;
   const projects = sourceProjects.map((project) => {
     const legacy = legacyById.get(project.id) || {};
+    const snapshotTeam = snapshot && snapshot.teams && snapshot.teams.xlaunchvi;
     const owner = String(project.repo || legacy.repo || '').split('/')[0];
     const avatarUrl = legacy.avatarUrl || (/^[\w-]+$/.test(owner) ? `https://github.com/${encodeURIComponent(owner)}.png?size=88` : '');
     return {
       ...legacy,
       ...project,
+      teamReport: project.teamReport || (project.id === 'xlaunchvi' && snapshotTeam ? snapshotTeam.latestReport : null),
       author: project.author || legacy.author || owner,
       avatar: project.avatar || legacy.avatar || String(project.name || '').slice(0, 2).toUpperCase(),
       avatarUrl,
@@ -2025,11 +2114,15 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
     { label: 'Projetos acompanhados', markup: counterMarkup(projects.length) }
   ];
   const timelineProjects = rankedProjects.slice(0, 5).filter((project) => portwatchProjectProgress(project, milestones) > 0);
+  const xlaunchReportProject = projects.find((project) => project.id === 'xlaunchvi' && project.teamReport);
+  if (xlaunchReportProject && !timelineProjects.some((project) => project.id === xlaunchReportProject.id)) {
+    timelineProjects.push(xlaunchReportProject);
+  }
   const lines = timelineProjects.map((project, index) => {
     const x = portwatchProjectProgress(project, milestones) * 10;
     const lane = index;
     const y = 24 + lane * 48;
-    return `<line x1="${x}" y1="${y}" x2="${x}" y2="276" /><circle cx="${x}" cy="276" r="4" />`;
+    return `<line x1="${x}" y1="${y}" x2="${x}" y2="306" /><circle cx="${x}" cy="306" r="4" />`;
   }).join('');
   const markerCards = timelineProjects.map((project, index) => {
     const projectProgress = portwatchProjectProgress(project, milestones);
@@ -2041,8 +2134,15 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
     const avatarMarkup = project.avatarUrl
       ? `<span class="pw-avatar" aria-hidden="true"><img class="pw-avatar-image" width="34" height="34" src="${escapeHtml(safeUrl(project.avatarUrl))}" alt="" loading="lazy" decoding="async" /><span class="pw-avatar-fallback" hidden>${escapeHtml(avatar)}</span></span>`
       : `<span class="pw-avatar" aria-hidden="true">${escapeHtml(avatar)}</span>`;
-    const tooltip = `${project.name}: ${progressLabel}% · ${stage}`;
-    return `<button class="pw-project-marker align-${edge}" type="button" style="--marker-x:${projectProgress}%;--marker-lane:${lane}" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(tooltip)}">${avatarMarkup}</button>`;
+    const reportStage = project.teamReport && localizedValue(project.teamReport, 'stage');
+    const snapshotPercent = Number.isFinite(Number(project.portwatchPercent))
+      ? formatPercent(project.portwatchPercent)
+      : progressLabel;
+    const estimateLabel = project.progressBasis === 'team-report-estimate'
+      ? ` · ${t('estimativa editorial da equipe')}; ${t('snapshot GitHub/tracker')}: ${snapshotPercent}%`
+      : reportStage ? ` · ${t('Relato do Discord')}: ${reportStage}; ${t('snapshot GitHub/tracker')}: ${snapshotPercent}%` : '';
+    const tooltip = `${project.name}: ${progressLabel}% · ${stage}${estimateLabel}`;
+    return `<button class="pw-project-marker align-${edge} ${project.teamReport ? 'pw-project-marker--xlaunch' : ''}" type="button" style="--marker-x:${projectProgress}%;--marker-lane:${lane}" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(tooltip)}">${avatarMarkup}</button>`;
   }).join('');
   const projectList = projects.slice()
     .sort((left, right) => Number(isInactiveProject(left)) - Number(isInactiveProject(right))
@@ -2052,9 +2152,15 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
       const stage = portwatchMilestone(project, milestones).label;
       const avatar = String(project.avatar || project.name.slice(0, 2)).slice(0, 3);
       const inactive = isInactiveProject(project);
-      const stageText = inactive
+      let stageText = inactive
         ? `${t('Fora do ranking ativo')} · ${t('Último marco')}: ${t(stage)}`
         : t(stage);
+      if (project.teamReport) {
+        const snapshotPercent = Number.isFinite(Number(project.portwatchPercent))
+          ? formatPercent(project.portwatchPercent)
+          : formatPercent(projectProgress);
+        stageText += ` · ${t('Discord relata')}: ${localizedValue(project.teamReport, 'stage')}; ${t('snapshot GitHub/tracker')}: ${snapshotPercent}%`;
+      }
       const avatarMarkup = project.avatarUrl
         ? `<img class="pw-avatar-image" width="28" height="28" src="${escapeHtml(safeUrl(project.avatarUrl))}" alt="" loading="lazy" decoding="async" /><span class="pw-avatar-fallback" hidden>${escapeHtml(avatar)}</span>`
         : escapeHtml(avatar);
@@ -2115,7 +2221,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
       <div class="pw-timeline-heading"><div><span class="section-kicker">${escapeHtml(t('TRILHA DE MARCOS'))}</span><h3>${escapeHtml(t('Do primeiro executável à estabilidade.'))}</h3></div></div>
       <div class="pw-timeline-viewport" tabindex="0" aria-label="Trilha de progresso; deslize horizontalmente para ver todos os marcos">
         <div class="pw-timeline">
-          <svg class="pw-connectors" viewBox="0 0 1000 278" preserveAspectRatio="none" aria-hidden="true">${lines}</svg>
+          <svg class="pw-connectors" viewBox="0 0 1000 308" preserveAspectRatio="none" aria-hidden="true">${lines}</svg>
           ${markerCards}
           <div class="pw-progress-track" role="progressbar" aria-label="${escapeHtml(t('Progresso geral da portabilidade'))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}">
             <span class="pw-progress-fill" data-progress-value="${progress}"></span>
@@ -2643,7 +2749,7 @@ function renderStoryFeature(story, target) {
       <div class="news-feature-meta"><span class="news-feature-kicker">${escapeHtml(t('Manchete em destaque'))}</span><span class="news-category">${escapeHtml(t(story.category))}</span>${publicationTimeMarkup(story.date)}</div>
       <h3>${escapeHtml(story.title)}</h3>
       <p>${escapeHtml(story.summary)}</p>
-      <div class="news-source-links">${(story.sources || []).map((source) => `<a class="text-link" href="${escapeHtml(safeUrl(source.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(source.title)}">${escapeHtml(source.outlet)} ↗</a>`).join('')}</div>
+      <div class="news-source-links">${(story.sources || []).map((source) => `<a class="text-link" href="${escapeHtml(safeUrl(source.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(t(source.title))}">${escapeHtml(t(source.outlet))} ↗</a>`).join('')}</div>
     </div>
     <div class="news-feature-stamp" aria-hidden="true"><span>KYNOSRECOMPVI</span><strong>LEONIDA</strong><small>${escapeHtml(formatNewsDate(story.date))}</small></div>`;
   window.KynosI18n.translateDom(target, state.language);
@@ -2654,7 +2760,8 @@ function renderStoryCard(story, featured = false) {
     <div class="news-card-top"><span class="news-category">${escapeHtml(t(story.category))}</span>${publicationTimeMarkup(story.date)}</div>
     <h3>${escapeHtml(localizedValue(story, 'title') || story.title)}</h3>
     <p>${escapeHtml(localizedValue(story, 'summary') || story.summary)}</p>
-    <div class="news-source-links">${(story.sources || []).map((source) => `<a class="text-link" href="${escapeHtml(safeUrl(source.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(source.title)}">${escapeHtml(source.outlet)} ↗</a>`).join('')}</div>
+    ${story.loggedAt ? `<p class="news-card-recorded">${escapeHtml(t('Registro editorial no portal:'))} ${publicationTimeMarkup(story.loggedAt)}</p>` : ''}
+    <div class="news-source-links">${(story.sources || []).map((source) => `<a class="text-link" href="${escapeHtml(safeUrl(source.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(t(source.title))}">${escapeHtml(t(source.outlet))} ↗</a>`).join('')}</div>
   </article>`;
 }
 
@@ -2694,13 +2801,79 @@ function homeProjectStory(project, rank, date) {
   };
 }
 
+function renderXlaunchSpotlight(project, team, snapshot, modifier = '') {
+  if (!project) return '';
+  const report = project.teamReport || (team && team.latestReport);
+  if (!report) return '';
+  const percentValue = Number(project.percent);
+  const percent = Number.isFinite(percentValue) ? Math.max(0, Math.min(100, percentValue)) : 0;
+  const repositoryUrl = safeUrl(project.url);
+  const discordUrl = safeUrl(team && team.discordUrl);
+  const owner = String(project.repo || '').split('/')[0];
+  const avatarUrl = /^[\w-]+$/.test(owner) ? `https://github.com/${encodeURIComponent(owner)}.png?size=88` : '';
+  const repositoryCheck = team && team.repositoryCheck && typeof team.repositoryCheck === 'object'
+    ? team.repositoryCheck
+    : {};
+  const httpStatus = Number(repositoryCheck.httpStatus);
+  const checkDate = typeof repositoryCheck.checkedAt === 'string' ? repositoryCheck.checkedAt : '';
+  const snapshotDate = project.repositoryAssessedAt || (snapshot && snapshot.updatedAt) || '';
+  const checkMessage = httpStatus === 404
+    ? t('A consulta pública sem autenticação ao GitHub retornou HTTP 404. Isso não permite determinar se o repositório está privado, removido ou temporariamente indisponível.')
+    : '';
+  const reportDate = report.loggedAt || report.date;
+
+  return `<article class="xlaunch-spotlight ${escapeHtml(modifier)}">
+    <div class="xlaunch-spotlight-heading">
+      <span class="home-leader-avatar">${avatarUrl ? `<img src="${escapeHtml(avatarUrl)}" alt="" loading="lazy" decoding="async">` : ''}<span class="home-leader-avatar-fallback" ${avatarUrl ? 'hidden' : ''}>X</span></span>
+      <div><span class="section-kicker">${escapeHtml(t('DESTAQUE DA COMUNIDADE BR'))}</span><h3>${escapeHtml(project.name)}</h3><span class="repo-slug">${escapeHtml(project.repo || '')}</span></div>
+      <span class="status-badge warning">${escapeHtml(t('Relato não verificado independentemente'))}</span>
+    </div>
+    <p class="xlaunch-spotlight-teaser">${escapeHtml(localizedValue(report, 'teaser') || localizedValue(report, 'summary') || '')}</p>
+    <div class="xlaunch-spotlight-progress">
+      <div class="progress-label"><span>${escapeHtml(t('Estimativa editorial baseada em relato'))}</span><strong>${counterMarkup(percent, 'percent')}%</strong></div>
+      <div class="progress-track" role="progressbar" aria-label="${escapeHtml(`${project.name}: ${formatPercent(percent)}% de estimativa editorial`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><span data-progress-value="${percent}"></span></div>
+    </div>
+    <p class="xlaunch-spotlight-check">${escapeHtml(t('Snapshot PortWatch/GitHub:'))} ${formatPercent(project.portwatchPercent)}%${snapshotDate ? ` · ${escapeHtml(formatNewsDate(snapshotDate))}` : ''}</p>
+    ${checkMessage ? `<p class="xlaunch-spotlight-check">${escapeHtml(checkMessage)}${checkDate ? ` · ${escapeHtml(formatNewsDate(checkDate))}` : ''}</p>` : ''}
+    ${reportDate ? `<p class="xlaunch-spotlight-recorded">${escapeHtml(t('Relato registrado no portal:'))} ${publicationTimeMarkup(reportDate)}</p>` : ''}
+    <div class="xlaunch-spotlight-links">
+      ${repositoryUrl !== '#' ? `<a class="button primary-link" href="${escapeHtml(repositoryUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('GitHub do XlaunchVI ↗'))}</a>` : ''}
+      ${discordUrl !== '#' ? `<a class="button button-discord" href="${escapeHtml(discordUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Discord do XlaunchVI ↗'))}</a>` : ''}
+    </div>
+  </article>`;
+}
+
+function renderXlaunchReportPanel(report, team) {
+  if (!report) return '';
+  const discordUrl = safeUrl(team && team.discordUrl);
+  const sources = Array.isArray(report.sources) ? report.sources : [];
+  return `<article class="panel xlaunch-team-report">
+    <div class="xlaunch-team-report-heading"><span class="section-kicker">${escapeHtml(t('RELATO DA EQUIPE · DISCORD'))}</span><span class="status-badge warning">${escapeHtml(report.reporter || 'JPTuba')}</span></div>
+    <h3>${escapeHtml(localizedValue(report, 'title') || report.title || '')}</h3>
+    <p>${escapeHtml(localizedValue(report, 'summary') || report.summary || '')}</p>
+    ${localizedValue(report, 'dashboardContext') ? `<p class="xlaunch-team-report-dashboard">${escapeHtml(localizedValue(report, 'dashboardContext'))}</p>` : ''}
+    <div class="xlaunch-team-report-times">
+      ${report.date ? `<div><span>${escapeHtml(t('Data do relato; horário original não informado:'))}</span>${publicationTimeMarkup(report.date)}</div>` : ''}
+      ${report.loggedAt ? `<div><span>${escapeHtml(t('Registro editorial no portal:'))}</span>${publicationTimeMarkup(report.loggedAt)}</div>` : ''}
+    </div>
+    <p class="xlaunch-team-report-transparency">${escapeHtml(localizedValue(report, 'transparency') || report.transparency || '')}</p>
+    <div class="news-source-links">${sources.map((source) => `<a class="text-link" href="${escapeHtml(safeUrl(source.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(t(source.title || ''))}">${escapeHtml(t(source.outlet || 'Fonte original'))} ↗</a>`).join('')}${discordUrl !== '#' && !sources.length ? `<a class="text-link" href="${escapeHtml(discordUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Discord do XlaunchVI ↗'))}</a>` : ''}</div>
+  </article>`;
+}
+
 function renderPortalHome(data) {
+  renderHeaderFreshness(data);
   const lead = data.news.find((story) => story.id === '2026-11-23-leonida-nuked') || data.news[0];
   if (lead) renderStoryFeature(lead, byId('home-feature'));
   const projects = data.efforts.filter((project) => project.status !== 'offline')
     .slice().sort((left, right) => right.percent - left.percent || left.name.localeCompare(right.name));
   const assignedStories = new Set(lead ? [lead] : []);
-  const latest = projects.slice(0, 3).map((project, index) => {
+  const teamReportStory = data.news.find((story) => story.id === 'xlaunchvi-loading-screen-team-report');
+  if (teamReportStory) assignedStories.add(teamReportStory);
+  const latestProjects = projects.filter((project) => project.id !== 'xlaunchvi').slice(0, teamReportStory ? 2 : 3);
+  const latest = [
+    ...(teamReportStory ? [teamReportStory] : []),
+    ...latestProjects.map((project, index) => {
     const projectName = normalizeHardwareSearch(project.name);
     const projectRepo = normalizeHardwareSearch(project.repo || '');
     const matchingStory = data.news.find((story) => {
@@ -2718,12 +2891,15 @@ function renderPortalHome(data) {
       return matchingStory;
     }
     return homeProjectStory(project, index + 1, formatNewsDate(data.updatedAt));
-  });
+    })
+  ];
   byId('home-news-list').innerHTML = latest.map((story) => renderStoryCard(story)).join('');
   window.KynosI18n.translateDom(byId('home-news-list'), state.language);
 
   const leader = projects[0];
   renderPortwatchProgress(PORTWATCH_FALLBACK, data);
+  const xlaunch = data.efforts.find((project) => project.id === 'xlaunchvi');
+  const xlaunchTeam = data.teams && data.teams.xlaunchvi;
   const owner = leader && leader.repo ? leader.repo.split('/')[0] : '';
   const avatarUrl = /^[\w-]+$/.test(owner) ? `https://github.com/${encodeURIComponent(owner)}.png?size=96` : '';
   const initials = leader ? leader.name.slice(0, 2).toUpperCase() : '—';
@@ -2741,11 +2917,185 @@ function renderPortalHome(data) {
       <p class="home-leader-verification">${escapeHtml(leader.verification)}</p>
       ${leader.url ? `<a class="text-link" href="${escapeHtml(safeUrl(leader.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Repositório original'))} ↗</a>` : ''}
     </article>
+    ${renderXlaunchSpotlight(xlaunch, xlaunchTeam, data, 'xlaunch-spotlight--home')}
     <p class="tracker-data-note">${escapeHtml(t('Relatos autodeclarados; percentuais conforme o snapshot do tracker.'))}</p>` : `<p>${escapeHtml(t('Sem dados de projetos'))}</p>`;
   window.KynosI18n.translateDom(byId('home-progress-summary'), state.language);
   attachAvatarFallbacks(byId('home-progress-summary'));
   animateCounters(byId('home-progress-summary'));
   animateProgress(byId('home-progress-summary'));
+}
+
+function trackerTimestamp(data) {
+  const values = [data && data.updatedAt, data && data.updated, data && data.lastSyncedAt]
+    .map((value) => {
+      const timestamp = Date.parse(String(value || ''));
+      return Number.isFinite(timestamp) ? timestamp : null;
+    })
+    .filter((timestamp) => timestamp !== null);
+  return values.length ? Math.max(...values) : null;
+}
+
+function renderHeaderFreshness(data) {
+  const container = byId('header-freshness');
+  const full = byId('header-freshness-full');
+  const compact = byId('header-freshness-short');
+  if (!container || !full || !compact) return;
+  headerFreshnessTimestamp = trackerTimestamp(data);
+  const updateLabel = () => {
+    if (headerFreshnessTimestamp === null) {
+      full.textContent = t('Atualização sem horário');
+      compact.textContent = '—';
+      container.title = t('Atualização sem horário');
+      container.setAttribute('aria-label', t('Atualização sem horário'));
+      container.hidden = false;
+      return;
+    }
+    const age = Math.max(0, Date.now() - headerFreshnessTimestamp);
+    let fullLabel;
+    let shortLabel;
+    if (age < 60_000) {
+      fullLabel = t('Atualizado há poucos segundos');
+      shortLabel = { pt: 'agora', en: 'now', es: 'ahora', zh: '刚刚' }[state.language];
+    } else if (age < 60 * 60_000) {
+      const minutes = Math.floor(age / 60_000);
+      fullLabel = t('Atualizado há {value} min').replace('{value}', String(minutes));
+      shortLabel = `${minutes}m`;
+    } else if (age < 24 * 60 * 60_000) {
+      const hours = Math.floor(age / (60 * 60_000));
+      fullLabel = t('Atualizado há {value} h').replace('{value}', String(hours));
+      shortLabel = `${hours}h`;
+    } else {
+      const days = Math.floor(age / (24 * 60 * 60_000));
+      fullLabel = t('Atualizado há {value} d').replace('{value}', String(days));
+      shortLabel = `${days}d`;
+    }
+    full.textContent = fullLabel;
+    compact.textContent = shortLabel;
+    container.title = `${fullLabel} · ${new Date(headerFreshnessTimestamp).toISOString()}`;
+    container.setAttribute('aria-label', `${fullLabel} · ${new Date(headerFreshnessTimestamp).toISOString()}`);
+    container.hidden = false;
+  };
+  updateLabel();
+  if (!headerFreshnessTimer) headerFreshnessTimer = window.setInterval(updateLabel, 15_000);
+}
+
+function renderXlaunchPage(data) {
+  const output = byId('xlaunchvi-content');
+  if (!output) return;
+  const efforts = data && Array.isArray(data.efforts) ? data.efforts : [];
+  const project = efforts.find((item) => item && item.id === 'xlaunchvi');
+  if (!project) {
+    output.innerHTML = `<p class="xlaunch-unavailable" role="status">${escapeHtml(t('A página do projeto está indisponível no snapshot atual.'))}</p>`;
+    output.setAttribute('aria-busy', 'false');
+    return;
+  }
+
+  const teams = data && data.teams && typeof data.teams === 'object' ? data.teams : {};
+  const team = teams.xlaunchvi && typeof teams.xlaunchvi === 'object' ? teams.xlaunchvi : {};
+  const teamReport = team.latestReport || project.teamReport || null;
+  const repositoryCheck = team.repositoryCheck && typeof team.repositoryCheck === 'object' ? team.repositoryCheck : {};
+  const details = project.technicalDetails && typeof project.technicalDetails === 'object' ? project.technicalDetails : {};
+  const hasProgress = project.percent !== null && project.percent !== undefined && String(project.percent).trim() !== '';
+  const progressValue = hasProgress ? Number(project.percent) : NaN;
+  const progress = Number.isFinite(progressValue) ? Math.max(0, Math.min(100, progressValue)) : null;
+  const estimatedFromTeam = project.progressBasis === 'team-report-estimate';
+  const progressLabel = progress === null ? '—' : `${counterMarkup(progress, 'percent')}%${estimatedFromTeam ? ` · ${escapeHtml(t('estimativa'))}` : ''}`;
+  const statusLabel = project.status === 'offline'
+    ? t('Projeto fora do ar / encerrado')
+    : estimatedFromTeam
+    ? t('Estimativa editorial baseada em relato')
+    : project.status === 'acompanhado'
+      ? progress === 0
+        ? t('Acompanhado, sem marco de progresso reportado')
+        : progress === null
+          ? t('Progresso não informado no snapshot.')
+          : t('Em progresso (relato do tracker)')
+      : t('Status não informado no snapshot.');
+  const repositoryUrl = safeUrl(project.url);
+  const repositoryHttpStatus = Number(repositoryCheck.httpStatus || project.repositoryHttpStatus);
+  const repositoryMissing = project.repositoryMissing === true || repositoryHttpStatus === 404;
+  const repositoryAssessedAt = typeof repositoryCheck.checkedAt === 'string'
+    ? repositoryCheck.checkedAt
+    : typeof project.repositoryAssessedAt === 'string' ? project.repositoryAssessedAt : '';
+  const pixKey = typeof team.pixKey === 'string' ? team.pixKey.trim() : '';
+  const kickUrl = safeUrl(typeof team.kickUrl === 'string' ? team.kickUrl.trim() : '');
+  const discordUrl = safeUrl(typeof team.discordUrl === 'string' ? team.discordUrl.trim() : '');
+  const highlights = Array.isArray(details.highlights) ? details.highlights.filter((item) => typeof item === 'string' && item.trim()) : [];
+  const blockers = Array.isArray(details.blockers) ? details.blockers.filter((item) => typeof item === 'string' && item.trim()) : [];
+  const groundwork = Array.isArray(details.groundwork)
+    ? details.groundwork.filter((item) => item && item.percent !== null && item.percent !== undefined && String(item.percent).trim() !== '' && Number.isFinite(Number(item.percent)))
+    : [];
+  const repositoryUpdate = typeof project.lastRepositoryUpdate === 'string' ? project.lastRepositoryUpdate : '';
+  const metricCards = groundwork.map((metric) => {
+    const value = Math.max(0, Math.min(100, Number(metric.percent)));
+    return `<article class="xlaunch-tech-metric">
+      <div><span>${escapeHtml(t(metric.label || ''))}</span><strong>${counterMarkup(value, 'percent')}%</strong></div>
+      <div class="xlaunch-tech-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${value}"><span data-progress-value="${value}"></span></div>
+    </article>`;
+  }).join('');
+  const repositoryWarning = repositoryMissing
+    ? repositoryHttpStatus === 404
+      ? t('A consulta pública sem autenticação ao GitHub retornou HTTP 404. Isso não permite determinar se o repositório está privado, removido ou temporariamente indisponível.')
+      : Number.isFinite(repositoryHttpStatus) && repositoryHttpStatus > 0
+        ? t('Repositório indisponível no último registro (HTTP {status}); isso não confirma o motivo.').replace('{status}', String(repositoryHttpStatus))
+        : t('Repositório indisponível no último registro; motivo não confirmado.')
+    : '';
+
+  output.innerHTML = `
+    <section class="section-heading xlaunch-section-heading">
+      <div><span class="section-kicker">${escapeHtml(t('PROJETO NO GITHUB'))}</span><h2>${escapeHtml(project.name)} <span>${escapeHtml(t('em foco.'))}</span></h2></div>
+      ${repositoryUrl !== '#' ? `<a class="button primary-link" href="${escapeHtml(repositoryUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Repositório de código'))} ↗</a>` : ''}
+    </section>
+    ${renderXlaunchReportPanel(teamReport, team)}
+    ${repositoryWarning ? `<p class="xlaunch-repository-warning xlaunch-repository-warning--report">${escapeHtml(repositoryWarning)}${repositoryAssessedAt ? ` · ${escapeHtml(t('Verificado em'))} ${escapeHtml(formatNewsDate(repositoryAssessedAt))}` : ''}</p>` : ''}
+    <div class="xlaunch-overview-grid">
+      <article class="panel xlaunch-project-card">
+        <div class="xlaunch-project-heading">
+          <div><span class="section-kicker">${escapeHtml(t('Status do tracker'))}</span><h3>${escapeHtml(project.name)}</h3><span class="repo-slug">${escapeHtml(project.repo || '')}</span></div>
+            <div class="xlaunch-status-stack"><span class="status-badge accent">${escapeHtml(statusLabel)}</span>${repositoryMissing ? `<span class="status-badge warning">${escapeHtml(t('Repositório indisponível'))}</span>` : ''}</div>
+        </div>
+          <p class="xlaunch-project-summary">${escapeHtml(t(project.summary || ''))}</p>
+        <div class="xlaunch-project-facts">
+          <div><span>${escapeHtml(t('Abordagem'))}</span><strong>${escapeHtml(t(details.approach || '—'))}</strong></div>
+          <div><span>${escapeHtml(t('Alvo'))}</span><strong>${escapeHtml(t(details.target || '—'))}</strong></div>
+          <div><span>${escapeHtml(t('Progresso de GTA VI'))}</span><strong>${progressLabel}</strong></div>
+          <div><span>${escapeHtml(t('Marco atual'))}</span><strong>${escapeHtml(project.stage ? t(project.stage) : t('Nenhum marco de progresso foi informado no tracker.'))}</strong></div>
+          ${estimatedFromTeam ? `<div><span>${escapeHtml(t('Snapshot PortWatch/GitHub'))}</span><strong>${formatPercent(project.portwatchPercent)}%</strong></div>` : ''}
+        </div>
+        ${progress !== null ? `<div class="xlaunch-project-progress" role="progressbar" aria-label="${escapeHtml(`${project.name}: ${formatPercent(progress)}%`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}"><span data-progress-value="${progress}"></span></div>` : ''}
+        ${repositoryUpdate ? `<p class="xlaunch-last-update"><span>${escapeHtml(t('Último push registrado'))}:</span> ${publicationTimeMarkup(repositoryUpdate)}</p>` : ''}
+        <p class="xlaunch-disclaimer">${escapeHtml(t(project.verification || ''))}</p>
+      </article>
+      <article class="panel xlaunch-tech-card">
+        <div class="xlaunch-card-heading"><span class="section-kicker">${escapeHtml(t('Indicadores técnicos'))}</span><span class="xlaunch-tech-icon" aria-hidden="true">⌁</span></div>
+        <p class="xlaunch-tech-note">${escapeHtml(t(details.groundworkNote || 'Indicadores técnicos do snapshot; não representam progresso de GTA VI.'))}</p>
+        <div class="xlaunch-tech-metrics">${metricCards || `<p>${escapeHtml(t('Nenhum indicador técnico reportado no snapshot.'))}</p>`}</div>
+      </article>
+    </div>
+    ${(highlights.length || blockers.length) ? `<div class="xlaunch-details-grid">
+      ${highlights.length ? `<article class="panel xlaunch-details-card"><span class="section-kicker">${escapeHtml(t('Avanços reportados'))}</span><ul>${highlights.map((item) => `<li>${escapeHtml(t(item))}</li>`).join('')}</ul></article>` : ''}
+      ${blockers.length ? `<article class="panel xlaunch-details-card xlaunch-details-card--blockers"><span class="section-kicker">${escapeHtml(t('Bloqueios conhecidos'))}</span><ul>${blockers.map((item) => `<li>${escapeHtml(t(item))}</li>`).join('')}</ul></article>` : ''}
+    </div>` : ''}
+    <div class="xlaunch-community-grid">
+      <article class="panel xlaunch-community-card xlaunch-pix-card">
+        <span class="section-kicker">${escapeHtml(t('Apoio ao desenvolvimento'))}</span><h3>Pix</h3>
+        ${pixKey ? `<code class="xlaunch-pix-key">${escapeHtml(pixKey)}</code><button class="button primary-link" type="button" data-copy-pix="${escapeHtml(pixKey)}">${escapeHtml(t('Copiar chave Pix'))}</button><p class="xlaunch-copy-status" id="xlaunch-pix-status" role="status" aria-live="polite"></p>` : `<p class="xlaunch-copy-status" id="xlaunch-pix-status" role="status">${escapeHtml(t('Chave Pix indisponível neste snapshot.'))}</p>`}
+        <p class="xlaunch-community-note">${escapeHtml(t('Contribuição voluntária e independente; o KynosRecompVI não administra nem recebe pagamentos.'))}</p>
+      </article>
+      <article class="panel xlaunch-community-card">
+        <span class="section-kicker">${escapeHtml(t('Transmissão ao vivo (Kick BR)'))}</span><h3>Kick</h3>
+        ${kickUrl !== '#' ? `<a class="button xlaunch-kick-link" href="${escapeHtml(kickUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Abrir canal na Kick ↗'))}</a>` : `<p>${escapeHtml(t('Canal indisponível neste snapshot.'))}</p>`}
+        <p class="xlaunch-community-note">${escapeHtml(t('Canal externo e comunitário; o status ao vivo é informado pela plataforma.'))}</p>
+      </article>
+      <article class="panel xlaunch-community-card">
+        <span class="section-kicker">${escapeHtml(t('Discord da equipe'))}</span><h3>Discord</h3>
+        ${discordUrl !== '#' ? `<a class="button" href="${escapeHtml(discordUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Discord do XlaunchVI ↗'))}</a>` : `<p class="xlaunch-discord-pending">${escapeHtml(t('Link do Discord será adicionado em breve.'))}</p>`}
+      </article>
+    </div>`;
+  output.setAttribute('aria-busy', 'false');
+  window.KynosI18n.translateDom(output, state.language);
+  animateCounters(output);
+  animateProgress(output);
 }
 
 function renderTrackerProjectCard(project, rank, leaderId) {
@@ -2781,33 +3131,40 @@ function renderTrackerProjects(data) {
   const top = active.slice(0, 5);
   const leader = active[0];
   const runnerUp = active[1];
+  const xlaunch = active.find((project) => project.id === 'xlaunchvi');
+  const xlaunchTeam = data.teams && data.teams.xlaunchvi;
   byId('repo-count').innerHTML = counterMarkup(active.length);
   byId('tracker-race-summary').innerHTML = `
     <article class="panel race-summary-card race-summary-card--featured"><span class="section-kicker">${escapeHtml(t('Projeto mais avançado'))}</span><strong>${leader ? `${escapeHtml(leader.name)} · ${counterMarkup(leader.percent, 'percent')}%` : '—'}</strong><p>${leader ? escapeHtml(t(leader.stage)) : escapeHtml(t('Sem dados de projetos'))}</p></article>
     <article class="panel race-summary-card"><span class="section-kicker">${escapeHtml(t('Segundo projeto ativo'))}</span><strong>${runnerUp ? `${escapeHtml(runnerUp.name)} · ${counterMarkup(runnerUp.percent, 'percent')}%` : '—'}</strong><p>${runnerUp ? escapeHtml(t(runnerUp.stage)) : ''}</p></article>
     <article class="panel race-summary-card"><span class="section-kicker">${escapeHtml(t('Projetos acompanhados'))}</span><strong>${counterMarkup(projects.length)}</strong><p>${inactive.length} ${escapeHtml(t('fora do ar, sem contar no ranking ativo'))}</p></article>`;
   byId('repository-list').innerHTML = top.map((project, index) => renderTrackerProjectCard(project, index + 1, leader && leader.id)).join('');
+  byId('xlaunch-race-spotlight').innerHTML = renderXlaunchSpotlight(xlaunch, xlaunchTeam, data, 'xlaunch-spotlight--repositories');
   byId('tracker-all-projects').innerHTML = active.slice(top.length).map((project, index) => renderTrackerProjectCard(project, top.length + index + 1, leader && leader.id)).join('');
   byId('tracked-project-count').textContent = `${active.length - top.length} ${t('outros projetos')}`;
   byId('inactive-repositories').hidden = inactive.length === 0;
   byId('inactive-repository-list').innerHTML = inactive.map((project) => renderTrackerProjectCard(project, 0, leader && leader.id)).join('');
   window.KynosI18n.translateDom(byId('tracker-race-summary'), state.language);
   window.KynosI18n.translateDom(byId('repository-list'), state.language);
+  window.KynosI18n.translateDom(byId('xlaunch-race-spotlight'), state.language);
   window.KynosI18n.translateDom(byId('tracker-all-projects'), state.language);
   window.KynosI18n.translateDom(byId('inactive-repositories'), state.language);
+  attachAvatarFallbacks(byId('xlaunch-race-spotlight'));
   animateCounters(byId('tracker-race-summary'));
   animateCounters(byId('repository-list'));
+  animateCounters(byId('xlaunch-race-spotlight'));
   animateCounters(byId('tracker-all-projects'));
   animateCounters(byId('inactive-repositories'));
   animateProgress(byId('repository-list'));
+  animateProgress(byId('xlaunch-race-spotlight'));
   animateProgress(byId('tracker-all-projects'));
   animateProgress(byId('inactive-repositories'));
 }
 
 function renderNews(data) {
   const headline = data.news.find((story) => story.id === '2026-11-23-leonida-nuked') || data.news[0];
-  const sourceNote = t('Resumos em PT-BR preparados a partir do tracker; consulte as fontes originais em cada notícia.');
-  byId('news-source-note').innerHTML = `${escapeHtml(sourceNote)} <span>· ${escapeHtml(t('Atualizado em'))} ${escapeHtml(formatNewsDate(data.updatedAt))} ·</span> <a href="data/tracker-pt-BR.json" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Dados localizados'))} ↗</a>`;
+  const sourceNote = t('Notícias traduzidas e relatos de equipe em PT-BR; confira fontes e rótulos de verificação em cada item.');
+  byId('news-source-note').innerHTML = `${escapeHtml(sourceNote)} <span>· ${escapeHtml(t('Atualizado em'))} ${escapeHtml(formatNewsDate(data.lastSyncedAt || data.updatedAt))} ·</span> <a href="data/tracker-pt-BR.json" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Dados localizados'))} ↗</a>`;
   if (headline) renderStoryFeature(headline, byId('news-feature'));
   byId('news-list').innerHTML = data.news.filter((story) => story !== headline).map((story) => renderStoryCard(story)).join('');
   window.KynosI18n.translateDom(byId('news-source-note'), state.language);
@@ -3074,7 +3431,7 @@ function renderDiscords(data) {
     link.href = safeUrl(official.url);
     if (link.getAttribute('href') === '#') link.setAttribute('aria-disabled', 'true');
   });
-  byId('official-discord').innerHTML = `<article class="official-card">${serverAvatar(official)}<div class="server-copy"><span class="section-kicker">${escapeHtml(official.badge)}</span><h3>${escapeHtml(official.name)}</h3><p>${escapeHtml(official.description)}</p></div><a class="button button-discord" href="${escapeHtml(safeUrl(official.url))}" target="_blank" rel="noopener noreferrer">Participar do projeto ↗</a></article>`;
+  byId('official-discord').innerHTML = `<article class="official-card">${serverAvatar(official)}<div class="server-copy"><span class="section-kicker">${escapeHtml(official.badge)}</span><h3>${escapeHtml(official.name)}</h3><p>${escapeHtml(official.description)}</p></div><a class="button button-discord" href="${escapeHtml(safeUrl(official.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Entrar no Discord do XlaunchVI ↗'))}</a></article>`;
   byId('discord-list').innerHTML = data.affiliates.map((server) => `
     <article class="discord-card">
       <div class="discord-card-head">${serverAvatar(server)}<div><h3>${escapeHtml(server.name)}</h3><div class="discord-tags">${server.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join('<span>·</span>')}</div></div></div>
@@ -3091,6 +3448,11 @@ function setPage(page, updateHash = true, countVisit = true) {
   document.querySelectorAll('.page-section').forEach((section) => section.classList.toggle('active', !isAnalytics && section.dataset.page === page));
   document.querySelectorAll('.nav-link').forEach((link) => link.classList.toggle('active', link.dataset.pageLink === page));
   document.querySelector('.main-nav').classList.remove('open');
+  const navMore = document.querySelector('.nav-more');
+  if (navMore) {
+    navMore.open = false;
+    navMore.classList.toggle('has-active', page === 'tracker' || page === 'discord');
+  }
   document.querySelector('.menu-toggle').setAttribute('aria-expanded', 'false');
   if (updateHash) history.replaceState(null, '', `#${page}`);
   if (isAnalytics) renderAnalytics();
@@ -3294,16 +3656,30 @@ async function init() {
   try {
     let data;
     if (window.location.protocol === 'file:') {
-      await window.KynosFileDataReady;
-      data = window.KynosFileData;
-      if (!data) throw new Error('O fallback local não foi inicializado.');
+      const embedded = await ensureEmbeddedFallback();
+      data = {
+        hardware: embedded.hardware,
+        discords: embedded.discords,
+        tracker: mergeTrackerPayloads(null, embedded.tracker, embedded)
+      };
     } else {
-      const [hardwareData, discords, tracker] = await Promise.all([
-        loadJson('data/hardware.json'),
-        loadJson('data/discords.json'),
-        loadJson('data/tracker-pt-BR.json')
+      const [hardwareData, discords, portwatch, localized] = await Promise.all([
+        loadOptionalJson('data/hardware.json'),
+        loadOptionalJson('data/discords.json'),
+        loadOptionalJson('data/tracker.json'),
+        loadOptionalJson('data/tracker-pt-BR.json')
       ]);
-      data = { hardware: hardwareData, discords, tracker };
+      const needsEmbeddedFallback = !hardwareData || !discords
+        || !localized || !Array.isArray(localized.efforts) || !Array.isArray(localized.news);
+      const embedded = needsEmbeddedFallback ? await ensureEmbeddedFallback() : null;
+      data = {
+        hardware: hardwareData || (embedded && embedded.hardware),
+        discords: discords || (embedded && embedded.discords),
+        tracker: mergeTrackerPayloads(portwatch, localized, embedded)
+      };
+    }
+    if (!data || !data.hardware || !data.discords || !isTrackerPayload(data.tracker)) {
+      throw new Error('Os dados do portal e os fallbacks não forneceram o conjunto mínimo para inicializar.');
     }
     hardware = data.hardware;
     trackerData = data.tracker;
@@ -3312,6 +3688,7 @@ async function init() {
     renderTrackerProjects(trackerData);
     renderNews(trackerData);
     renderTrackerDetails(trackerData);
+    renderXlaunchPage(trackerData);
     setupNotificationCenter(trackerData);
     setupXclFeed();
     renderDiscords(data.discords);
@@ -3322,12 +3699,35 @@ async function init() {
     setPage(initialPage || 'home', false);
   } catch (error) {
     console.error(error);
-    document.querySelector('main').insertAdjacentHTML('afterbegin', '<p class="load-error">Não foi possível carregar o conteúdo. Confira os arquivos JSON da pasta data/ e, ao abrir com file://, gere data/file-fallback.js com scripts/build_tracker_ptbr.py.</p>');
+    document.querySelector('main').insertAdjacentHTML('afterbegin', '<p class="load-error">Não foi possível carregar os dados essenciais. Confira os arquivos da pasta data/ ou gere o fallback com scripts/build_tracker_ptbr.py.</p>');
     applyLanguage();
   }
 }
 
 document.body.addEventListener('click', (event) => {
+  const pixCopyButton = event.target.closest('[data-copy-pix]');
+  if (pixCopyButton && !pixCopyButton.disabled) {
+    const pixKey = pixCopyButton.dataset.copyPix || '';
+    const buttonLabel = pixCopyButton.textContent.trim();
+    const status = byId('xlaunch-pix-status');
+    pixCopyButton.disabled = true;
+    pixCopyButton.setAttribute('aria-busy', 'true');
+    copyText(pixKey).then(() => {
+      if (status) status.textContent = t('Chave Pix copiada!');
+      pixCopyButton.textContent = t('Chave Pix copiada!');
+      trackEvent('xlaunch_pix_copy', 'Copiar chave Pix', { route: 'xlaunchvi' });
+    }).catch((error) => {
+      console.error('Não foi possível copiar a chave Pix:', error);
+      if (status) status.textContent = t('Falha ao copiar a chave Pix.');
+    }).finally(() => {
+      window.setTimeout(() => {
+        if (!pixCopyButton.isConnected) return;
+        pixCopyButton.disabled = false;
+        pixCopyButton.removeAttribute('aria-busy');
+        pixCopyButton.textContent = buttonLabel;
+      }, 1600);
+    });
+  }
   const pageLink = event.target.closest('[data-page-link]');
   if (pageLink) {
     event.preventDefault();
@@ -3342,7 +3742,7 @@ document.body.addEventListener('click', (event) => {
     document.querySelectorAll('.pw-milestone.is-tooltip-open, .pw-project-marker.is-tooltip-open').forEach((item) => item.classList.remove('is-tooltip-open'));
   }
   if (event.target.closest('.analytics-page')) return;
-  const control = event.target.closest('.target-option, .button-discord, .repo-links a, .news-card a, .news-feature a, .news-source-note a, .discord-card a, .official-card a, .add-server-card, .menu-toggle, .nav-link, .segmented button, .storage-choice, .tool-button, .theme-toggle, .what-if-menu summary, .what-if-options button');
+  const control = event.target.closest('[data-copy-pix], .target-option, .button-discord, .repo-links a, .news-card a, .news-feature a, .news-source-note a, .discord-card a, .official-card a, .add-server-card, .menu-toggle, .nav-link, .segmented button, .storage-choice, .tool-button, .theme-toggle, .what-if-menu summary, .what-if-options button');
   if (!control) return;
   const label = pageNames[control.dataset.pageLink]
     || control.getAttribute('data-analytics-label')

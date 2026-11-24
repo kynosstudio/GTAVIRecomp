@@ -1,6 +1,79 @@
 {
-  "updatedAt": "2026-11-24T01:46:58.000Z",
+  "updatedAt": "2026-11-24T04:13:54.192Z",
+  "lastSyncedAt": "2026-11-24T05:07:48.307Z",
   "sourceFile": "data/tracker.json",
+  "teams": {
+    "xlaunchvi": {
+      "pixKey": "galinhafritadubs@gmail.com",
+      "kickUrl": "https://kick.com/myleouss",
+      "discordUrl": "https://discord.gg/R5T6zeQuPY",
+      "latestReport": {
+        "id": "xlaunchvi-loading-screen-team-report",
+        "reporter": "JPTuba",
+        "date": "2026-11-24",
+        "loggedAt": "2026-11-24T05:07:48.307Z",
+        "stage": "Tela de carregamento · estimativa editorial (~50%)",
+        "estimatedPercent": 50.0,
+        "portwatchPercent": 0.0,
+        "title": "XlaunchVI: estimativa editorial de 50% na tela de carregamento",
+        "summary": "Relato atribuído a JPTuba no Discord situa o XlaunchVI na tela de carregamento. A equipe informou uma pausa de cerca de 2–3 horas após esgotar o uso de IA e a retomada depois de recarregar o Claude. O portal registra agora 50% como estimativa editorial informada para esta atualização; não é medição oficial nem marco publicado no GitHub. O escopo informado do XLaunch Dashboard inclui reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. A equipe busca chegar ao carregamento do mundo e alcançar ou ultrapassar XCL e VIctory, com apoio da comunidade brasileira.",
+        "teaser": "O portal registra 50% como estimativa editorial; o marco relatado é a tela de carregamento.",
+        "transparency": "Os 50% foram informados como estimativa editorial para esta atualização, não como medição oficial. O relato da tela de carregamento é atribuído a JPTuba no Discord, mas o convite não aponta para a mensagem original. O snapshot público PortWatch/GitHub registra 0% nos marcos de GTA VI, e os detalhes do Dashboard não foram verificados de forma independente nesse snapshot.",
+        "dashboardContext": "Escopo do XLaunch Dashboard informado ao portal: reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. Esses detalhes não estão confirmados de forma independente no snapshot público do GitHub.",
+        "dashboardFeatures": [
+          "Reconhecimento de jogos e mídia física",
+          "Detecção de build",
+          "Suporte a controles",
+          "Login e troca de perfil",
+          "Biblioteca de jogos"
+        ],
+        "translations": {
+          "en": {
+            "title": "XlaunchVI: 50% editorial estimate at the loading-screen milestone",
+            "summary": "A report attributed to JPTuba on Discord places XlaunchVI at the loading screen. The team said work paused for about 2–3 hours after its AI usage ran out, then resumed after Claude was recharged. The portal now records 50% as an editorial estimate supplied for this update, not an official measurement or a GitHub milestone. The reported XLaunch Dashboard scope includes game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. The team aims to reach world loading and catch or overtake XCL and VIctory, with support from the Brazilian community.",
+            "teaser": "The portal lists 50% as an editorial estimate; the reported milestone is the loading screen.",
+            "stage": "Loading screen · editorial estimate (~50%)",
+            "transparency": "The 50% estimate was supplied for this portal update; it is not an official measurement. The loading-screen report is attributed to JPTuba on Discord, but the invite does not link to the original message. The public PortWatch/GitHub snapshot records 0% for GTA VI milestones, and the Dashboard details have not been independently verified there.",
+            "dashboardContext": "XLaunch Dashboard scope supplied to the portal: game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. These details are not independently confirmed in the public GitHub snapshot."
+          },
+          "es": {
+            "title": "XlaunchVI: estimación editorial del 50% en la pantalla de carga",
+            "summary": "Un relato atribuido a JPTuba en Discord sitúa a XlaunchVI en la pantalla de carga. El equipo dijo que el trabajo se pausó durante unas 2–3 horas al agotarse el uso de IA y se reanudó después de recargar Claude. El portal registra ahora un 50% como estimación editorial proporcionada para esta actualización; no es una medición oficial ni un hito de GitHub. El alcance informado de XLaunch Dashboard incluye reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y una biblioteca. El objetivo es llegar a la carga del mundo y alcanzar o superar a XCL y VIctory, con apoyo de la comunidad brasileña.",
+            "teaser": "El portal registra un 50% como estimación editorial; el hito informado es la pantalla de carga.",
+            "stage": "Pantalla de carga · estimación editorial (~50%)",
+            "transparency": "La estimación del 50% se proporcionó para esta actualización del portal; no es una medición oficial. El informe sobre la pantalla de carga se atribuye a JPTuba en Discord, pero la invitación no enlaza al mensaje original. El snapshot público de PortWatch/GitHub registra un 0% en hitos de GTA VI, y esos detalles del Dashboard no se verificaron de forma independiente allí.",
+            "dashboardContext": "Alcance de XLaunch Dashboard informado al portal: reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y biblioteca. Estos detalles no están confirmados de forma independiente en el snapshot público de GitHub."
+          },
+          "zh": {
+            "title": "XlaunchVI：加载画面阶段的编辑估算为 50%",
+            "summary": "归于 JPTuba 在 Discord 发布的报告称，XlaunchVI 已到达加载画面。团队表示，AI 使用额度耗尽后暂停了约 2–3 小时，补充 Claude 额度后恢复开发。门户在本次更新中将 50% 记录为编辑估算；这不是官方测量，也不是 GitHub 里程碑。获提供的 XLaunch Dashboard 范围包括游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。团队目标是进入世界加载阶段并追赶或超过 XCL 和 VIctory，同时获得巴西社区支持。",
+            "teaser": "门户记录的 50% 是编辑估算；报告的里程碑为加载画面。",
+            "stage": "加载画面 · 编辑估算（约 50%）",
+            "transparency": "50% 估算是为本次门户更新提供的信息，并非官方测量。加载画面的报告归于 JPTuba 在 Discord 发布，但邀请链接未指向原始消息。公开的 PortWatch/GitHub 快照记录的 GTA VI 里程碑为 0%，且 Dashboard 详情未在该快照中得到独立验证。",
+            "dashboardContext": "提供给门户的 XLaunch Dashboard 范围：游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。这些详情未在公开 GitHub 快照中得到独立确认。"
+          }
+        },
+        "sources": [
+          {
+            "outlet": "Discord do XlaunchVI",
+            "title": "Convite do servidor; não direciona à mensagem original",
+            "url": "https://discord.gg/R5T6zeQuPY"
+          },
+          {
+            "outlet": "Repositório GitHub",
+            "title": "O snapshot consultado ainda não registra este marco",
+            "url": "https://github.com/JPTuba9/xlaunch-vi"
+          }
+        ]
+      },
+      "repositoryCheck": {
+        "checkedAt": "2026-11-23",
+        "httpStatus": null,
+        "missing": false,
+        "authenticated": false
+      }
+    }
+  },
   "news": [
     {
       "id": "2026-11-24-xcl-30fps-in-game",
@@ -59,6 +132,66 @@
           "url": "https://github.com/OnlyMoisties/GTA6-BootTest/blob/main/REPORT.md"
         }
       ]
+    },
+    {
+      "id": "xlaunchvi-loading-screen-team-report",
+      "reporter": "JPTuba",
+      "date": "2026-11-24",
+      "loggedAt": "2026-11-24T05:07:48.307Z",
+      "stage": "Tela de carregamento · estimativa editorial (~50%)",
+      "estimatedPercent": 50.0,
+      "portwatchPercent": 0.0,
+      "title": "XlaunchVI: estimativa editorial de 50% na tela de carregamento",
+      "summary": "Relato atribuído a JPTuba no Discord situa o XlaunchVI na tela de carregamento. A equipe informou uma pausa de cerca de 2–3 horas após esgotar o uso de IA e a retomada depois de recarregar o Claude. O portal registra agora 50% como estimativa editorial informada para esta atualização; não é medição oficial nem marco publicado no GitHub. O escopo informado do XLaunch Dashboard inclui reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. A equipe busca chegar ao carregamento do mundo e alcançar ou ultrapassar XCL e VIctory, com apoio da comunidade brasileira.",
+      "teaser": "O portal registra 50% como estimativa editorial; o marco relatado é a tela de carregamento.",
+      "transparency": "Os 50% foram informados como estimativa editorial para esta atualização, não como medição oficial. O relato da tela de carregamento é atribuído a JPTuba no Discord, mas o convite não aponta para a mensagem original. O snapshot público PortWatch/GitHub registra 0% nos marcos de GTA VI, e os detalhes do Dashboard não foram verificados de forma independente nesse snapshot.",
+      "dashboardContext": "Escopo do XLaunch Dashboard informado ao portal: reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. Esses detalhes não estão confirmados de forma independente no snapshot público do GitHub.",
+      "dashboardFeatures": [
+        "Reconhecimento de jogos e mídia física",
+        "Detecção de build",
+        "Suporte a controles",
+        "Login e troca de perfil",
+        "Biblioteca de jogos"
+      ],
+      "translations": {
+        "en": {
+          "title": "XlaunchVI: 50% editorial estimate at the loading-screen milestone",
+          "summary": "A report attributed to JPTuba on Discord places XlaunchVI at the loading screen. The team said work paused for about 2–3 hours after its AI usage ran out, then resumed after Claude was recharged. The portal now records 50% as an editorial estimate supplied for this update, not an official measurement or a GitHub milestone. The reported XLaunch Dashboard scope includes game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. The team aims to reach world loading and catch or overtake XCL and VIctory, with support from the Brazilian community.",
+          "teaser": "The portal lists 50% as an editorial estimate; the reported milestone is the loading screen.",
+          "stage": "Loading screen · editorial estimate (~50%)",
+          "transparency": "The 50% estimate was supplied for this portal update; it is not an official measurement. The loading-screen report is attributed to JPTuba on Discord, but the invite does not link to the original message. The public PortWatch/GitHub snapshot records 0% for GTA VI milestones, and the Dashboard details have not been independently verified there.",
+          "dashboardContext": "XLaunch Dashboard scope supplied to the portal: game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. These details are not independently confirmed in the public GitHub snapshot."
+        },
+        "es": {
+          "title": "XlaunchVI: estimación editorial del 50% en la pantalla de carga",
+          "summary": "Un relato atribuido a JPTuba en Discord sitúa a XlaunchVI en la pantalla de carga. El equipo dijo que el trabajo se pausó durante unas 2–3 horas al agotarse el uso de IA y se reanudó después de recargar Claude. El portal registra ahora un 50% como estimación editorial proporcionada para esta actualización; no es una medición oficial ni un hito de GitHub. El alcance informado de XLaunch Dashboard incluye reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y una biblioteca. El objetivo es llegar a la carga del mundo y alcanzar o superar a XCL y VIctory, con apoyo de la comunidad brasileña.",
+          "teaser": "El portal registra un 50% como estimación editorial; el hito informado es la pantalla de carga.",
+          "stage": "Pantalla de carga · estimación editorial (~50%)",
+          "transparency": "La estimación del 50% se proporcionó para esta actualización del portal; no es una medición oficial. El informe sobre la pantalla de carga se atribuye a JPTuba en Discord, pero la invitación no enlaza al mensaje original. El snapshot público de PortWatch/GitHub registra un 0% en hitos de GTA VI, y esos detalles del Dashboard no se verificaron de forma independiente allí.",
+          "dashboardContext": "Alcance de XLaunch Dashboard informado al portal: reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y biblioteca. Estos detalles no están confirmados de forma independiente en el snapshot público de GitHub."
+        },
+        "zh": {
+          "title": "XlaunchVI：加载画面阶段的编辑估算为 50%",
+          "summary": "归于 JPTuba 在 Discord 发布的报告称，XlaunchVI 已到达加载画面。团队表示，AI 使用额度耗尽后暂停了约 2–3 小时，补充 Claude 额度后恢复开发。门户在本次更新中将 50% 记录为编辑估算；这不是官方测量，也不是 GitHub 里程碑。获提供的 XLaunch Dashboard 范围包括游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。团队目标是进入世界加载阶段并追赶或超过 XCL 和 VIctory，同时获得巴西社区支持。",
+          "teaser": "门户记录的 50% 是编辑估算；报告的里程碑为加载画面。",
+          "stage": "加载画面 · 编辑估算（约 50%）",
+          "transparency": "50% 估算是为本次门户更新提供的信息，并非官方测量。加载画面的报告归于 JPTuba 在 Discord 发布，但邀请链接未指向原始消息。公开的 PortWatch/GitHub 快照记录的 GTA VI 里程碑为 0%，且 Dashboard 详情未在该快照中得到独立验证。",
+          "dashboardContext": "提供给门户的 XLaunch Dashboard 范围：游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。这些详情未在公开 GitHub 快照中得到独立确认。"
+        }
+      },
+      "sources": [
+        {
+          "outlet": "Discord do XlaunchVI",
+          "title": "Convite do servidor; não direciona à mensagem original",
+          "url": "https://discord.gg/R5T6zeQuPY"
+        },
+        {
+          "outlet": "Repositório GitHub",
+          "title": "O snapshot consultado ainda não registra este marco",
+          "url": "https://github.com/JPTuba9/xlaunch-vi"
+        }
+      ],
+      "category": "Relato da equipe"
     },
     {
       "id": "2026-11-23-leonida-nuked",
@@ -378,8 +511,8 @@
       "stage": "Dentro do mundo (relato)",
       "summary": "Camada em Rust. Relata telas iniciais a 30 FPS e chegada ao mundo, com iluminação parcial e áudio; a cena ainda não é jogável e os relatos são autodeclarados.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 2377,
-      "forks": 270
+      "stars": 4264,
+      "forks": 541
     },
     {
       "id": "xbox-emulator",
@@ -392,8 +525,8 @@
       "stage": "Preparação",
       "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 1680,
-      "forks": 108
+      "stars": 1703,
+      "forks": 110
     },
     {
       "id": "xcl",
@@ -406,8 +539,8 @@
       "stage": "Carregamento do mundo (relato)",
       "summary": "Camada de compatibilidade que executa código de Xbox Series no Windows. Testes relatam menus e carregamento do mundo; a imagem ainda fica presa na tela de carregamento e os resultados não foram reproduzidos de forma independente.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 2880,
-      "forks": 326
+      "stars": 3920,
+      "forks": 496
     },
     {
       "id": "scarlettx",
@@ -420,7 +553,7 @@
       "stage": "Preparação",
       "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 228,
+      "stars": 237,
       "forks": 25
     },
     {
@@ -434,8 +567,8 @@
       "stage": "Primeiro quadro",
       "summary": "Camada voltada a Linux/Proton. Registrou a tela de seleção de jogador em 4K, sem interação; o marco é um primeiro quadro, não um menu.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 130,
-      "forks": 5
+      "stars": 162,
+      "forks": 8
     },
     {
       "id": "americas-recomp",
@@ -476,7 +609,7 @@
       "stage": "Preparação",
       "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 52,
+      "stars": 57,
       "forks": 7
     },
     {
@@ -504,8 +637,8 @@
       "stage": "Menus parciais (relato)",
       "summary": "Pesquisa de recompilação estática. Uma gravação mostra menus instáveis; o projeto ainda não declara o marco como confirmado.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 1548,
-      "forks": 160
+      "stars": 1605,
+      "forks": 168
     },
     {
       "id": "anyxboxx",
@@ -518,7 +651,7 @@
       "stage": "Preparação",
       "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 80,
+      "stars": 86,
       "forks": 7
     },
     {
@@ -532,7 +665,7 @@
       "stage": "Preparação",
       "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 192,
+      "stars": 195,
       "forks": 10
     },
     {
@@ -546,7 +679,7 @@
       "stage": "Preparação",
       "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 49,
+      "stars": 50,
       "forks": 5
     },
     {
@@ -602,7 +735,7 @@
       "stage": "Executável em execução",
       "summary": "Relata executar o código até uma sequência de quadros pretos antes de a GPU travar; ainda sem imagem utilizável.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 23,
+      "stars": 25,
       "forks": 2
     },
     {
@@ -696,12 +829,110 @@
       "url": "https://github.com/JPTuba9/xlaunch-vi",
       "tier": "watchlist",
       "status": "acompanhado",
-      "percent": 0.0,
-      "stage": "Preparação",
-      "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
-      "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 9,
-      "forks": 0
+      "percent": 50.0,
+      "stage": "Tela de carregamento (estimativa editorial)",
+      "summary": "A equipe relata a tela de carregamento; o portal registra 50% como estimativa editorial. O contexto do XLaunch Dashboard foi informado ao portal, mas não é confirmado pelo snapshot público.",
+      "verification": "Estimativa editorial baseada em relato; não é medição oficial nem marco confirmado no GitHub.",
+      "stars": 2,
+      "forks": 0,
+      "teamReport": {
+        "id": "xlaunchvi-loading-screen-team-report",
+        "reporter": "JPTuba",
+        "date": "2026-11-24",
+        "loggedAt": "2026-11-24T05:07:48.307Z",
+        "stage": "Tela de carregamento · estimativa editorial (~50%)",
+        "estimatedPercent": 50.0,
+        "portwatchPercent": 0.0,
+        "title": "XlaunchVI: estimativa editorial de 50% na tela de carregamento",
+        "summary": "Relato atribuído a JPTuba no Discord situa o XlaunchVI na tela de carregamento. A equipe informou uma pausa de cerca de 2–3 horas após esgotar o uso de IA e a retomada depois de recarregar o Claude. O portal registra agora 50% como estimativa editorial informada para esta atualização; não é medição oficial nem marco publicado no GitHub. O escopo informado do XLaunch Dashboard inclui reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. A equipe busca chegar ao carregamento do mundo e alcançar ou ultrapassar XCL e VIctory, com apoio da comunidade brasileira.",
+        "teaser": "O portal registra 50% como estimativa editorial; o marco relatado é a tela de carregamento.",
+        "transparency": "Os 50% foram informados como estimativa editorial para esta atualização, não como medição oficial. O relato da tela de carregamento é atribuído a JPTuba no Discord, mas o convite não aponta para a mensagem original. O snapshot público PortWatch/GitHub registra 0% nos marcos de GTA VI, e os detalhes do Dashboard não foram verificados de forma independente nesse snapshot.",
+        "dashboardContext": "Escopo do XLaunch Dashboard informado ao portal: reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. Esses detalhes não estão confirmados de forma independente no snapshot público do GitHub.",
+        "dashboardFeatures": [
+          "Reconhecimento de jogos e mídia física",
+          "Detecção de build",
+          "Suporte a controles",
+          "Login e troca de perfil",
+          "Biblioteca de jogos"
+        ],
+        "translations": {
+          "en": {
+            "title": "XlaunchVI: 50% editorial estimate at the loading-screen milestone",
+            "summary": "A report attributed to JPTuba on Discord places XlaunchVI at the loading screen. The team said work paused for about 2–3 hours after its AI usage ran out, then resumed after Claude was recharged. The portal now records 50% as an editorial estimate supplied for this update, not an official measurement or a GitHub milestone. The reported XLaunch Dashboard scope includes game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. The team aims to reach world loading and catch or overtake XCL and VIctory, with support from the Brazilian community.",
+            "teaser": "The portal lists 50% as an editorial estimate; the reported milestone is the loading screen.",
+            "stage": "Loading screen · editorial estimate (~50%)",
+            "transparency": "The 50% estimate was supplied for this portal update; it is not an official measurement. The loading-screen report is attributed to JPTuba on Discord, but the invite does not link to the original message. The public PortWatch/GitHub snapshot records 0% for GTA VI milestones, and the Dashboard details have not been independently verified there.",
+            "dashboardContext": "XLaunch Dashboard scope supplied to the portal: game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. These details are not independently confirmed in the public GitHub snapshot."
+          },
+          "es": {
+            "title": "XlaunchVI: estimación editorial del 50% en la pantalla de carga",
+            "summary": "Un relato atribuido a JPTuba en Discord sitúa a XlaunchVI en la pantalla de carga. El equipo dijo que el trabajo se pausó durante unas 2–3 horas al agotarse el uso de IA y se reanudó después de recargar Claude. El portal registra ahora un 50% como estimación editorial proporcionada para esta actualización; no es una medición oficial ni un hito de GitHub. El alcance informado de XLaunch Dashboard incluye reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y una biblioteca. El objetivo es llegar a la carga del mundo y alcanzar o superar a XCL y VIctory, con apoyo de la comunidad brasileña.",
+            "teaser": "El portal registra un 50% como estimación editorial; el hito informado es la pantalla de carga.",
+            "stage": "Pantalla de carga · estimación editorial (~50%)",
+            "transparency": "La estimación del 50% se proporcionó para esta actualización del portal; no es una medición oficial. El informe sobre la pantalla de carga se atribuye a JPTuba en Discord, pero la invitación no enlaza al mensaje original. El snapshot público de PortWatch/GitHub registra un 0% en hitos de GTA VI, y esos detalles del Dashboard no se verificaron de forma independiente allí.",
+            "dashboardContext": "Alcance de XLaunch Dashboard informado al portal: reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y biblioteca. Estos detalles no están confirmados de forma independiente en el snapshot público de GitHub."
+          },
+          "zh": {
+            "title": "XlaunchVI：加载画面阶段的编辑估算为 50%",
+            "summary": "归于 JPTuba 在 Discord 发布的报告称，XlaunchVI 已到达加载画面。团队表示，AI 使用额度耗尽后暂停了约 2–3 小时，补充 Claude 额度后恢复开发。门户在本次更新中将 50% 记录为编辑估算；这不是官方测量，也不是 GitHub 里程碑。获提供的 XLaunch Dashboard 范围包括游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。团队目标是进入世界加载阶段并追赶或超过 XCL 和 VIctory，同时获得巴西社区支持。",
+            "teaser": "门户记录的 50% 是编辑估算；报告的里程碑为加载画面。",
+            "stage": "加载画面 · 编辑估算（约 50%）",
+            "transparency": "50% 估算是为本次门户更新提供的信息，并非官方测量。加载画面的报告归于 JPTuba 在 Discord 发布，但邀请链接未指向原始消息。公开的 PortWatch/GitHub 快照记录的 GTA VI 里程碑为 0%，且 Dashboard 详情未在该快照中得到独立验证。",
+            "dashboardContext": "提供给门户的 XLaunch Dashboard 范围：游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。这些详情未在公开 GitHub 快照中得到独立确认。"
+          }
+        },
+        "sources": [
+          {
+            "outlet": "Discord do XlaunchVI",
+            "title": "Convite do servidor; não direciona à mensagem original",
+            "url": "https://discord.gg/R5T6zeQuPY"
+          },
+          {
+            "outlet": "Repositório GitHub",
+            "title": "O snapshot consultado ainda não registra este marco",
+            "url": "https://github.com/JPTuba9/xlaunch-vi"
+          }
+        ]
+      },
+      "progressBasis": "team-report-estimate",
+      "portwatchPercent": 0.0,
+      "lastRepositoryUpdate": "2026-11-23T23:20:01Z",
+      "repositoryMissing": false,
+      "repositoryHttpStatus": null,
+      "repositoryAssessedAt": "2026-11-23",
+      "technicalDetails": {
+        "approach": "Camada de compatibilidade",
+        "target": "Qualquer jogo de Xbox Series",
+        "highlights": [
+          "O projeto relata 12 de 12 shaders de computação compilados pela AMD com resultados idênticos aos de referência de CPU, em testes próprios.",
+          "O tradutor recusa instruções sem suporte em vez de simular resultados.",
+          "As tabelas do decodificador foram conferidas com a especificação oficial RDNA2 da AMD."
+        ],
+        "blockers": [
+          "O snapshot público consultado não comprova a execução de um jogo de Xbox; a inicialização de Matrix Awakens ainda está em diagnóstico.",
+          "A maior parte dos recursos está em pull requests abertos; a branch principal contém principalmente documentação.",
+          "Os testes foram feitos com shaders próprios, não os de GTA VI; ainda não há tiling de texturas de console."
+        ],
+        "groundwork": [
+          {
+            "label": "Carregador PE e bibliotecas",
+            "percent": 30.0
+          },
+          {
+            "label": "Tradutor de shaders",
+            "percent": 5.0
+          },
+          {
+            "label": "Backend gráfico D3D12",
+            "percent": 20.0
+          },
+          {
+            "label": "Execução comprovada",
+            "percent": 0
+          }
+        ],
+        "groundworkNote": "Indicadores técnicos do snapshot; não representam progresso de GTA VI."
+      }
     },
     {
       "id": "openscarlett-ce",
@@ -714,8 +945,8 @@
       "stage": "Preparação",
       "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 35,
-      "forks": 1
+      "stars": 42,
+      "forks": 2
     },
     {
       "id": "five-star-recomp",
@@ -728,8 +959,8 @@
       "stage": "Primeiro quadro",
       "summary": "Relata executar o executável e exibir o vídeo de introdução; ainda não publicou captura que permita confirmar o resultado.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 31,
-      "forks": 1
+      "stars": 42,
+      "forks": 3
     },
     {
       "id": "g6recomp",
@@ -756,7 +987,7 @@
       "stage": "Executável em execução",
       "summary": "Harness de depuração com DLLs substitutas; o projeto afirma chegar à interface, mas não publicou captura do resultado.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 25,
+      "stars": 29,
       "forks": 1
     },
     {
@@ -770,10 +1001,52 @@
       "stage": "Executável em execução",
       "summary": "Continuação aberta da Leonida. Registra a execução do executável até uma interrupção na criação de recursos, sem exibir um quadro.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 50,
-      "forks": 33
+      "stars": 78,
+      "forks": 39
     }
   ],
+  "editorial": {
+    "teams": {
+      "xlaunchvi": {
+        "pixKey": "galinhafritadubs@gmail.com",
+        "kickUrl": "https://kick.com/myleouss",
+        "discordUrl": "https://discord.gg/R5T6zeQuPY",
+        "latestReport": {
+          "reporter": "JPTuba",
+          "date": "2026-11-24",
+          "loggedAt": "2026-11-24T05:07:48.307Z",
+          "reportedStage": "loading_screen",
+          "estimatedPercent": 50,
+          "pauseHours": "2–3",
+          "aiUsageExhausted": true,
+          "claudeRecharged": true,
+          "objective": "Alcançar o carregamento do mundo e disputar/ultrapassar XCL e VIctory.",
+          "dashboardFeatures": [
+            "Reconhecimento de jogos e mídia física",
+            "Detecção de build",
+            "Suporte a controles",
+            "Login e troca de perfil",
+            "Biblioteca de jogos"
+          ],
+          "source": "Relato atribuído a JPTuba no Discord; estimativa de 50% informada ao portal"
+        },
+        "repositoryCheck": {
+          "checkedAt": "2026-11-24",
+          "httpStatus": null,
+          "missing": false,
+          "authenticated": false
+        }
+      }
+    },
+    "effortOverrides": {
+      "xlaunchvi": {
+        "percent": 50,
+        "stage": "Tela de carregamento (estimativa editorial)",
+        "basis": "team-report-estimate"
+      }
+    },
+    "news": []
+  },
   "tools": [
     {
       "name": "Rage Tools VI",
@@ -781,7 +1054,7 @@
       "url": "https://github.com/lynxnathan/rage-tools-vi",
       "kind": "Ferramentas de arquivos",
       "description": "Ferramentas Python para inspecionar arquivos RPF9, áudio e esquemas de scripts.",
-      "stars": 1
+      "stars": 3
     },
     {
       "name": "GTA VI PC port hub",
@@ -797,7 +1070,7 @@
       "url": "https://github.com/holdmysocks/SixNG",
       "kind": "Extrator de recursos",
       "description": "Extrator para converter modelos em glTF e navegar por texturas e dados de mapa.",
-      "stars": 77
+      "stars": 80
     },
     {
       "name": "PercyStar",
@@ -821,7 +1094,7 @@
       "url": "https://github.com/Ahmet-Dedeler/bcpack-rs",
       "kind": "Codec de texturas",
       "description": "Decodificador de texturas Xbox BCPack; BC1 funciona e BC7 segue em desenvolvimento.",
-      "stars": 11
+      "stars": 12
     },
     {
       "name": "RageForge",
@@ -853,7 +1126,7 @@
       "url": "https://github.com/Ahmet-Dedeler/awesome-gta6-reverse-engineering",
       "kind": "Lista curada",
       "description": "Lista curada de ferramentas abertas de engenharia reversa e camadas de compatibilidade.",
-      "stars": 568
+      "stars": 595
     },
     {
       "name": "gta6-explorer",
@@ -869,7 +1142,7 @@
       "url": "https://github.com/meetox80/6stars",
       "kind": "Visualizador de mundo",
       "description": "Visualizador para macOS que renderiza mapa, vegetação e clima a partir de arquivos locais.",
-      "stars": 16
+      "stars": 17
     },
     {
       "name": "rage9-re",
@@ -925,7 +1198,7 @@
       "url": "https://github.com/sub-north/xbox-hle-lab",
       "kind": "Ferramentas de teste",
       "description": "Ferramentas de teste de GPU e scripts de VM para experimentação isolada com XCL.",
-      "stars": 0
+      "stars": 1
     },
     {
       "name": "XBOX-Inspector",
@@ -936,7 +1209,7 @@
       "stars": 2
     }
   ],
-  "candidates": 0,
+  "candidates": 17,
   "flagged": [
     {
       "id": "switch-emulator-network",
@@ -982,7 +1255,7 @@
     {
       "id": "copies",
       "title": "Reenvios de projetos acompanhados",
-      "count": 34,
+      "count": 42,
       "summary": "O tracker lista reenvios sob outras contas. Cópias podem ser alteradas para incluir malware; prefira os links dos repositórios originais.",
       "examples": [
         "FaelSemW/RafaVI",
@@ -994,54 +1267,14 @@
     }
   ],
   "ignored": {
-    "count": 309,
+    "count": 326,
     "summary": "Itens fora do escopo, cópias, páginas sem código funcional e projetos ainda sem evidência suficiente."
   },
   "changes": [
     {
       "date": "2026-11-24",
-      "kind": "novo",
-      "summary": "O scout encontrou um possível esforço em nufu88pa/retun-leonida-for-nufu."
-    },
-    {
-      "date": "2026-11-24",
-      "kind": "novo",
-      "summary": "O scout encontrou um possível esforço em nandorjanosi/Leocica."
-    },
-    {
-      "date": "2026-11-24",
-      "kind": "novo",
-      "summary": "O scout encontrou um possível esforço em Guernica4u/Leonida-archive."
-    },
-    {
-      "date": "2026-11-24",
-      "kind": "novo",
-      "summary": "O scout encontrou um possível esforço em LatukaTV/Leonardo."
-    },
-    {
-      "date": "2026-11-24",
-      "kind": "novo",
-      "summary": "O scout encontrou um possível esforço em TreXito/mangrove."
-    },
-    {
-      "date": "2026-11-24",
-      "kind": "novo",
-      "summary": "O scout encontrou um possível esforço em Nikide/leonida-bvhfix."
-    },
-    {
-      "date": "2026-11-24",
-      "kind": "novo",
-      "summary": "Um repositório de backup foi sinalizado para triagem; não foi incluído como projeto confirmado."
-    },
-    {
-      "date": "2026-11-24",
       "kind": "progresso",
-      "summary": "Xbox2Windows recebeu crédito parcial pelo menu: há uma gravação de execução instável, ainda sem confirmação do próprio repositório. Progresso indicado: 47,5%."
-    },
-    {
-      "date": "2026-11-24",
-      "kind": "progresso",
-      "summary": "VIctory avançou para 67% ao relatar iluminação parcial e áudio no mundo do jogo. É o maior percentual do snapshot, mas segue autodeclarado."
+      "summary": "VIctory avançou para 67%, após relatar iluminação parcial e áudio no mundo do jogo. É o maior percentual do snapshot, mas segue autodeclarado."
     },
     {
       "date": "2026-11-24",
@@ -1057,12 +1290,22 @@
       "date": "2026-11-24",
       "kind": "progresso",
       "summary": "XCL avançou para 62,5% após relatos de testers que carregaram o mundo; a tela segue no indicador de carregamento e o watchdog encerra os testes."
+    },
+    {
+      "date": "2026-11-24",
+      "kind": "alegação",
+      "summary": "O README do PercyScarlett pode alegar um novo marco de inicialização: loop de quadros com imagem preta, seguido por travamento da GPU. Alegação sem confirmação independente."
+    },
+    {
+      "date": "2026-11-24",
+      "kind": "novo",
+      "summary": "O scout sinalizou 17 candidatos a possíveis esforços; todos aguardam confirmação. Exemplos: DesignWithTommy/6ixlaunch, bstillbstill/xcl-hub, larpingvibecoder/sonoma, Github-Samuel/sixonpc."
     }
   ],
   "scout": {
     "since": "2026-11-19",
-    "lastRun": "2026-11-24T01:26:54.871Z",
-    "summary": "Última varredura: 23 repositórios atualizados, 7 READMEs alterados, 21 candidatos novos e 23 itens sinalizados.",
+    "lastRun": "2026-11-24T04:13:54.192Z",
+    "summary": "Última varredura: 25 repositórios atualizados, 3 READMEs alterados, 17 candidatos novos e 8 itens sinalizados.",
     "sources": [
       "GitHub",
       "Reddit",
@@ -1075,9 +1318,21 @@
   },
   "headlines": [
     {
+      "title": "GTA 6 no PC: Cyberleek divulga EXE de Xbox; port da Leonida segue indisponível",
+      "outlet": "Basic Tutorials",
+      "date": "2026-11-24T03:56:25.000Z",
+      "url": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPQ2hsczJhbUJYZmhWWDZVYnJWUkVtZm8zY3V3VTc0MjBhRWpINU5mQVEtZ0g2cmdMZENLMzVPb3FfWVN5d0ZPTFptRVFrSHZMNnFPTHVVcVFVbVlKUWV6MmNJT3JPNGlveTNTLWVha0RVTm5Sd0MtMFpJb0ozT1MwN1RWS1FqM21vSXNhR2pHRU9Zbm00R2tuVWdpMVd0eE5aSVZUdQ?oc=5"
+    },
+    {
+      "title": "Enquanto projetos de GTA 6 para PC avançam, Rockstar estaria agindo contra modders e comunidades no Discord",
+      "outlet": "Notebookcheck",
+      "date": "2026-11-24T00:47:00.000Z",
+      "url": "https://news.google.com/rss/articles/CBMigAJBVV95cUxQRVdxMFdUakJqUV9BbkhmSUVrVGtZLXFEYUZGeGRtdlZGLWNtWE1kWWZfQ0NvTkZhRUJnWnBTY1dRTWdGVlVqdjAxVURYTl8yTnozRUpmaHdxdVIxSzNuQzh1Ul9lYWpEMDdRRHhyTW41TFF5ZDd1UzdEQTh4Y21iWVZEMEx3VlUyckN6NVBpTTljQngzUmpqY1N3ZnpqQncxaVlWaFl3clBlTV8zblZINmFRWFN4c1gtbVVRRXZidXcwUGhsVnN5RHJHczhhalpUTGZrdGJwRk5lNnJCcFVvWmVTcFJjUnQ5MXhINTZsUkg2cUNsTEQ2VUNlNkw2TFpZ?oc=5"
+    },
+    {
       "title": "GTA 6 no PC: quando o jogo pode chegar?",
       "outlet": "Esports.gg",
-      "date": "2026-11-23T23:52:58.000Z",
+      "date": "2026-11-24T00:07:14.000Z",
       "url": "https://news.google.com/rss/articles/CBMimgFBVV95cUxNNl9POFBmQnZ2ZzUxTW85UmJZUnZyd2lXQUItc1lKcEx1MHFHcUVBTGpDYThFVzUzdzdyTnR0dFV0SHlOZFhHN2FIdFRwT2xYRjRoQ09paFMtQUxBMGRTdjZMaUFmMEphNVRJbEFqSF9sdUxjV1pDUXQ3Sy1GZ1RWUXFmb25PWkZpdDVSb3lTM0NkNjFjeVFPRTFn?oc=5"
     },
     {
@@ -1097,6 +1352,18 @@
       "outlet": "Mashable",
       "date": "2026-11-23T23:23:37.000Z",
       "url": "https://news.google.com/rss/articles/CBMid0FVX3lxTE9TdXBVeWdzSDFQU1VJdDRtWk81ck9yOVV6U0dEMEMycDFjQ084V244QmNBcDRMcDBCcWRRMGd0UlBqUTc4TjNackQwS0EzVC0xVDNlN1hISlRRMldhcEZYZ0ZZT2c2X1pxVFA0bVZKY0l1TXZqWFVJ?oc=5"
+    },
+    {
+      "title": "GTA 6 chegou há menos de uma semana e um port completo para PC já estaria a caminho",
+      "outlet": "MakeUseOf",
+      "date": "2026-11-23T22:58:48.000Z",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE5hY2FoWFlsdnM1Y3pQRDhYWUpFT0NCck42dU9oMmNvN3FxODU4RWRoZWl6Y3hVSjc5QlVJTkIyQUtuNFR5RmR4ck90N1NWYVp2a0pIUzBBeHB3ZTJDOUx0ME91c0thTG1YWHJvQ0xHOA?oc=5"
+    },
+    {
+      "title": "Não quer esperar para jogar GTA 6? Este método transmite o jogo para o PC",
+      "outlet": "PCMag",
+      "date": "2026-11-23T22:46:38.000Z",
+      "url": "https://news.google.com/rss/articles/CBMiogFBVV95cUxNZUxPR1ZzZWI2R3JRMGJGYlBSeHBOVjVfb2x2Uk9pYzY4ODQtOHNNSzVkOFdPX2hJX2E2QlNFWWRoaTdoMTZybzNaTHBzVWlYUFVzZDBISXJJcVdNc3JlS3BXM18tNmNOX3ZOelEwa0EtUElzTGUyUUFPYjVWQmJIeThEbVlXakk5THNEZTMtbEFDV2VhREd4MWxCc1lUVkw5QVE?oc=5"
     },
     {
       "title": "Componente que faltava para testar a build de Xbox no PC teria aparecido",
@@ -1229,30 +1496,6 @@
       "outlet": "PC Gamer",
       "date": "2026-11-23T17:54:30.000Z",
       "url": "https://news.google.com/rss/articles/CBMijgJBVV95cUxOSmdTNHgzY1FTT2Zja2swNDVOWEpHbVpVOUVLTkl2ZEg3c2pxUzFxbVN6YTRLOFUyYVlqTE1oZU4xbHNwMXk1aFlYRkhIbDdXdXFnUm51YXRKUkZsbFVWbFY0MkdEb0FjNW1GQUtXTExiT1lzTkFOeW9wWUxQdTdDbVg0Uzd0dmtUUzlmOXZxd3NNTTNvMDlTMUlxOE5Ha3AzV2dqNUM5Y2JuYmZ4b0ltRzRfZEFEWFhsWXE0R28temN4N29ISTJTMkYta21ybnRGRkpNZmZtc09IbHp1dlh5Q3ZmclpvXzZheUpKeE5yTzg4Q1VPOGNqMkM3U29yVWlKWDVxc090MmFKVVpBUXc?oc=5"
-    },
-    {
-      "title": "Responsável por vazamento de GTA 6 é solto; juiz pede que o caso não se repita",
-      "outlet": "GamesRadar+",
-      "date": "2026-11-23T17:50:06.000Z",
-      "url": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxQeDhrdGw5V2syOHkyeVJ6endpc3VnZVZMaTZJTDdEMkNhSDJYellXd25MZUNQX3d6SzlEdlYtZUdRNEJKZ2tWVEt4VjMyb1hNazRwcDRSaVIzbkxiQmN6ZWQzdHVKdmVfMkVrVXZ3R0ZxeVFnUEZYZEFrc1FjSXJUVGJUcG5aMHhoYnU1enoyTHgxb1V1T1RuUTRfTS12S3c3MnZ6RVkyQmI0WkRlOThmQ0ROeWRQVjBvam9jNnBfbVdOdTQ?oc=5"
-    },
-    {
-      "title": "Executável atribuído ao Cyberleek é divulgado enquanto projetos testam compatibilidade",
-      "outlet": "LevelUp",
-      "date": "2026-11-23T17:47:43.000Z",
-      "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxPam9VSXlmTXZNR0szZ3U4VUt5azRQMHJwMnNRQUR6VFJpTERrZjUyUFBLSUhLTFRIVWZoa2hmODNmWjlPZU9nSWVVV0RIb1MzcHl5dk56NjRwb3lIQ0NweU9yWHAzOXM4bWwyUC1tdXIyMzBaOVFDcGhJODFpRnlTWFh0YVlQa05fQWp2b0Myb0xHSnc5aE5xQXU2V1Q4S1RKMVZqcTFjalFwdm16YUNfZko3RDZHd1N1TFktbkc2Y2VlU2pwLTNR?oc=5"
-    },
-    {
-      "title": "Executável atribuído ao Cyberleek aumenta as expectativas por testes no PC",
-      "outlet": "Notebookcheck",
-      "date": "2026-11-23T17:08:00.000Z",
-      "url": "https://news.google.com/rss/articles/CBMiugFBVV95cUxNR09zeWt4bG8wNmtXRlpHVTJzUmNTZXJrY3FiU2t1Q2hoczRkTjhubmwzeTVrWEpJcW1NeVFOMm5sZkxsSVNZX2ZCZzFha0l0RkZJbDdCMm9SWmItNVgxQXkwNzJDcTMwclBCR3RTbkZxX3hybW5BeTZ5ajFKdThkdkx1RzhJaVRLdW53Q2V5bWFUaVhuTldZN2FNTUpDUF9YbWIzRjJMOG4yckN5ZFA4YlB4U181NDVHYXc?oc=5"
-    },
-    {
-      "title": "Executável de GTA 6 para Xbox é divulgado; projetos de fãs começam testes",
-      "outlet": "ShiftDelete.Net",
-      "date": "2026-11-23T16:51:56.000Z",
-      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE9BTDNzZ1JSS3lMNmdnNWlSTFZRUF8yTldRWnlJZVFld09VRjhhU0ZVcTgyZ0toUGx0U2t3R2VHY1RDbl9TcnZpSGRzTy0zUkJSQVVSN09mLTFkckItUVZ5YlZTN0dfSWlVbW04andR?oc=5"
     }
   ],
   "dmca": [

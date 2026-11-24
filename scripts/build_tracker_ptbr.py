@@ -1,9 +1,22 @@
 import json
+import math
+import re
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
+
+
+def normalized_groundwork_percent(value):
+    try:
+        ratio = float(value)
+    except (TypeError, ValueError):
+        return 0
+    if not math.isfinite(ratio):
+        return 0
+    return round(max(0, min(1, ratio)) * 100, 1)
+
 
 NEWS_PT = {
     "2026-11-24-xcl-30fps-in-game": (
@@ -115,15 +128,16 @@ HEADLINES_PT = {
     "Liverpool Echo News. . A hacker has been jailed after leaking clips from GTA 6 🚨 🎮 Arion Kurtaj has also hacked into BT, EE, Revolut and Uber - costing the companies millions 💰 #GTA #hacker #game": "Responsável pelo vazamento de vídeos de GTA 6 é condenado no Reino Unido",
     "Hackers say they have leaked an Xbox build of GTA VI, now with its missing executable": "Grupo afirma ter divulgado build de Xbox de GTA VI e o executável que faltava",
     "Cyberleek releases executable for GTA 6 Xbox build leaked last week: 'The torch passes to the open source recomp and emulation projects'": "Cyberleek afirma ter divulgado executável de GTA 6 e diz passar o trabalho a projetos abertos",
-    "Hacker behind GTA 6 leak released as judge says \"don't let this happen again\"": "Responsável por vazamento de GTA 6 é solto; juiz pede que o caso não se repita",
-    "CyberLeek Leaks GTA 6’s Executable File, and Modders Are Already Working on a Playable PC Version": "Executável atribuído ao Cyberleek é divulgado enquanto projetos testam compatibilidade",
-    "Cyberleek releases GTA 6 Xbox build .exe, boosting playable PC port chances": "Executável atribuído ao Cyberleek aumenta as expectativas por testes no PC",
-    "GTA 6 Xbox Executable Leaks, Fan PC Port Projects Begin Testing": "Executável de GTA 6 para Xbox é divulgado; projetos de fãs começam testes",
+    "GTA 6 PC: Cyberleek Releases Xbox EXE; Leonida Port Remains Unreleased": "GTA 6 no PC: Cyberleek divulga EXE de Xbox; port da Leonida segue indisponível",
+    "As GTA 6 PC port gets closer to becoming playable, Rockstar is reportedly taking action against modders and Discord communities": "Enquanto projetos de GTA 6 para PC avançam, Rockstar estaria agindo contra modders e comunidades no Discord",
+    "Can't Wait to Live Stream GTA 6? This Trick Lets You Play It On Your PC Now": "Não quer esperar para jogar GTA 6? Este método transmite o jogo para o PC",
+    "GTA 6 has been out less than a week, and a full PC port is already on its way": "GTA 6 chegou há menos de uma semana e um port completo para PC já estaria a caminho",
 }
 
 PROJECT_SUMMARIES_PT = {
     "xcl": "Camada de compatibilidade que executa código de Xbox Series no Windows. Testes relatam menus e carregamento do mundo; a imagem ainda fica presa na tela de carregamento e os resultados não foram reproduzidos de forma independente.",
     "marvis": "Camada em Rust. Relata telas iniciais a 30 FPS e chegada ao mundo, com iluminação parcial e áudio; a cena ainda não é jogável e os relatos são autodeclarados.",
+    "xlaunchvi": "A equipe relata a tela de carregamento; o portal registra 50% como estimativa editorial. O contexto do XLaunch Dashboard foi informado ao portal, mas não é confirmado pelo snapshot público.",
     "tuxbox": "Camada voltada a Linux/Proton. Registrou a tela de seleção de jogador em 4K, sem interação; o marco é um primeiro quadro, não um menu.",
     "leonida": "Projeto fora do ar desde 23/11: repositório removido, Discord indisponível e criador afastado. O último marco relatado foi o executável em execução, com quadros pretos.",
     "xbox2windows": "Pesquisa de recompilação estática. Uma gravação mostra menus instáveis; o projeto ainda não declara o marco como confirmado.",
@@ -165,23 +179,121 @@ FLAGGED_PT = {
     "copies": ("Reenvios de projetos acompanhados", "O tracker lista reenvios sob outras contas. Cópias podem ser alteradas para incluir malware; prefira os links dos repositórios originais."),
 }
 
-RECENT_CHANGES_PT = [
-    "O scout encontrou um possível esforço em nufu88pa/retun-leonida-for-nufu.",
-    "O scout encontrou um possível esforço em nandorjanosi/Leocica.",
-    "O scout encontrou um possível esforço em Guernica4u/Leonida-archive.",
-    "O scout encontrou um possível esforço em LatukaTV/Leonardo.",
-    "O scout encontrou um possível esforço em TreXito/mangrove.",
-    "O scout encontrou um possível esforço em Nikide/leonida-bvhfix.",
-    "Um repositório de backup foi sinalizado para triagem; não foi incluído como projeto confirmado.",
-    "Xbox2Windows recebeu crédito parcial pelo menu: há uma gravação de execução instável, ainda sem confirmação do próprio repositório. Progresso indicado: 47,5%.",
-    "VIctory avançou para 67% ao relatar iluminação parcial e áudio no mundo do jogo. É o maior percentual do snapshot, mas segue autodeclarado.",
-    "Five Star Recomp relata executar o executável e exibir o vídeo de introdução; a captura ainda não foi publicada. Progresso indicado: 40%.",
-    "Palmetto, continuação aberta da Leonida, entrou na lista de observação; registra execução do executável sem quadro visível. Dezesseis cópias foram separadas para revisão.",
-    "XCL avançou para 62,5% após relatos de testers que carregaram o mundo; a tela segue no indicador de carregamento e o watchdog encerra os testes.",
-]
+XLAUNCH_EDITORIAL_DEFAULTS = {
+    "teams": {
+        "xlaunchvi": {
+            "pixKey": "galinhafritadubs@gmail.com",
+            "kickUrl": "https://kick.com/myleouss",
+            "discordUrl": "https://discord.gg/R5T6zeQuPY",
+            "latestReport": {
+                "reporter": "JPTuba",
+                "date": "2026-11-24",
+                "loggedAt": "2026-11-24T05:07:48.307Z",
+                "reportedStage": "loading_screen",
+                "estimatedPercent": 50,
+                "pauseHours": "2–3",
+                "aiUsageExhausted": True,
+                "claudeRecharged": True,
+                "objective": "Alcançar o carregamento do mundo e disputar/ultrapassar XCL e VIctory.",
+                "dashboardFeatures": [
+                    "Reconhecimento de jogos e mídia física",
+                    "Detecção de build",
+                    "Suporte a controles",
+                    "Login e troca de perfil",
+                    "Biblioteca de jogos",
+                ],
+                "source": "Relato atribuído a JPTuba no Discord; estimativa de 50% informada ao portal",
+            },
+            "repositoryCheck": {
+                "checkedAt": "2026-11-24",
+                "httpStatus": None,
+                "missing": False,
+                "authenticated": False,
+            },
+        }
+    },
+    "effortOverrides": {
+        "xlaunchvi": {
+            "percent": 50,
+            "stage": "Tela de carregamento (estimativa editorial)",
+            "basis": "team-report-estimate",
+        }
+    },
+    "news": [],
+}
 
 
-def translated_news(source):
+def translated_xlaunch_report(source, editorial):
+    source_teams = editorial.get("teams") if isinstance(editorial.get("teams"), dict) else {}
+    team = source_teams.get("xlaunchvi") if isinstance(source_teams.get("xlaunchvi"), dict) else {}
+    report = team.get("latestReport") if isinstance(team.get("latestReport"), dict) else None
+    if not report:
+        return None
+
+    project = next((item for item in source.get("efforts", []) if item.get("id") == "xlaunchvi"), {})
+    portwatch_percent = round(float(snapshot_percent(project.get("gta") or {})), 1)
+    estimated_percent = report.get("estimatedPercent", 50)
+    try:
+        estimated_percent = round(max(0, min(100, float(estimated_percent))), 1)
+    except (TypeError, ValueError):
+        estimated_percent = 50
+    translations = {
+        "en": {
+            "title": "XlaunchVI: 50% editorial estimate at the loading-screen milestone",
+            "summary": "A report attributed to JPTuba on Discord places XlaunchVI at the loading screen. The team said work paused for about 2–3 hours after its AI usage ran out, then resumed after Claude was recharged. The portal now records 50% as an editorial estimate supplied for this update, not an official measurement or a GitHub milestone. The reported XLaunch Dashboard scope includes game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. The team aims to reach world loading and catch or overtake XCL and VIctory, with support from the Brazilian community.",
+            "teaser": "The portal lists 50% as an editorial estimate; the reported milestone is the loading screen.",
+            "stage": "Loading screen · editorial estimate (~50%)",
+            "transparency": "The 50% estimate was supplied for this portal update; it is not an official measurement. The loading-screen report is attributed to JPTuba on Discord, but the invite does not link to the original message. The public PortWatch/GitHub snapshot records 0% for GTA VI milestones, and the Dashboard details have not been independently verified there.",
+            "dashboardContext": "XLaunch Dashboard scope supplied to the portal: game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. These details are not independently confirmed in the public GitHub snapshot.",
+        },
+        "es": {
+            "title": "XlaunchVI: estimación editorial del 50% en la pantalla de carga",
+            "summary": "Un relato atribuido a JPTuba en Discord sitúa a XlaunchVI en la pantalla de carga. El equipo dijo que el trabajo se pausó durante unas 2–3 horas al agotarse el uso de IA y se reanudó después de recargar Claude. El portal registra ahora un 50% como estimación editorial proporcionada para esta actualización; no es una medición oficial ni un hito de GitHub. El alcance informado de XLaunch Dashboard incluye reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y una biblioteca. El objetivo es llegar a la carga del mundo y alcanzar o superar a XCL y VIctory, con apoyo de la comunidad brasileña.",
+            "teaser": "El portal registra un 50% como estimación editorial; el hito informado es la pantalla de carga.",
+            "stage": "Pantalla de carga · estimación editorial (~50%)",
+            "transparency": "La estimación del 50% se proporcionó para esta actualización del portal; no es una medición oficial. El informe sobre la pantalla de carga se atribuye a JPTuba en Discord, pero la invitación no enlaza al mensaje original. El snapshot público de PortWatch/GitHub registra un 0% en hitos de GTA VI, y esos detalles del Dashboard no se verificaron de forma independiente allí.",
+            "dashboardContext": "Alcance de XLaunch Dashboard informado al portal: reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y biblioteca. Estos detalles no están confirmados de forma independiente en el snapshot público de GitHub.",
+        },
+        "zh": {
+            "title": "XlaunchVI：加载画面阶段的编辑估算为 50%",
+            "summary": "归于 JPTuba 在 Discord 发布的报告称，XlaunchVI 已到达加载画面。团队表示，AI 使用额度耗尽后暂停了约 2–3 小时，补充 Claude 额度后恢复开发。门户在本次更新中将 50% 记录为编辑估算；这不是官方测量，也不是 GitHub 里程碑。获提供的 XLaunch Dashboard 范围包括游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。团队目标是进入世界加载阶段并追赶或超过 XCL 和 VIctory，同时获得巴西社区支持。",
+            "teaser": "门户记录的 50% 是编辑估算；报告的里程碑为加载画面。",
+            "stage": "加载画面 · 编辑估算（约 50%）",
+            "transparency": "50% 估算是为本次门户更新提供的信息，并非官方测量。加载画面的报告归于 JPTuba 在 Discord 发布，但邀请链接未指向原始消息。公开的 PortWatch/GitHub 快照记录的 GTA VI 里程碑为 0%，且 Dashboard 详情未在该快照中得到独立验证。",
+            "dashboardContext": "提供给门户的 XLaunch Dashboard 范围：游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。这些详情未在公开 GitHub 快照中得到独立确认。",
+        },
+    }
+    return {
+        "id": "xlaunchvi-loading-screen-team-report",
+        "reporter": str(report.get("reporter") or "JPTuba"),
+        "date": str(report.get("date") or ""),
+        "loggedAt": str(report.get("loggedAt") or ""),
+        "stage": f"Tela de carregamento · estimativa editorial (~{estimated_percent:g}%)",
+        "estimatedPercent": estimated_percent,
+        "portwatchPercent": portwatch_percent,
+        "title": f"XlaunchVI: estimativa editorial de {estimated_percent:g}% na tela de carregamento",
+        "summary": f"Relato atribuído a JPTuba no Discord situa o XlaunchVI na tela de carregamento. A equipe informou uma pausa de cerca de 2–3 horas após esgotar o uso de IA e a retomada depois de recarregar o Claude. O portal registra agora {estimated_percent:g}% como estimativa editorial informada para esta atualização; não é medição oficial nem marco publicado no GitHub. O escopo informado do XLaunch Dashboard inclui reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. A equipe busca chegar ao carregamento do mundo e alcançar ou ultrapassar XCL e VIctory, com apoio da comunidade brasileira.",
+        "teaser": f"O portal registra {estimated_percent:g}% como estimativa editorial; o marco relatado é a tela de carregamento.",
+        "transparency": f"Os {estimated_percent:g}% foram informados como estimativa editorial para esta atualização, não como medição oficial. O relato da tela de carregamento é atribuído a JPTuba no Discord, mas o convite não aponta para a mensagem original. O snapshot público PortWatch/GitHub registra {portwatch_percent:g}% nos marcos de GTA VI, e os detalhes do Dashboard não foram verificados de forma independente nesse snapshot.",
+        "dashboardContext": "Escopo do XLaunch Dashboard informado ao portal: reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. Esses detalhes não estão confirmados de forma independente no snapshot público do GitHub.",
+        "dashboardFeatures": report.get("dashboardFeatures", []),
+        "translations": translations,
+        "sources": [
+            {
+                "outlet": "Discord do XlaunchVI",
+                "title": "Convite do servidor; não direciona à mensagem original",
+                "url": str(team.get("discordUrl") or ""),
+            },
+            {
+                "outlet": "Repositório GitHub",
+                "title": "O snapshot consultado ainda não registra este marco",
+                "url": "https://github.com/JPTuba9/xlaunch-vi",
+            },
+        ],
+    }
+
+
+def translated_news(source, editorial):
     if set(NEWS_PT) != {item["id"] for item in source["news"]}:
         raise ValueError("NEWS_PT precisa conter exatamente os IDs de news do tracker.json.")
     stories = []
@@ -204,22 +316,108 @@ def translated_news(source):
             "summary": summary,
             "sources": sources,
         })
+    team_report = translated_xlaunch_report(source, editorial)
+    if team_report:
+        team_story = {
+            **team_report,
+            "category": "Relato da equipe",
+        }
+        lead_index = next(
+            (index for index, story in enumerate(stories) if story["id"] == "2026-11-23-leonida-nuked"),
+            -1,
+        )
+        stories.insert(lead_index + 1 if lead_index >= 0 else 0, team_story)
+    for story in editorial.get("news", []):
+        if not isinstance(story, dict) or not story.get("id") or not story.get("title") or not story.get("summary"):
+            continue
+        if any(existing["id"] == story["id"] for existing in stories):
+            continue
+        stories.append({
+            "id": str(story["id"]),
+            "date": str(story.get("date") or ""),
+            "category": str(story.get("category") or "Atualização editorial"),
+            "title": str(story["title"]),
+            "summary": str(story["summary"]),
+            "sources": [
+                source_item for source_item in story.get("sources", [])
+                if isinstance(source_item, dict)
+                and str(source_item.get("url") or "").startswith(("https://", "http://"))
+            ],
+            **({"translations": story["translations"]} if isinstance(story.get("translations"), dict) else {}),
+        })
+    stories.sort(key=lambda story: story.get("date", ""), reverse=True)
     return stories
 
 
-def translated_efforts(source):
-    overrides = {
-        "xcl": 62.5,
-        "marvis": 67,
-        "xbox2windows": 47.5,
-        "tuxbox": 40,
-        "five-star-recomp": 40,
-    }
+def translated_change_summary(item):
+    text = str(item.get("text") or "")
+    if text.startswith("VIctory moves most of the way"):
+        return "VIctory avançou para 67%, após relatar iluminação parcial e áudio no mundo do jogo. É o maior percentual do snapshot, mas segue autodeclarado."
+    if text.startswith("Five Star Recomp reports"):
+        return "Five Star Recomp relata executar o executável e exibir o vídeo de introdução; a captura ainda não foi publicada. Progresso indicado: 40%."
+    if text.startswith("Palmetto, the open continuation"):
+        return "Palmetto, continuação aberta da Leonida, entrou na lista de observação; registra execução do executável sem quadro visível. Dezesseis cópias foram separadas para revisão."
+    if text.startswith("XCL gets half credit"):
+        return "XCL avançou para 62,5% após relatos de testers que carregaram o mundo; a tela segue no indicador de carregamento e o watchdog encerra os testes."
+    if text.startswith("PercyScarlett's README"):
+        return "O README do PercyScarlett pode alegar um novo marco de inicialização: loop de quadros com imagem preta, seguido por travamento da GPU. Alegação sem confirmação independente."
+    kind = item.get("kind")
+    if kind == "up":
+        return "Atualização de progresso registrada no tracker; o resultado é autodeclarado e aguarda confirmação independente."
+    if kind == "claim":
+        return "Nova alegação registrada pelo tracker; ainda sem confirmação independente."
+    if kind == "flag":
+        return "Novo alerta sinalizado pelo tracker e encaminhado para triagem."
+    return "Novo candidato ou atividade registrada para triagem; ainda sem confirmação."
+
+
+def translated_scout_summary(scout):
+    raw_summary = str(scout.get("lastSummary") or "")
+    match = re.search(
+        r"(\d+)\s+refreshed,\s*(\d+)\s+READMEs? changed,\s*(\d+)\s+new candidates,\s*(\d+)\s+flagged",
+        raw_summary,
+        re.IGNORECASE,
+    )
+    if not match:
+        return "Resumo da última varredura não disponível no snapshot."
+    refreshed, readmes, candidates, flagged = match.groups()
+    return (
+        f"Última varredura: {refreshed} repositórios atualizados, {readmes} READMEs alterados, "
+        f"{candidates} candidatos novos e {flagged} itens sinalizados."
+    )
+
+
+def snapshot_percent(gta):
+    if gta.get("stability") == "stable":
+        return 100
+    if gta.get("fps"):
+        return 85
+    if gta.get("ingame"):
+        return 55 + 15 * float(gta["ingame"])
+    if gta.get("menu"):
+        return 40 + 15 * float(gta["menu"])
+    if gta.get("boots"):
+        return 40
+    if gta.get("loads"):
+        return 25
+    return 0
+
+
+def translated_efforts(source, editorial):
+    overrides = {}
     stage_overrides = {
         "xcl": "Carregamento do mundo (relato)",
         "marvis": "Dentro do mundo (relato)",
         "xbox2windows": "Menus parciais (relato)",
     }
+    editorial_overrides = editorial.get("effortOverrides") if isinstance(editorial.get("effortOverrides"), dict) else {}
+    for project_id, override in editorial_overrides.items():
+        if not isinstance(override, dict):
+            continue
+        if override.get("percent") is not None:
+            overrides[project_id] = override["percent"]
+        if override.get("stage"):
+            stage_overrides[project_id] = str(override["stage"])
     milestones = [
         (100, "Estável"),
         (85, "30 FPS"),
@@ -232,22 +430,10 @@ def translated_efforts(source):
     projects = []
     for item in source["efforts"]:
         gta = item.get("gta") or {}
+        source_percent = round(float(snapshot_percent(gta)), 1)
         percent = overrides.get(item["id"])
         if percent is None:
-            if gta.get("stability") == "stable":
-                percent = 100
-            elif gta.get("fps"):
-                percent = 85
-            elif gta.get("ingame"):
-                percent = 55 + 15 * float(gta["ingame"])
-            elif gta.get("menu"):
-                percent = 40 + 15 * float(gta["menu"])
-            elif gta.get("boots"):
-                percent = 40
-            elif gta.get("loads"):
-                percent = 25
-            else:
-                percent = 0
+            percent = source_percent
         percent = round(float(percent), 1)
         stage = stage_overrides.get(item["id"]) or next(
             (label for threshold, label in milestones if percent >= threshold),
@@ -261,7 +447,7 @@ def translated_efforts(source):
             "O tracker registra atividade de inicialização, mas o resultado é autodeclarado e ainda não foi verificado de forma independente.",
         )
         stats = item.get("stats") or {}
-        projects.append({
+        project = {
             "id": item["id"],
             "name": item["name"],
             "repo": item.get("repo", ""),
@@ -271,20 +457,60 @@ def translated_efforts(source):
             "percent": percent,
             "stage": stage,
             "summary": summary,
-            "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
+            "verification": (
+                "Estimativa editorial baseada em relato; não é medição oficial nem marco confirmado no GitHub."
+                if item["id"] == "xlaunchvi"
+                else "Relato dos próprios projetos; não equivale a reprodução independente."
+            ),
             "stars": stats.get("stars"),
             "forks": stats.get("forks"),
-        })
+        }
+        if item["id"] == "xlaunchvi":
+            project["teamReport"] = translated_xlaunch_report(source, editorial)
+            project["progressBasis"] = "team-report-estimate"
+            project["portwatchPercent"] = source_percent
+            project["lastRepositoryUpdate"] = stats.get("pushedAt")
+            project["repositoryMissing"] = stats.get("missing") is True
+            project["repositoryHttpStatus"] = stats.get("missingStatus") if stats.get("missing") is True else None
+            project["repositoryAssessedAt"] = item.get("assessedAt")
+            groundwork = item.get("groundwork") if isinstance(item.get("groundwork"), dict) else {}
+            groundwork_fields = [
+                ("loader", "Carregador PE e bibliotecas"),
+                ("shaders", "Tradutor de shaders"),
+                ("graphics", "Backend gráfico D3D12"),
+                ("proven", "Execução comprovada"),
+            ]
+            project["technicalDetails"] = {
+                "approach": "Camada de compatibilidade",
+                "target": "Qualquer jogo de Xbox Series",
+                "highlights": [
+                    "O projeto relata 12 de 12 shaders de computação compilados pela AMD com resultados idênticos aos de referência de CPU, em testes próprios.",
+                    "O tradutor recusa instruções sem suporte em vez de simular resultados.",
+                    "As tabelas do decodificador foram conferidas com a especificação oficial RDNA2 da AMD.",
+                ],
+                "blockers": [
+                    "O snapshot público consultado não comprova a execução de um jogo de Xbox; a inicialização de Matrix Awakens ainda está em diagnóstico.",
+                    "A maior parte dos recursos está em pull requests abertos; a branch principal contém principalmente documentação.",
+                    "Os testes foram feitos com shaders próprios, não os de GTA VI; ainda não há tiling de texturas de console.",
+                ],
+                "groundwork": [
+                    {
+                        "label": label,
+                        "percent": normalized_groundwork_percent(groundwork.get(field, 0)),
+                    }
+                    for field, label in groundwork_fields
+                ],
+                "groundworkNote": "Indicadores técnicos do snapshot; não representam progresso de GTA VI.",
+            }
+        projects.append(project)
     return projects
 
 
-def build_tracker(source):
+def build_tracker(source, editorial):
     headline_translations = HEADLINES_PT
     source_titles = {item["title"] for item in source["headlines"]}
     if source_titles != set(headline_translations):
         raise ValueError("HEADLINES_PT precisa conter exatamente os títulos de headlines do tracker.json.")
-    if len(RECENT_CHANGES_PT) > len(source["changes"]):
-        raise ValueError("O tracker tem menos mudanças do que o conjunto de traduções recentes.")
 
     tools = []
     if {item["name"] for item in source["tools"]} != set(TOOL_DESCRIPTIONS_PT):
@@ -329,12 +555,40 @@ def build_tracker(source):
             "examples": (item.get("members") or [])[:5],
         })
 
-    recent_changes = []
-    for item, translation in zip(source["changes"][-len(RECENT_CHANGES_PT):], RECENT_CHANGES_PT):
-        recent_changes.append({
+    source_changes = source.get("changes", [])
+    significant_changes = []
+    for item in source_changes:
+        text = str(item.get("text") or "")
+        if not text.startswith("Scout spotted "):
+            significant_changes.append(item)
+    recent_changes = [
+        {
             "date": item["date"],
-            "kind": {"up": "progresso", "new": "novo", "flag": "alerta"}.get(item.get("kind"), "atualização"),
-            "summary": translation,
+            "kind": {"up": "progresso", "new": "novo", "flag": "alerta", "claim": "alegação"}.get(item.get("kind"), "atualização"),
+            "summary": translated_change_summary(item),
+        }
+        for item in significant_changes[-5:]
+    ]
+    latest_scout_changes = []
+    for item in reversed(source_changes):
+        if not str(item.get("text") or "").startswith("Scout spotted "):
+            break
+        latest_scout_changes.append(item)
+    latest_scout_changes.reverse()
+    if latest_scout_changes:
+        candidate_names = []
+        for item in latest_scout_changes:
+            match = re.match(r"Scout spotted (.+?) \(possible effort,", str(item.get("text") or ""))
+            if match:
+                candidate_names.append(match.group(1))
+        examples = ", ".join(candidate_names[:4])
+        recent_changes.append({
+            "date": latest_scout_changes[-1].get("date", ""),
+            "kind": "novo",
+            "summary": (
+                f"O scout sinalizou {len(latest_scout_changes)} candidatos a possíveis esforços; todos aguardam confirmação."
+                + (f" Exemplos: {examples}." if examples else "")
+            ),
         })
 
     headlines = [
@@ -348,6 +602,12 @@ def build_tracker(source):
         if item.get("link", "").startswith(("https://", "http://"))
     ]
     scout = source.get("scout") or {}
+    source_teams = editorial.get("teams") if isinstance(editorial.get("teams"), dict) else {}
+    xlaunch_team = source_teams.get("xlaunchvi") if isinstance(source_teams.get("xlaunchvi"), dict) else {}
+    xlaunch_source = next((item for item in source.get("efforts", []) if item.get("id") == "xlaunchvi"), {})
+    xlaunch_stats = xlaunch_source.get("stats") or {}
+    repository_missing = xlaunch_stats.get("missing") is True
+    team_report = translated_xlaunch_report(source, editorial)
     dmca = [
         {
             "date": item.get("date", ""),
@@ -364,9 +624,25 @@ def build_tracker(source):
     ]
     return {
         "updatedAt": source["updated"],
+        "lastSyncedAt": str(source.get("lastSyncedAt") or (team_report or {}).get("loggedAt") or ""),
         "sourceFile": "data/tracker.json",
-        "news": translated_news(source),
-        "efforts": translated_efforts(source),
+        "teams": {
+            "xlaunchvi": {
+                "pixKey": str(xlaunch_team.get("pixKey") or "").strip(),
+                "kickUrl": str(xlaunch_team.get("kickUrl") or "").strip(),
+                "discordUrl": str(xlaunch_team.get("discordUrl") or "").strip(),
+                "latestReport": team_report,
+                "repositoryCheck": {
+                    "checkedAt": str(xlaunch_source.get("assessedAt") or ""),
+                    "httpStatus": xlaunch_stats.get("missingStatus") if repository_missing else None,
+                    "missing": repository_missing,
+                    "authenticated": False,
+                },
+            }
+        },
+        "news": translated_news(source, editorial),
+        "efforts": translated_efforts(source, editorial),
+        "editorial": editorial,
         "tools": tools,
         "candidates": len(source.get("candidates", [])),
         "flagged": flagged,
@@ -378,7 +654,7 @@ def build_tracker(source):
         "scout": {
             "since": scout.get("since", ""),
             "lastRun": scout.get("lastRun", ""),
-            "summary": "Última varredura: 23 repositórios atualizados, 7 READMEs alterados, 21 candidatos novos e 23 itens sinalizados.",
+            "summary": translated_scout_summary(scout),
             "sources": ["GitHub", "Reddit", "Hacker News", "X"],
             "watchNames": scout.get("watchNames", []),
         },
@@ -395,17 +671,41 @@ def build_tracker(source):
     }
 
 
+def merge_editorial_defaults(defaults, overrides):
+    if not isinstance(overrides, dict):
+        return json.loads(json.dumps(defaults, ensure_ascii=False))
+    merged = dict(defaults)
+    for key, value in overrides.items():
+        if isinstance(value, dict) and isinstance(defaults.get(key), dict):
+            merged[key] = merge_editorial_defaults(defaults[key], value)
+        else:
+            merged[key] = value
+    return merged
+
+
 def main():
     source_path = DATA / "tracker.json"
     source = json.loads(source_path.read_text(encoding="utf-8"))
-    localized = build_tracker(source)
     localized_path = DATA / "tracker-pt-BR.json"
+    previous_localized = {}
+    if localized_path.exists():
+        previous_localized = json.loads(localized_path.read_text(encoding="utf-8"))
+    editorial = merge_editorial_defaults(
+        XLAUNCH_EDITORIAL_DEFAULTS,
+        previous_localized.get("editorial", {}),
+    )
+    localized = build_tracker(source, editorial)
     localized_path.write_text(json.dumps(localized, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     fallback = {
         "hardware": json.loads((DATA / "hardware.json").read_text(encoding="utf-8")),
         "discords": json.loads((DATA / "discords.json").read_text(encoding="utf-8")),
         "tracker": localized,
+        "portwatch": {
+            "updated": source.get("updated", ""),
+            "lastSyncedAt": source.get("lastSyncedAt", ""),
+            "sourceFile": "data/tracker.json",
+        },
     }
     fallback_path = DATA / "file-fallback.js"
     fallback_path.write_text(
