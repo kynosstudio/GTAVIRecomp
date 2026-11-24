@@ -1,7 +1,7 @@
 {
   "updatedAt": "23/11/2026 · 20:57",
   "sourceNote": "Os dados são atualizados manualmente retirados do site oficial PortWatch VI.",
-  "overallProgress": 72,
+  "overallProgress": 75,
   "leaderId": "cgbj",
   "milestones": [
     { "percent": 0, "label": "Preparação", "description": "Projeto em fase de preparação." },
@@ -13,7 +13,7 @@
     { "percent": 100, "label": "Estável", "description": "A experiência está estável.", "statusField": "stability", "statusValue": "stable" }
   ],
   "projects": [
-    { "id": "cgbj", "name": "CGBJ", "author": "Private team", "gta": { "loads": 1, "boots": 1, "menu": 1, "ingame": 1, "fps": 4, "stability": "unknown" } },
+    { "id": "cgbj", "name": "CGBJ", "author": "Private team", "percent": 75, "gta": { "loads": 1, "boots": 1, "menu": 1, "ingame": 1, "fps": 4, "stability": "unknown" } },
     { "id": "xcl", "name": "XCL", "author": "ivall", "avatar": "XC", "avatarUrl": "https://github.com/ivall.png?size=88", "gta": { "loads": 1, "boots": 1, "menu": 1, "ingame": 0, "fps": 0, "stability": "unknown" } },
     { "id": "marvis", "name": "VIctory", "author": "Marvisak", "avatar": "VI", "avatarUrl": "https://github.com/Marvisak.png?size=88", "gta": { "loads": 1, "boots": 1, "menu": 1, "ingame": 0, "fps": 0, "stability": "unknown" } },
     { "id": "xbox-emulator", "name": "xbox-emulator", "author": "omonkeyz", "gta": { "loads": 0, "boots": 0, "menu": 0, "ingame": 0, "fps": 0, "stability": "unknown" } },

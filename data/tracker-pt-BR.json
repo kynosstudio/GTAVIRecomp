@@ -35,27 +35,27 @@
         ],
         "translations": {
           "en": {
-            "title": "XlaunchVI: 50% editorial estimate at the loading-screen milestone",
-            "summary": "A report attributed to JPTuba on Discord places XlaunchVI at the loading screen. The team said work paused for about 2–3 hours after its AI usage ran out, then resumed after Claude was recharged. The portal now records 50% as an editorial estimate supplied for this update, not an official measurement or a GitHub milestone. The reported XLaunch Dashboard scope includes game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. The team aims to reach world loading and catch or overtake XCL and VIctory, with support from the Brazilian community.",
-            "teaser": "The portal lists 50% as an editorial estimate; the reported milestone is the loading screen.",
-            "stage": "Loading screen · editorial estimate (~50%)",
-            "transparency": "The 50% estimate was supplied for this portal update; it is not an official measurement. The loading-screen report is attributed to JPTuba on Discord, but the invite does not link to the original message. The public PortWatch/GitHub snapshot records 0% for GTA VI milestones, and the Dashboard details have not been independently verified there.",
+            "title": "XlaunchVI: 55% editorial estimate at the loading-screen milestone",
+            "summary": "A report attributed to JPTuba on Discord places XlaunchVI at the menu at 30 FPS without textures. The team said work paused for about 2–3 hours after its AI usage ran out, then resumed after Claude was recharged. The portal now records 55% as an editorial estimate supplied for this update, not an official measurement or a GitHub milestone. The reported XLaunch Dashboard scope includes game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. The team aims to reach world loading and catch or overtake XCL and VIctory, with support from the Brazilian community.",
+            "teaser": "The portal lists 55% as an editorial estimate; the reported milestone is the menu at 30 FPS without textures.",
+            "stage": "Main menu at 30 FPS · no textures · editorial estimate (~55%)",
+            "transparency": "The 55% estimate was supplied for this portal update; it is not an official measurement. The loading-screen report is attributed to JPTuba on Discord, but the invite does not link to the original message. The public PortWatch/GitHub snapshot records 0% for GTA VI milestones, and the Dashboard details have not been independently verified there.",
             "dashboardContext": "XLaunch Dashboard scope supplied to the portal: game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. These details are not independently confirmed in the public GitHub snapshot."
           },
           "es": {
-            "title": "XlaunchVI: estimación editorial del 50% en la pantalla de carga",
-            "summary": "Un relato atribuido a JPTuba en Discord sitúa a XlaunchVI en la pantalla de carga. El equipo dijo que el trabajo se pausó durante unas 2–3 horas al agotarse el uso de IA y se reanudó después de recargar Claude. El portal registra ahora un 50% como estimación editorial proporcionada para esta actualización; no es una medición oficial ni un hito de GitHub. El alcance informado de XLaunch Dashboard incluye reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y una biblioteca. El objetivo es llegar a la carga del mundo y alcanzar o superar a XCL y VIctory, con apoyo de la comunidad brasileña.",
-            "teaser": "El portal registra un 50% como estimación editorial; el hito informado es la pantalla de carga.",
-            "stage": "Pantalla de carga · estimación editorial (~50%)",
-            "transparency": "La estimación del 50% se proporcionó para esta actualización del portal; no es una medición oficial. El informe sobre la pantalla de carga se atribuye a JPTuba en Discord, pero la invitación no enlaza al mensaje original. El snapshot público de PortWatch/GitHub registra un 0% en hitos de GTA VI, y esos detalles del Dashboard no se verificaron de forma independiente allí.",
+            "title": "XlaunchVI: estimación editorial del 55% en la menú a 30 FPS sin texturas",
+            "summary": "Un relato atribuido a JPTuba en Discord sitúa a XlaunchVI en la menú a 30 FPS sin texturas. El equipo dijo que el trabajo se pausó durante unas 2–3 horas al agotarse el uso de IA y se reanudó después de recargar Claude. El portal registra ahora un 55% como estimación editorial proporcionada para esta actualización; no es una medición oficial ni un hito de GitHub. El alcance informado de XLaunch Dashboard incluye reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y una biblioteca. El objetivo es llegar a la carga del mundo y alcanzar o superar a XCL y VIctory, con apoyo de la comunidad brasileña.",
+            "teaser": "El portal registra un 55% como estimación editorial; el hito informado es la menú a 30 FPS sin texturas.",
+            "stage": "Menú principal a 30 FPS · sin texturas · estimación editorial (~55%)",
+            "transparency": "La estimación del 55% se proporcionó para esta actualización del portal; no es una medición oficial. El informe sobre la menú a 30 FPS sin texturas se atribuye a JPTuba en Discord, pero la invitación no enlaza al mensaje original. El snapshot público de PortWatch/GitHub registra un 0% en hitos de GTA VI, y esos detalles del Dashboard no se verificaron de forma independiente allí.",
             "dashboardContext": "Alcance de XLaunch Dashboard informado al portal: reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y biblioteca. Estos detalles no están confirmados de forma independiente en el snapshot público de GitHub."
           },
           "zh": {
-            "title": "XlaunchVI：加载画面阶段的编辑估算为 50%",
-            "summary": "归于 JPTuba 在 Discord 发布的报告称，XlaunchVI 已到达加载画面。团队表示，AI 使用额度耗尽后暂停了约 2–3 小时，补充 Claude 额度后恢复开发。门户在本次更新中将 50% 记录为编辑估算；这不是官方测量，也不是 GitHub 里程碑。获提供的 XLaunch Dashboard 范围包括游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。团队目标是进入世界加载阶段并追赶或超过 XCL 和 VIctory，同时获得巴西社区支持。",
-            "teaser": "门户记录的 50% 是编辑估算；报告的里程碑为加载画面。",
-            "stage": "加载画面 · 编辑估算（约 50%）",
-            "transparency": "50% 估算是为本次门户更新提供的信息，并非官方测量。加载画面的报告归于 JPTuba 在 Discord 发布，但邀请链接未指向原始消息。公开的 PortWatch/GitHub 快照记录的 GTA VI 里程碑为 0%，且 Dashboard 详情未在该快照中得到独立验证。",
+            "title": "XlaunchVI：无贴图的主菜单阶段的编辑估算为 55%",
+            "summary": "归于 JPTuba 在 Discord 发布的报告称，XlaunchVI 已到达无贴图的主菜单。团队表示，AI 使用额度耗尽后暂停了约 2–3 小时，补充 Claude 额度后恢复开发。门户在本次更新中将 55% 记录为编辑估算；这不是官方测量，也不是 GitHub 里程碑。获提供的 XLaunch Dashboard 范围包括游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。团队目标是进入世界加载阶段并追赶或超过 XCL 和 VIctory，同时获得巴西社区支持。",
+            "teaser": "门户记录的 55% 是编辑估算；报告的里程碑为无贴图的主菜单。",
+            "stage": "主菜单以 30 FPS运行 · 无贴图 · 编辑估算（约55%）",
+            "transparency": "55% 估算是为本次门户更新提供的信息，并非官方测量。无贴图的主菜单的报告归于 JPTuba 在 Discord 发布，但邀请链接未指向原始消息。公开的 PortWatch/GitHub 快照记录的 GTA VI 里程碑为 0%，且 Dashboard 详情未在该快照中得到独立验证。",
             "dashboardContext": "提供给门户的 XLaunch Dashboard 范围：游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。这些详情未在公开 GitHub 快照中得到独立确认。"
           }
         },
@@ -161,27 +161,27 @@
       ],
       "translations": {
         "en": {
-          "title": "XlaunchVI: 50% editorial estimate at the loading-screen milestone",
-          "summary": "A report attributed to JPTuba on Discord places XlaunchVI at the loading screen. The team said work paused for about 2–3 hours after its AI usage ran out, then resumed after Claude was recharged. The portal now records 50% as an editorial estimate supplied for this update, not an official measurement or a GitHub milestone. The reported XLaunch Dashboard scope includes game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. The team aims to reach world loading and catch or overtake XCL and VIctory, with support from the Brazilian community.",
-          "teaser": "The portal lists 50% as an editorial estimate; the reported milestone is the loading screen.",
-          "stage": "Loading screen · editorial estimate (~50%)",
-          "transparency": "The 50% estimate was supplied for this portal update; it is not an official measurement. The loading-screen report is attributed to JPTuba on Discord, but the invite does not link to the original message. The public PortWatch/GitHub snapshot records 0% for GTA VI milestones, and the Dashboard details have not been independently verified there.",
+          "title": "XlaunchVI: 55% editorial estimate at the loading-screen milestone",
+          "summary": "A report attributed to JPTuba on Discord places XlaunchVI at the menu at 30 FPS without textures. The team said work paused for about 2–3 hours after its AI usage ran out, then resumed after Claude was recharged. The portal now records 55% as an editorial estimate supplied for this update, not an official measurement or a GitHub milestone. The reported XLaunch Dashboard scope includes game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. The team aims to reach world loading and catch or overtake XCL and VIctory, with support from the Brazilian community.",
+          "teaser": "The portal lists 55% as an editorial estimate; the reported milestone is the menu at 30 FPS without textures.",
+          "stage": "Main menu at 30 FPS · no textures · editorial estimate (~55%)",
+          "transparency": "The 55% estimate was supplied for this portal update; it is not an official measurement. The loading-screen report is attributed to JPTuba on Discord, but the invite does not link to the original message. The public PortWatch/GitHub snapshot records 0% for GTA VI milestones, and the Dashboard details have not been independently verified there.",
           "dashboardContext": "XLaunch Dashboard scope supplied to the portal: game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. These details are not independently confirmed in the public GitHub snapshot."
         },
         "es": {
-          "title": "XlaunchVI: estimación editorial del 50% en la pantalla de carga",
-          "summary": "Un relato atribuido a JPTuba en Discord sitúa a XlaunchVI en la pantalla de carga. El equipo dijo que el trabajo se pausó durante unas 2–3 horas al agotarse el uso de IA y se reanudó después de recargar Claude. El portal registra ahora un 50% como estimación editorial proporcionada para esta actualización; no es una medición oficial ni un hito de GitHub. El alcance informado de XLaunch Dashboard incluye reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y una biblioteca. El objetivo es llegar a la carga del mundo y alcanzar o superar a XCL y VIctory, con apoyo de la comunidad brasileña.",
-          "teaser": "El portal registra un 50% como estimación editorial; el hito informado es la pantalla de carga.",
-          "stage": "Pantalla de carga · estimación editorial (~50%)",
-          "transparency": "La estimación del 50% se proporcionó para esta actualización del portal; no es una medición oficial. El informe sobre la pantalla de carga se atribuye a JPTuba en Discord, pero la invitación no enlaza al mensaje original. El snapshot público de PortWatch/GitHub registra un 0% en hitos de GTA VI, y esos detalles del Dashboard no se verificaron de forma independiente allí.",
+          "title": "XlaunchVI: estimación editorial del 55% en la menú a 30 FPS sin texturas",
+          "summary": "Un relato atribuido a JPTuba en Discord sitúa a XlaunchVI en la menú a 30 FPS sin texturas. El equipo dijo que el trabajo se pausó durante unas 2–3 horas al agotarse el uso de IA y se reanudó después de recargar Claude. El portal registra ahora un 55% como estimación editorial proporcionada para esta actualización; no es una medición oficial ni un hito de GitHub. El alcance informado de XLaunch Dashboard incluye reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y una biblioteca. El objetivo es llegar a la carga del mundo y alcanzar o superar a XCL y VIctory, con apoyo de la comunidad brasileña.",
+          "teaser": "El portal registra un 55% como estimación editorial; el hito informado es la menú a 30 FPS sin texturas.",
+          "stage": "Menú principal a 30 FPS · sin texturas · estimación editorial (~55%)",
+          "transparency": "La estimación del 55% se proporcionó para esta actualización del portal; no es una medición oficial. El informe sobre la menú a 30 FPS sin texturas se atribuye a JPTuba en Discord, pero la invitación no enlaza al mensaje original. El snapshot público de PortWatch/GitHub registra un 0% en hitos de GTA VI, y esos detalles del Dashboard no se verificaron de forma independiente allí.",
           "dashboardContext": "Alcance de XLaunch Dashboard informado al portal: reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y biblioteca. Estos detalles no están confirmados de forma independiente en el snapshot público de GitHub."
         },
         "zh": {
-          "title": "XlaunchVI：加载画面阶段的编辑估算为 50%",
-          "summary": "归于 JPTuba 在 Discord 发布的报告称，XlaunchVI 已到达加载画面。团队表示，AI 使用额度耗尽后暂停了约 2–3 小时，补充 Claude 额度后恢复开发。门户在本次更新中将 50% 记录为编辑估算；这不是官方测量，也不是 GitHub 里程碑。获提供的 XLaunch Dashboard 范围包括游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。团队目标是进入世界加载阶段并追赶或超过 XCL 和 VIctory，同时获得巴西社区支持。",
-          "teaser": "门户记录的 50% 是编辑估算；报告的里程碑为加载画面。",
-          "stage": "加载画面 · 编辑估算（约 50%）",
-          "transparency": "50% 估算是为本次门户更新提供的信息，并非官方测量。加载画面的报告归于 JPTuba 在 Discord 发布，但邀请链接未指向原始消息。公开的 PortWatch/GitHub 快照记录的 GTA VI 里程碑为 0%，且 Dashboard 详情未在该快照中得到独立验证。",
+          "title": "XlaunchVI：无贴图的主菜单阶段的编辑估算为 55%",
+          "summary": "归于 JPTuba 在 Discord 发布的报告称，XlaunchVI 已到达无贴图的主菜单。团队表示，AI 使用额度耗尽后暂停了约 2–3 小时，补充 Claude 额度后恢复开发。门户在本次更新中将 55% 记录为编辑估算；这不是官方测量，也不是 GitHub 里程碑。获提供的 XLaunch Dashboard 范围包括游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。团队目标是进入世界加载阶段并追赶或超过 XCL 和 VIctory，同时获得巴西社区支持。",
+          "teaser": "门户记录的 55% 是编辑估算；报告的里程碑为无贴图的主菜单。",
+          "stage": "主菜单以 30 FPS运行 · 无贴图 · 编辑估算（约55%）",
+          "transparency": "55% 估算是为本次门户更新提供的信息，并非官方测量。无贴图的主菜单的报告归于 JPTuba 在 Discord 发布，但邀请链接未指向原始消息。公开的 PortWatch/GitHub 快照记录的 GTA VI 里程碑为 0%，且 Dashboard 详情未在该快照中得到独立验证。",
           "dashboardContext": "提供给门户的 XLaunch Dashboard 范围：游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。这些详情未在公开 GitHub 快照中得到独立确认。"
         }
       },
@@ -506,6 +506,26 @@
     }
   ],
   "efforts": [
+    {
+      "id": "cgbj",
+      "name": "CGBJ",
+      "repo": null,
+      "url": null,
+      "tier": "tracked",
+      "status": "acompanhado",
+      "percent": 75,
+      "stage": "Dentro do jogo · cut-scenes a 4 FPS",
+      "summary": "Build privada baseada em VIctory e XCL. Consegue movimentar no mundo, interagir com NPCs e abrir menus devagar; agora também reproduz cut-scenes a cerca de 4 FPS. Ainda não há texturas ou iluminação completas.",
+      "verification": "Resultado privado e autodeclarado; não reproduzido por pessoas de fora do grupo.",
+      "gta": {
+        "loads": 1,
+        "boots": 1,
+        "menu": 1,
+        "ingame": 1,
+        "fps": 0.13,
+        "stability": "unknown"
+      }
+    },
     {
       "id": "marvis",
       "name": "VIctory",
@@ -863,27 +883,27 @@
         ],
         "translations": {
           "en": {
-            "title": "XlaunchVI: 50% editorial estimate at the loading-screen milestone",
-            "summary": "A report attributed to JPTuba on Discord places XlaunchVI at the loading screen. The team said work paused for about 2–3 hours after its AI usage ran out, then resumed after Claude was recharged. The portal now records 50% as an editorial estimate supplied for this update, not an official measurement or a GitHub milestone. The reported XLaunch Dashboard scope includes game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. The team aims to reach world loading and catch or overtake XCL and VIctory, with support from the Brazilian community.",
-            "teaser": "The portal lists 50% as an editorial estimate; the reported milestone is the loading screen.",
-            "stage": "Loading screen · editorial estimate (~50%)",
-            "transparency": "The 50% estimate was supplied for this portal update; it is not an official measurement. The loading-screen report is attributed to JPTuba on Discord, but the invite does not link to the original message. The public PortWatch/GitHub snapshot records 0% for GTA VI milestones, and the Dashboard details have not been independently verified there.",
+            "title": "XlaunchVI: 55% editorial estimate at the loading-screen milestone",
+            "summary": "A report attributed to JPTuba on Discord places XlaunchVI at the menu at 30 FPS without textures. The team said work paused for about 2–3 hours after its AI usage ran out, then resumed after Claude was recharged. The portal now records 55% as an editorial estimate supplied for this update, not an official measurement or a GitHub milestone. The reported XLaunch Dashboard scope includes game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. The team aims to reach world loading and catch or overtake XCL and VIctory, with support from the Brazilian community.",
+            "teaser": "The portal lists 55% as an editorial estimate; the reported milestone is the menu at 30 FPS without textures.",
+            "stage": "Main menu at 30 FPS · no textures · editorial estimate (~55%)",
+            "transparency": "The 55% estimate was supplied for this portal update; it is not an official measurement. The loading-screen report is attributed to JPTuba on Discord, but the invite does not link to the original message. The public PortWatch/GitHub snapshot records 0% for GTA VI milestones, and the Dashboard details have not been independently verified there.",
             "dashboardContext": "XLaunch Dashboard scope supplied to the portal: game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. These details are not independently confirmed in the public GitHub snapshot."
           },
           "es": {
-            "title": "XlaunchVI: estimación editorial del 50% en la pantalla de carga",
-            "summary": "Un relato atribuido a JPTuba en Discord sitúa a XlaunchVI en la pantalla de carga. El equipo dijo que el trabajo se pausó durante unas 2–3 horas al agotarse el uso de IA y se reanudó después de recargar Claude. El portal registra ahora un 50% como estimación editorial proporcionada para esta actualización; no es una medición oficial ni un hito de GitHub. El alcance informado de XLaunch Dashboard incluye reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y una biblioteca. El objetivo es llegar a la carga del mundo y alcanzar o superar a XCL y VIctory, con apoyo de la comunidad brasileña.",
-            "teaser": "El portal registra un 50% como estimación editorial; el hito informado es la pantalla de carga.",
-            "stage": "Pantalla de carga · estimación editorial (~50%)",
-            "transparency": "La estimación del 50% se proporcionó para esta actualización del portal; no es una medición oficial. El informe sobre la pantalla de carga se atribuye a JPTuba en Discord, pero la invitación no enlaza al mensaje original. El snapshot público de PortWatch/GitHub registra un 0% en hitos de GTA VI, y esos detalles del Dashboard no se verificaron de forma independiente allí.",
+            "title": "XlaunchVI: estimación editorial del 55% en la menú a 30 FPS sin texturas",
+            "summary": "Un relato atribuido a JPTuba en Discord sitúa a XlaunchVI en la menú a 30 FPS sin texturas. El equipo dijo que el trabajo se pausó durante unas 2–3 horas al agotarse el uso de IA y se reanudó después de recargar Claude. El portal registra ahora un 55% como estimación editorial proporcionada para esta actualización; no es una medición oficial ni un hito de GitHub. El alcance informado de XLaunch Dashboard incluye reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y una biblioteca. El objetivo es llegar a la carga del mundo y alcanzar o superar a XCL y VIctory, con apoyo de la comunidad brasileña.",
+            "teaser": "El portal registra un 55% como estimación editorial; el hito informado es la menú a 30 FPS sin texturas.",
+            "stage": "Menú principal a 30 FPS · sin texturas · estimación editorial (~55%)",
+            "transparency": "La estimación del 55% se proporcionó para esta actualización del portal; no es una medición oficial. El informe sobre la menú a 30 FPS sin texturas se atribuye a JPTuba en Discord, pero la invitación no enlaza al mensaje original. El snapshot público de PortWatch/GitHub registra un 0% en hitos de GTA VI, y esos detalles del Dashboard no se verificaron de forma independiente allí.",
             "dashboardContext": "Alcance de XLaunch Dashboard informado al portal: reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y biblioteca. Estos detalles no están confirmados de forma independiente en el snapshot público de GitHub."
           },
           "zh": {
-            "title": "XlaunchVI：加载画面阶段的编辑估算为 50%",
-            "summary": "归于 JPTuba 在 Discord 发布的报告称，XlaunchVI 已到达加载画面。团队表示，AI 使用额度耗尽后暂停了约 2–3 小时，补充 Claude 额度后恢复开发。门户在本次更新中将 50% 记录为编辑估算；这不是官方测量，也不是 GitHub 里程碑。获提供的 XLaunch Dashboard 范围包括游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。团队目标是进入世界加载阶段并追赶或超过 XCL 和 VIctory，同时获得巴西社区支持。",
-            "teaser": "门户记录的 50% 是编辑估算；报告的里程碑为加载画面。",
-            "stage": "加载画面 · 编辑估算（约 50%）",
-            "transparency": "50% 估算是为本次门户更新提供的信息，并非官方测量。加载画面的报告归于 JPTuba 在 Discord 发布，但邀请链接未指向原始消息。公开的 PortWatch/GitHub 快照记录的 GTA VI 里程碑为 0%，且 Dashboard 详情未在该快照中得到独立验证。",
+            "title": "XlaunchVI：无贴图的主菜单阶段的编辑估算为 55%",
+            "summary": "归于 JPTuba 在 Discord 发布的报告称，XlaunchVI 已到达无贴图的主菜单。团队表示，AI 使用额度耗尽后暂停了约 2–3 小时，补充 Claude 额度后恢复开发。门户在本次更新中将 55% 记录为编辑估算；这不是官方测量，也不是 GitHub 里程碑。获提供的 XLaunch Dashboard 范围包括游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。团队目标是进入世界加载阶段并追赶或超过 XCL 和 VIctory，同时获得巴西社区支持。",
+            "teaser": "门户记录的 55% 是编辑估算；报告的里程碑为无贴图的主菜单。",
+            "stage": "主菜单以 30 FPS运行 · 无贴图 · 编辑估算（约55%）",
+            "transparency": "55% 估算是为本次门户更新提供的信息，并非官方测量。无贴图的主菜单的报告归于 JPTuba 在 Discord 发布，但邀请链接未指向原始消息。公开的 PortWatch/GitHub 快照记录的 GTA VI 里程碑为 0%，且 Dashboard 详情未在该快照中得到独立验证。",
             "dashboardContext": "提供给门户的 XLaunch Dashboard 范围：游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。这些详情未在公开 GitHub 快照中得到独立确认。"
           }
         },
@@ -1021,12 +1041,12 @@
           "reporter": "JPTuba",
           "date": "2026-11-24",
           "loggedAt": "2026-11-24T05:07:48.307Z",
-          "reportedStage": "loading_screen",
-          "estimatedPercent": 50,
+          "reportedStage": "menu_30fps_no_textures",
+          "estimatedPercent": 55,
           "pauseHours": "2–3",
           "aiUsageExhausted": true,
           "claudeRecharged": true,
-          "objective": "Alcançar o carregamento do mundo e disputar/ultrapassar XCL e VIctory.",
+          "objective": "Otimizar memória e shaders sem textura até os menus ganharem texturas e o jogo ficar quase jogável.",
           "dashboardFeatures": [
             "Reconhecimento de jogos e mídia física",
             "Detecção de build",
@@ -1034,7 +1054,7 @@
             "Login e troca de perfil",
             "Biblioteca de jogos"
           ],
-          "source": "Relato atribuído a JPTuba no Discord; estimativa de 50% informada ao portal"
+          "source": "Relato atribuído à equipe no Discord; menus a 30 FPS sem texturas"
         },
         "repositoryCheck": {
           "checkedAt": "2026-11-24",
@@ -1046,8 +1066,8 @@
     },
     "effortOverrides": {
       "xlaunchvi": {
-        "percent": 50,
-        "stage": "Tela de carregamento (estimativa editorial)",
+        "percent": 55,
+        "stage": "Menu principal a 30 FPS (sem texturas)",
         "basis": "team-report-estimate"
       }
     },

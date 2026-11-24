@@ -1,8 +1,0 @@
-node_modules/
-_site/
-.claude/settings.local.json
-.env.local
-.env
-HANDOFF.md
-indexnow.json
-.chan/
