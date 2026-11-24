@@ -243,7 +243,7 @@ function animateCounters(root) {
       return;
     }
     element.textContent = formatCounter(0, kind);
-    const duration = 650;
+    const duration = root && root.querySelector && root.querySelector('.pw-overall-value') ? 1200 : 650;
     const startTime = performance.now();
     const tick = (now) => {
       const progress = Math.min(1, (now - startTime) / duration);
@@ -268,6 +268,42 @@ function animateCounters(root) {
     }, { threshold: 0.08 });
     observer.observe(root);
   } else start();
+}
+
+function recalculateProgressConnectors(root) {
+  const timeline = root && root.querySelector('.pw-timeline');
+  const svg = timeline && timeline.querySelector('.pw-connectors');
+  const bar = timeline && timeline.querySelector('.pw-progress-track');
+  const markers = timeline ? [...timeline.querySelectorAll('.pw-project-marker')] : [];
+  if (!timeline || !svg || !bar || !markers.length) return;
+
+  const timelineRect = timeline.getBoundingClientRect();
+  const barRect = bar.getBoundingClientRect();
+  const width = Math.max(1, timelineRect.width);
+  const height = Math.max(1, timelineRect.height);
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  svg.setAttribute('width', `${width}`);
+  svg.setAttribute('height', `${height}`);
+  svg.style.width = `${width}px`;
+  svg.style.height = `${height}px`;
+
+  const targetTop = barRect.top - timelineRect.top;
+  svg.innerHTML = markers.map((marker) => {
+    const markerRect = marker.getBoundingClientRect();
+    const startX = markerRect.left - timelineRect.left + markerRect.width / 2;
+    const startY = markerRect.bottom - timelineRect.top;
+    const markerProgress = Number(marker.dataset.markerProgress);
+    let endX = Number.isFinite(markerProgress)
+      ? markerProgress / 100 * width
+      : markerRect.left - timelineRect.left + markerRect.width / 2;
+    endX = Math.max(0, Math.min(width, endX));
+    const endY = targetTop;
+    const distance = Math.max(24, endY - startY);
+    const controlY1 = startY + distance * 0.42;
+    const controlY2 = endY - distance * 0.18;
+    return `<path d="M ${startX.toFixed(2)} ${startY.toFixed(2)} C ${startX.toFixed(2)} ${controlY1.toFixed(2)}, ${endX.toFixed(2)} ${controlY2.toFixed(2)}, ${endX.toFixed(2)} ${endY.toFixed(2)}" fill="none" class="pw-curve-path"/>
+      <circle cx="${endX.toFixed(2)}" cy="${endY.toFixed(2)}" r="3.5" class="pw-curve-dot"/>`;
+  }).join('');
 }
 
 function animateProgress(root) {
@@ -298,6 +334,7 @@ function animateProgress(root) {
       if (linear < 1) requestAnimationFrame(tick);
       else {
         bar.style.width = `${value}%`;
+        requestAnimationFrame(() => recalculateProgressConnectors(root));
         root.querySelectorAll('.pw-project-marker[data-marker-progress]').forEach((marker) => {
           const markerValue = Number(marker.dataset.markerProgress);
           marker.classList.remove('is-crossing');
@@ -1199,6 +1236,16 @@ function updateMemoryPressure(evaluation) {
   window.KynosI18n.translateDom(section, state.language);
   animateCounters(section);
   animateProgress(section);
+  requestAnimationFrame(() => {
+    recalculateProgressConnectors(section);
+    setTimeout(() => recalculateProgressConnectors(section), 700);
+  });
+  if (typeof ResizeObserver !== 'undefined') {
+    if (section._pwConnectorObserver) section._pwConnectorObserver.disconnect();
+    const observer = new ResizeObserver(() => recalculateProgressConnectors(section));
+    observer.observe(section);
+    section._pwConnectorObserver = observer;
+  }
 }
 
 function memoryCoverageLabel(coverage) {
@@ -1999,6 +2046,7 @@ function progressPercent(value) {
 }
 
 function portwatchEffortScore(project) {
+  if (project && project.id === 'cgbj') return 75;
   if (project && project.id === 'xlaunchvi') return 55;
   const gta = project && project.gta && typeof project.gta === 'object' ? project.gta : {};
   const groundwork = project && project.groundwork && typeof project.groundwork === 'object'
@@ -2274,22 +2322,6 @@ function renderRaceProjection(snapshot, leader, milestones, progress) {
   </section>`;
 }
 
-function renderRaceHistory(snapshot) {
-  const history = snapshot && Array.isArray(snapshot.history) ? snapshot.history : [];
-  if (!history.length) return '';
-  const rows = history.slice(-6).reverse().map((entry) => `
-    <li>
-      <time datetime="${escapeHtml(entry.date || '')}">${escapeHtml(formatNewsDate(entry.date || ''))}</time>
-      <span><b>${escapeHtml(entry.leaderName || entry.leaderId || t('Líder não identificado'))}</b><small>${escapeHtml(t('Média do top 3:'))} ${counterMarkup(entry.top3, 'percent')}% · ${escapeHtml(t('Projetos acompanhados:'))} ${counterMarkup(entry.tracked)}</small></span>
-      <strong>${counterMarkup(entry.leader, 'percent')}%</strong>
-    </li>`).join('');
-  return `<section class="race-intel-card panel race-history" aria-labelledby="race-history-title">
-    <span class="section-kicker">${escapeHtml(t('LEITURAS DIÁRIAS DO TRACKER'))}</span>
-    <h3 id="race-history-title">${escapeHtml(t('Snapshots registrados'))}</h3>
-    <p>${escapeHtml(t('Registros diários agregados pelo PortWatch. Não são uma série horária do mesmo projeto e não alimentam a projeção de prazo.'))}</p>
-    <ol>${rows}</ol>
-  </section>`;
-}
 
 function renderRaceTimeline(milestones, progress, leader) {
   const currentMilestone = milestones.filter((milestone) => progressPercent(milestone.percent) <= progress)
@@ -2429,15 +2461,24 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
   if (xlaunchReportProject && !timelineProjects.some((project) => project.id === xlaunchReportProject.id)) {
     timelineProjects.push(xlaunchReportProject);
   }
-  const lines = timelineProjects.map((project, index) => {
-    const x = portwatchProjectProgress(project, milestones) * 10;
-    const lane = index;
-    const y = 18 + lane * 22;
-    return `<line x1="${x}" y1="${y}" x2="${x}" y2="248" /><circle cx="${x}" cy="248" r="4" />`;
-  }).join('');
-  const markerCards = timelineProjects.map((project, index) => {
+  const markerLayout = [];
+  const laneGroups = new Map();
+  timelineProjects.forEach((project) => {
+    const percent = portwatchProjectProgress(project, milestones);
+    const bucket = Math.round(percent / 5) * 5;
+    if (!laneGroups.has(bucket)) laneGroups.set(bucket, []);
+    laneGroups.get(bucket).push({ project, percent });
+  });
+  laneGroups.forEach((items) => {
+    items.sort((left, right) => left.project.name.localeCompare(right.project.name));
+    items.forEach((item, itemIndex) => {
+      markerLayout.push({ ...item, lane: itemIndex % 3, offset: (itemIndex - ((items.length - 1) / 2)) * 18 });
+    });
+  });
+  const markerCards = timelineProjects.map((project) => {
+    const marker = markerLayout.find((item) => item.project === project);
+    const lane = marker ? marker.lane : 0;
     const projectProgress = portwatchProjectProgress(project, milestones);
-    const lane = index;
     const edge = projectProgress <= 7 ? 'left' : projectProgress >= 93 ? 'right' : 'center';
     const avatar = String(project.avatar || project.name.slice(0, 2)).slice(0, 3);
     const stage = portwatchMilestone(project, milestones).label;
@@ -2453,7 +2494,10 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
       ? ` · ${t('estimativa editorial da equipe')}; ${t('snapshot GitHub/tracker')}: ${snapshotPercent}%`
       : reportStage ? ` · ${t('Relato do Discord')}: ${reportStage}; ${t('snapshot GitHub/tracker')}: ${snapshotPercent}%` : '';
     const tooltip = `${project.name}: ${progressLabel}% · ${stage}${estimateLabel}`;
-    return `<button class="pw-project-marker align-${edge} ${project.teamReport ? 'pw-project-marker--xlaunch' : ''} ${projectProgress <= progress ? 'is-reached' : ''}" type="button" style="--marker-x:${projectProgress}%;--marker-lane:${lane}" data-marker-progress="${projectProgress}" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(tooltip)}">${avatarMarkup}</button>`;
+    const markerOffset = marker ? marker.offset : 0;
+    return `<button class="pw-project-marker align-${edge} ${project.teamReport ? 'pw-project-marker--xlaunch' : ''} ${projectProgress <= progress ? 'is-reached' : ''}" type="button" style="--marker-x:${projectProgress}%;--marker-lane:${lane};--marker-offset:${markerOffset}px" data-marker-progress="${projectProgress}" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(tooltip)}">
+      ${avatarMarkup}
+    </button>`;
   }).join('');
   const projectList = projects.slice()
     .sort((left, right) => Number(isInactiveProject(left)) - Number(isInactiveProject(right))
@@ -2506,13 +2550,6 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
   const readingTime = snapshot && snapshot.updatedAt
     ? `<p class="pw-reading-time">${escapeHtml(t('Leitura do progresso:'))} ${publicationTimeMarkup(snapshot.updatedAt)}</p>`
     : '';
-  const raceIntel = snapshot ? `<div class="race-intelligence-grid">
-    ${renderRaceTimeline(milestones, progress, leader)}
-    ${renderRaceProjection(snapshot, leader, milestones, progress)}
-    ${renderRaceReversals(snapshot, projects, leader)}
-    ${renderRaceControlLog(snapshot, leader, projects)}
-    ${renderRaceHistory(snapshot)}
-  </div>` : '';
 
   section.setAttribute('aria-busy', 'false');
   section.innerHTML = `
@@ -2533,7 +2570,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
       <div class="pw-timeline-heading"><div><span class="section-kicker">${escapeHtml(t('TRILHA DE MARCOS'))}</span><h3>${escapeHtml(t('Do primeiro executável à estabilidade.'))}</h3></div></div>
       <div class="pw-timeline-viewport" tabindex="0" aria-label="Trilha de progresso; deslize horizontalmente para ver todos os marcos">
         <div class="pw-timeline">
-          <svg class="pw-connectors" viewBox="0 0 1000 308" preserveAspectRatio="none" aria-hidden="true">${lines}</svg>
+          <svg class="pw-connectors" aria-hidden="true"></svg>
           ${markerCards}
           <div class="pw-progress-track" role="progressbar" aria-label="${escapeHtml(t('Progresso geral da portabilidade'))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}">
             <span class="pw-progress-fill" data-progress-value="${progress}"></span>
@@ -2546,7 +2583,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
         <summary><span>${escapeHtml(t('Progresso por projeto'))}</span><span class="pw-project-list-action">${escapeHtml(t('Ver progresso de todos os projetos'))} (${projects.length})</span></summary>
         <ul class="pw-project-progress-grid">${projectList}</ul>
       </details>
-    </div>${raceIntel}${changeStrip}`;
+    </div>${changeStrip}`;
   section.querySelectorAll('.pw-avatar-image').forEach((image) => {
     image.addEventListener('error', () => {
       image.hidden = true;
@@ -2561,6 +2598,16 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
   window.KynosI18n.translateDom(section, state.language);
   animateCounters(section);
   animateProgress(section);
+  requestAnimationFrame(() => {
+    recalculateProgressConnectors(section);
+    setTimeout(() => recalculateProgressConnectors(section), 700);
+  });
+  if (typeof ResizeObserver !== 'undefined') {
+    if (section._pwConnectorObserver) section._pwConnectorObserver.disconnect();
+    const observer = new ResizeObserver(() => recalculateProgressConnectors(section));
+    observer.observe(section);
+    section._pwConnectorObserver = observer;
+  }
 }
 
 function localizedChangeSummary(summary) {
