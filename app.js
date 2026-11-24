@@ -784,7 +784,8 @@ function mergeTrackerPayloads(portwatch, localized, fallback) {
   merged.portwatchSource = {
     updatedAt: rawUpdated || fallbackPortwatch.updated || '',
     lastSyncedAt: rawSynced || fallbackPortwatch.lastSyncedAt || '',
-    sourceFile: 'data/tracker.json'
+    sourceFile: 'data/tracker.json',
+    efforts: rawEfforts.map((effort) => ({ ...effort }))
   };
   return merged;
 }
@@ -2470,8 +2471,23 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
       status: isInactiveProject(project) || isInactiveProject(legacy) ? 'offline' : project.status || legacy.status || ''
     };
   }).filter((project) => project.name);
+  const scoreSourceProjects = snapshot && snapshot.portwatchSource
+    && Array.isArray(snapshot.portwatchSource.efforts)
+    ? snapshot.portwatchSource.efforts
+    : projects;
+  const scoreById = new Map(scoreSourceProjects
+    .filter((project) => project && project.id)
+    .map((project) => [project.id, window.PortWatchScoring.scoreEffort(normalizePortwatchEffort(project)).score]));
+  const scoreForProject = (project) => {
+    if (project.id === 'xlaunchvi' && project.manualScore != null && Number.isFinite(Number(project.manualScore))) {
+      return progressPercent(project.manualScore);
+    }
+    return scoreById.has(project.id)
+      ? progressPercent(scoreById.get(project.id))
+      : portwatchProjectProgress(project, milestones);
+  };
   const rankedScores = window.PortWatchScoring.overall(
-    projects.filter((project) => !isInactiveProject(project)).map(normalizePortwatchEffort)
+    scoreSourceProjects.filter((project) => !isInactiveProject(project)).map(normalizePortwatchEffort)
   );
   const rankedProjects = rankedScores.ranked
     .map((item) => projects.find((project) => project.id === item.effort.id))
@@ -2492,13 +2508,13 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
     { label: 'Iniciam o GTA VI', markup: `<span class="pw-stat-value">${counterMarkup(launchingCount)} / ${counterMarkup(rankedScores.ranked.length)}</span>` },
     { label: 'Projetos acompanhados', markup: `<span class="pw-stat-value">${counterMarkup(rankedScores.ranked.length)}</span>` }
   ];
-  const timelineProjects = rankedProjects.slice(0, 8).filter((project) => portwatchProjectProgress(project, milestones) >= 0);
+  const timelineProjects = rankedProjects.slice(0, 8).filter((project) => scoreForProject(project) >= 0);
   const xlaunchReportProject = projects.find((project) => project.id === 'xlaunchvi' && project.teamReport);
   if (xlaunchReportProject && !timelineProjects.some((project) => project.id === xlaunchReportProject.id)) {
     timelineProjects.push(xlaunchReportProject);
   }
   const markerCards = timelineProjects.map((project) => {
-    const projectProgress = portwatchProjectProgress(project, milestones);
+    const projectProgress = scoreForProject(project);
     const avatar = String(project.avatar || project.name.slice(0, 2)).slice(0, 3);
     const stage = portwatchMilestone(project, milestones).label;
     const progressLabel = formatPercent(projectProgress);
@@ -2524,9 +2540,9 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
   }).join('');
   const projectList = projects.slice()
     .sort((left, right) => Number(isInactiveProject(left)) - Number(isInactiveProject(right))
-      || portwatchProjectProgress(right, milestones) - portwatchProjectProgress(left, milestones))
+      || scoreForProject(right) - scoreForProject(left))
     .map((project) => {
-      const projectProgress = portwatchProjectProgress(project, milestones);
+      const projectProgress = scoreForProject(project);
       const stage = portwatchMilestone(project, milestones).label;
       const avatar = String(project.avatar || project.name.slice(0, 2)).slice(0, 3);
       const inactive = isInactiveProject(project);
