@@ -27,24 +27,15 @@
         <a class="nav-link" href="#repositories" data-page-link="repositories">Corrida</a>
         <a class="nav-link nav-utility-link" href="#utility" data-page-link="utility">Meu PC Roda GTAVI</a>
         <a class="nav-link" href="#xlaunchvi" data-page-link="xlaunchvi">XlaunchVI</a>
-        <details class="nav-more">
-          <summary class="nav-link nav-more-toggle">Mais <span aria-hidden="true">⌄</span></summary>
-          <div class="nav-more-panel">
-            <div class="nav-more-status">
-              <span class="section-kicker">STATUS DO PORTAL</span>
-              <div class="header-freshness" id="header-freshness" role="group" aria-label="Atualização do tracker" aria-live="off" hidden>
-                <span class="header-freshness-dot" aria-hidden="true"></span>
-                <span class="header-freshness-full" id="header-freshness-full"></span>
-                <span class="header-freshness-short" id="header-freshness-short" aria-hidden="true"></span>
-              </div>
-            </div>
-            <a class="nav-more-link nav-link" href="#tracker" data-page-link="tracker">Monitoramento</a>
-            <a class="nav-more-link nav-link" href="#discord" data-page-link="discord">Comunidades</a>
-            <a class="button button-discord nav-more-cta" data-official-link href="#" aria-label="Participar da comunidade" target="_blank" rel="noopener noreferrer">
-              <span class="discord-icon" aria-hidden="true">◉</span><span>Participar da comunidade</span><span aria-hidden="true">↗</span>
-            </a>
+        <a class="nav-link" href="#tracker" data-page-link="tracker">
+          <span>Monitoramento do tracker</span>
+          <div class="header-freshness" id="header-freshness" role="group" aria-label="Atualização do tracker" aria-live="off" hidden>
+            <span class="header-freshness-dot" aria-hidden="true"></span>
+            <span class="header-freshness-full" id="header-freshness-full"></span>
+            <span class="header-freshness-short" id="header-freshness-short" aria-hidden="true"></span>
           </div>
-        </details>
+        </a>
+        <a class="nav-link" href="#discord" data-page-link="discord">Comunidades no Discord</a>
       </nav>
       <div class="header-actions">
         <div class="notification-center" id="notification-center">
@@ -398,10 +389,18 @@
       <section class="page-section" id="tracker" data-page="tracker">
         <div class="hero compact-hero"><div class="hero-content"><div class="eyebrow"><span class="eyebrow-dot"></span> FONTES · ALERTAS · REGISTROS <span class="eyebrow-line"></span> TRANSPARÊNCIA</div><h1>Monitoramento <span>do tracker.</span></h1><p class="hero-copy">Status do executável, mudanças recentes, ferramentas, triagem de cópias e registros de direitos autorais.</p></div></div>
         <div class="content-wrap page-content tracker-content">
+          <details class="tracker-accordion tracker-accordion-open" open>
+            <summary>Executável e vigilância</summary>
+            <div class="tracker-accordion-body">
           <section class="tracker-exe-grid">
             <article id="tracker-exe" class="panel tracker-exe-card"></article>
             <article id="tracker-scout" class="panel tracker-info-card"></article>
           </section>
+            </div>
+          </details>
+          <details class="tracker-accordion" open>
+            <summary>Atualizações e fontes</summary>
+            <div class="tracker-accordion-body">
           <section class="tracker-block">
             <div class="section-heading"><div><span class="section-kicker">HISTÓRICO RECENTE</span><h2>Mudanças <span>do tracker.</span></h2></div></div>
             <div id="tracker-changes" class="tracker-changes"></div>
@@ -423,6 +422,8 @@
             <div class="section-heading"><div><span class="section-kicker">FONTES EXTERNAS</span><h2>Manchetes <span>relacionadas.</span></h2></div></div>
             <div id="tracker-headlines" class="tracker-headlines-grid"></div>
           </section>
+            </div>
+          </details>
           <section class="tracker-block">
             <div class="section-heading"><div><span class="section-kicker">HISTÓRICO</span><h2>Linha do tempo <span>do progresso.</span></h2></div></div>
             <div id="tracker-history" class="tracker-history-grid"></div>

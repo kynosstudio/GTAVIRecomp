@@ -15,6 +15,7 @@
     { "name": "Xbox Series X", "architecture": "CPU Zen 2 · GPU RDNA 2", "gpuTflops": 12.15, "memory": "16 GB GDDR6", "target": "4K dinâmico · 30 FPS" }
   ],
   "gpus": [
+    { "id": "rx-550-4gb", "name": "AMD Radeon RX 550 4GB", "score": 13, "vram": 4 },
     { "id": "gtx-970", "name": "NVIDIA GeForce GTX 970", "score": 10, "vram": 4 },
     { "id": "gtx-1050ti", "name": "NVIDIA GeForce GTX 1050 Ti", "score": 9, "vram": 4 },
     { "id": "gtx-1060", "name": "NVIDIA GeForce GTX 1060 6 GB", "score": 15, "vram": 6 },
@@ -95,6 +96,7 @@
     { "id": "igpu-intel-arc", "name": "Intel Arc integrada · Core Ultra", "score": 18, "vram": 0, "integrated": true }
   ],
   "cpus": [
+    { "id": "i5-4570", "name": "Intel Core i5-4570 · 4ª geração", "score": 24, "memoryGenerations": ["ddr3"] },
     { "id": "i5-6500", "name": "Intel Core i5-6500 · 6ª geração", "score": 10, "memoryGenerations": ["ddr4"] },
     { "id": "i7-6700k", "name": "Intel Core i7-6700K · 6ª geração", "score": 14, "memoryGenerations": ["ddr4"] },
     { "id": "i5-7400", "name": "Intel Core i5-7400 · 7ª geração", "score": 12, "memoryGenerations": ["ddr4"] },

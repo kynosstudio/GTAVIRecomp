@@ -2210,17 +2210,6 @@ function countdownParts(timestamp) {
   return { days, hours, minutes, seconds };
 }
 
-function elapsedParts(timestamp) {
-  let totalSeconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
-  const days = Math.floor(totalSeconds / 86400);
-  totalSeconds %= 86400;
-  const hours = Math.floor(totalSeconds / 3600);
-  totalSeconds %= 3600;
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return { days, hours, minutes, seconds };
-}
-
 function renderHeroRaceClock(snapshot, leader, milestones, progress) {
   const panel = byId('hero-race-clock');
   if (!panel) return;
@@ -2247,9 +2236,30 @@ function renderHeroRaceClock(snapshot, leader, milestones, progress) {
       if (Number.isFinite(calculatedRate) && calculatedRate > 0) rate = calculatedRate;
     }
   }
-  const targetTimestamp = rate && nextMilestone
-    ? projectionBase + Math.max(0, Math.ceil((progressPercent(nextMilestone.percent) - progress) / rate)) * 86400000
-    : null;
+  const updateDates = [
+    snapshot && (snapshot.updatedAt || snapshot.updated),
+    ...(Array.isArray(snapshot && snapshot.news) ? snapshot.news.map((item) => item.updatedAt || item.date) : []),
+    ...(Array.isArray(snapshot && snapshot.changes) ? snapshot.changes.map((item) => item.updatedAt || item.date) : []),
+    ...(Array.isArray(snapshot && snapshot.history) ? snapshot.history.map((item) => item.updatedAt || item.date) : [])
+  ].map((value) => Date.parse(value || '')).filter((value) => Number.isFinite(value)).sort((left, right) => left - right);
+  const updateIntervals = updateDates.slice(1).map((value, index) => value - updateDates[index]).filter((value) => value > 0);
+  const averageIntervalMs = updateIntervals.length
+    ? updateIntervals.reduce((sum, value) => sum + value, 0) / updateIntervals.length
+    : 24 * 60 * 60 * 1000;
+  const activeEfforts = snapshot && Array.isArray(snapshot.efforts)
+    ? snapshot.efforts.filter((project) => !isInactiveProject(project))
+    : [];
+  const currentProgress = progressPercent(progress);
+  const remainingProgress = Math.max(0, 100 - currentProgress);
+  const repositoryFactor = Math.max(0.75, Math.min(1.35, 1 + (activeEfforts.length - 20) * 0.012));
+  const progressFactor = Math.max(0.75, 1 - currentProgress / 500);
+  const intervalFactor = 1 / Math.max(0.75, Math.min(1.5, averageIntervalMs / (24 * 60 * 60 * 1000)));
+  const pcProjectionMs = remainingProgress * 2.2 * repositoryFactor * progressFactor * intervalFactor * 24 * 60 * 60 * 1000;
+  const leakReference = Date.parse('2026-11-23T14:36:00Z');
+  const pcTargetTimestamp = Number.isFinite(leakReference)
+    ? leakReference + pcProjectionMs
+    : projectionBase + pcProjectionMs;
+  const targetTimestamp = Number.isFinite(pcTargetTimestamp) ? pcTargetTimestamp : null;
   const hasProjection = Number.isFinite(targetTimestamp);
   const remaining = hasProjection ? countdownParts(targetTimestamp) : null;
   const units = [
@@ -2259,15 +2269,19 @@ function renderHeroRaceClock(snapshot, leader, milestones, progress) {
     { key: 'seconds', label: 'segundos' }
   ];
   const targetDate = hasProjection ? new Date(targetTimestamp).toISOString() : '';
+  const intervalHours = averageIntervalMs / 3600000;
+  const periodicityLabel = intervalHours >= 24
+    ? `${Math.round(intervalHours / 24 * 10) / 10} ${t('dias')}`
+    : `${Math.round(intervalHours * 10) / 10} ${t('horas')}`;
   const status = hasProjection
-    ? `${t('Contagem estimada por')} ${escapeHtml(t(nextMilestone.label))}${leader ? ` · ${escapeHtml(leader.name)}` : ''}. ${t('Baseada no ritmo dos snapshots históricos e no progresso atual do tracker.')}`
-    : t('Não há amostras históricas suficientes para calcular uma contagem factual de próximo marco.');
+    ? `${t('Estimativa GTA VI para PC')} · ${progress}% ${t('de progresso')} · ${activeEfforts.length} ${t('projetos ativos')}. ${t('Atualizações em média a cada')} ${periodicityLabel}.`
+    : t('Não há dados suficientes para calcular uma estimativa factual de próxima atualização.');
   const title = hasProjection
     ? t('Estimativa até o próximo marco')
     : t('Contagem indisponível');
 
   panel.dataset.state = hasProjection ? (targetTimestamp > Date.now() ? 'active' : 'elapsed') : 'unavailable';
-  panel.innerHTML = `<span class="section-kicker">${escapeHtml(t('ESTIMATIVA FÁTICA DO TRACKER'))}</span>
+  panel.innerHTML = `<span class="section-kicker">${escapeHtml(t('ESTIMATIVA GTA VI PARA PC'))}</span>
     <h2>${escapeHtml(title)}</h2>
     <p class="hero-clock-target">${hasProjection && nextMilestone ? `${escapeHtml(t('Próximo marco:'))} <b>${escapeHtml(t(nextMilestone.label))}</b>` : escapeHtml(t('Sem projeção disponível'))}</p>
     <div class="hero-clock-units" aria-label="${escapeHtml(t('Contagem regressiva em dias, horas, minutos e segundos'))}" aria-live="off">
@@ -2275,7 +2289,7 @@ function renderHeroRaceClock(snapshot, leader, milestones, progress) {
     </div>
     ${targetDate ? `<time class="hero-clock-date" datetime="${escapeHtml(targetDate)}">${escapeHtml(t('Estimativa:'))} ${escapeHtml(formatNewsDate(targetDate))}</time>` : ''}
     <p class="hero-clock-status" role="status">${escapeHtml(status)}</p>
-    <small class="hero-clock-disclaimer">${escapeHtml(t('Contagem estimada com base em notícias, datas e marcos registrados no tracker. Não é data oficial de lançamento da Rockstar para PC.'))}</small>`;
+    <small class="hero-clock-disclaimer">${escapeHtml(t('Contagem estimada com base no progresso atual, quantidade de repositórios, vazamento de 23/11 às 11:36 BRT e periodicidade das atualizações do tracker. Não é uma data oficial confirmada pela Rockstar para PC.'))}</small>`;
   window.KynosI18n.translateDom(panel, state.language);
   if (!hasProjection) return;
 
@@ -2495,7 +2509,12 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
       : reportStage ? ` · ${t('Relato do Discord')}: ${reportStage}; ${t('snapshot GitHub/tracker')}: ${snapshotPercent}%` : '';
     const tooltip = `${project.name}: ${progressLabel}% · ${stage}${estimateLabel}`;
     const markerOffset = marker ? marker.offset : 0;
-    return `<button class="pw-project-marker align-${edge} ${project.teamReport ? 'pw-project-marker--xlaunch' : ''} ${projectProgress <= progress ? 'is-reached' : ''}" type="button" style="--marker-x:${projectProgress}%;--marker-lane:${lane};--marker-offset:${markerOffset}px" data-marker-progress="${projectProgress}" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(tooltip)}">
+    const repositoryUrl = project.repo ? `https://github.com/${encodeURIComponent(String(project.repo).split('/')[0])}/${encodeURIComponent(String(project.repo).split('/')[1] || '')}` : '';
+    const publicUrl = project.id !== 'cgbj' && safeUrl(repositoryUrl) !== '#' ? repositoryUrl : '';
+    const markerLabel = publicUrl
+      ? `Abrir repositório público de ${project.name}`
+      : project.id === 'cgbj' ? 'CGBJ · repositório privado' : `Sem repositório público: ${project.name}`;
+    return `<button class="pw-project-marker align-${edge} ${project.teamReport ? 'pw-project-marker--xlaunch' : ''} ${projectProgress <= progress ? 'is-reached' : ''}" type="button" style="--marker-x:${projectProgress}%;--marker-lane:${lane};--marker-offset:${markerOffset}px" data-marker-progress="${projectProgress}" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(publicUrl ? `${markerLabel}: ${tooltip}` : `${markerLabel}. ${tooltip}`)}" ${publicUrl ? `data-repository-url="${escapeHtml(publicUrl)}"` : 'data-private-repository="true"'}>
       ${avatarMarkup}
     </button>`;
   }).join('');
@@ -2519,11 +2538,17 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
       const avatarMarkup = project.avatarUrl
         ? `<img class="pw-avatar-image" width="28" height="28" src="${escapeHtml(safeUrl(project.avatarUrl))}" alt="" loading="lazy" decoding="async" /><span class="pw-avatar-fallback" hidden>${escapeHtml(avatar)}</span>`
         : escapeHtml(avatar);
-      return `<li class="pw-project-progress-item ${projectProgress ? 'is-progressing' : ''} ${inactive ? 'is-inactive' : ''}">
+      const repositoryUrl = project.repo ? `https://github.com/${String(project.repo).replace(/^https?:\/\/github\.com\//, '').replace(/\/+$/, '')}` : '';
+      const isPublic = project.id !== 'cgbj' && Boolean(repositoryUrl) && !project.private;
+      const itemTag = isPublic ? 'a' : 'article';
+      const itemAttributes = isPublic
+        ? `href="${escapeHtml(repositoryUrl)}" target="_blank" rel="noopener noreferrer"`
+        : `aria-label="${project.id === 'cgbj' ? 'CGBJ: repositório privado' : 'Projeto sem repositório público'}"`;
+      return `<${itemTag} class="pw-project-progress-item ${projectProgress ? 'is-progressing' : ''} ${inactive ? 'is-inactive' : ''}" ${itemAttributes}>
         <span class="pw-project-list-avatar" aria-hidden="true">${avatarMarkup}</span>
         <span class="pw-project-progress-copy"><b>${escapeHtml(project.name)}</b><small>${escapeHtml(stageText)}</small></span>
         <strong>${counterMarkup(projectProgress, 'percent')}%</strong>
-      </li>`;
+      </${itemTag}>`;
     }).join('');
   const milestoneButtons = milestones.map((milestone) => {
     const milestoneProgress = progressPercent(milestone.percent);
@@ -3930,11 +3955,6 @@ function setPage(page, updateHash = true, countVisit = true) {
   document.querySelectorAll('.page-section').forEach((section) => section.classList.toggle('active', !isAnalytics && section.dataset.page === page));
   document.querySelectorAll('.nav-link').forEach((link) => link.classList.toggle('active', link.dataset.pageLink === page));
   document.querySelector('.main-nav').classList.remove('open');
-  const navMore = document.querySelector('.nav-more');
-  if (navMore) {
-    navMore.open = false;
-    navMore.classList.toggle('has-active', page === 'tracker' || page === 'discord');
-  }
   document.querySelector('.menu-toggle').setAttribute('aria-expanded', 'false');
   if (updateHash) history.replaceState(null, '', `#${page}`);
   if (isAnalytics) renderAnalytics();
@@ -4307,6 +4327,10 @@ document.body.addEventListener('click', (event) => {
     const shouldOpen = !tooltip.classList.contains('is-tooltip-open');
     document.querySelectorAll('.pw-milestone.is-tooltip-open, .pw-project-marker.is-tooltip-open').forEach((item) => item.classList.remove('is-tooltip-open'));
     tooltip.classList.toggle('is-tooltip-open', shouldOpen);
+    const repositoryUrl = tooltip.dataset.repositoryUrl;
+    if (repositoryUrl) {
+      window.open(repositoryUrl, '_blank', 'noopener,noreferrer');
+    }
   } else {
     document.querySelectorAll('.pw-milestone.is-tooltip-open, .pw-project-marker.is-tooltip-open').forEach((item) => item.classList.remove('is-tooltip-open'));
   }

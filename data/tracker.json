@@ -25,7 +25,7 @@
         "A group called CGBJ has got GTA VI into its game world on PC, and a player can move in it. With a controller they walk around, talk to NPCs and open the in-game menu. PortWatch has verified that it gets in game. No public project has shown a player moving yet.",
         "It is far from playable, and it runs very slowly. In the run where a player walked around, the screen was black. A 77-second video posted on X on Tuesday shows more: GTA VI's opening scenes in flat colours with no lighting, from a car's interior to a street of waving NPCs, a guard and a prison yard.",
         "CGBJ's code is private. It builds on VIctory, the open-source layer whose author first showed GTA VI's menus on a livestream on Monday, and also takes some of XCL's work. Both are public on GitHub; CGBJ's changes aren't, so nobody outside the group can test them.",
-        "We've updated CGBJ to 75%, at our In-game stage, after it also began rendering cut-scenes at about 4 FPS. That rests on our own check: the video doesn't name the project, and nobody outside the group can reproduce the result yet."
+        "We've updated CGBJ to 75%, at our In-game stage. It privately uses VIctory and XCL, moves slowly, talks to NPCs and opens menus. A 77-second X video shows flat-colour, unlit scenes, and nobody outside the group can reproduce the private build."
       ],
       "sources": [
         {
@@ -598,7 +598,7 @@
       "tier": "tracked",
       "approach": "Compatibility layer",
       "target": "GTA VI only",
-      "summary": "A private build based on VIctory, using some of XCL's work. PortWatch verified it gets in game: a player moves and talks to NPCs, very slowly. It now also renders cut-scenes at about 4 FPS. A video shows the opening in flat, unlit colours and incomplete textures. Code not public.",
+      "summary": "A private build based on VIctory and XCL. VIctory is open-source and its author showed GTA VI menus live on Monday; XCL is public on GitHub, while CGBJ's changes remain private. CGBJ moves a player with a controller, walks around the map, talks to NPCs and opens menus, very slowly. It is far from playable: some scenes stay black, and a 77-second X video on Tuesday shows the car interior, NPC-filled street, guard and prison yard in flat colours with no complete lighting. The project name is not stated in the video.",
       "highlights": [
         "A player moves with a controller, talks to NPCs and opens the in-game menu",
         "A video on X shows the opening scenes in flat colours: a car, a street, a prison yard",
@@ -5768,7 +5768,7 @@
     {
       "date": "2026-11-24",
       "kind": "new",
-      "text": "CGBJ reaches #1 at 75% (“In-game”): PortWatch verified that its private build, based on VIctory with some of XCL's work, moves a player around GTA VI's world, very slowly, and now renders cut-scenes at about 4 FPS. The build remains without complete textures or lighting, and its code isn't public."
+      "text": "CGBJ reaches #1 at 75% (“In-game”): it builds privately on VIctory and XCL, with movement, NPC interaction and slow menus verified. A 77-second X video shows flat-colour, unlit scenes and the CGBJ name is not stated. Its code remains private and not externally reproducible."
     },
     {
       "date": "2026-11-24",

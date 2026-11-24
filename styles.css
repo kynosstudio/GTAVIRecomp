@@ -189,7 +189,7 @@ h1, h2, h3, p { margin-top: 0; }
 .pw-overall-value span { margin: .12em 0 0 .06em; font-size: .42em; letter-spacing: 0; }
 .pw-stats { display: grid; grid-template-columns: repeat(4, minmax(110px, 1fr)); gap: 7px; width: min(650px, 62%); }
 .pw-stat { min-width: 0; min-height: 62px; padding: 10px 12px; border-radius: 8px; }
-.pw-stat span { font-size: 10px; }
+.pw-stat span { font-size: 1px; }
 .pw-stat strong { font-size: 17px; }
 .pw-progress-track {
   height: 30px;
@@ -225,7 +225,6 @@ h1, h2, h3, p { margin-top: 0; }
   overflow: visible;
 }
 .pw-project-marker .pw-avatar { width: 24px; height: 24px; flex-basis: 24px; }
-.pw-project-marker-copy { display: flex; }
 .pw-project-marker {
   margin-left: var(--marker-offset, 0);
 }
@@ -238,23 +237,6 @@ h1, h2, h3, p { margin-top: 0; }
 .pw-curve-dot {
   fill: #ffc08f;
   filter: drop-shadow(0 0 5px rgba(255, 123, 71, .8));
-}
-.pw-leader-history {
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
-}
-.pw-leader-history p {
-  margin: 0 0 6px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-}
-.pw-leader-history svg {
-  width: 100%;
-  height: 84px;
-  display: block;
-  overflow: visible;
 }
 .collab-banner { padding: 21px 24px; display: flex; align-items: center; gap: 18px; border: 1px solid rgba(180,104,219,.3); border-radius: 9px; background: linear-gradient(110deg, rgba(88,56,112,.25), rgba(23,18,35,.9) 50%, rgba(255,123,71,.08)); }
 .collab-symbol { width: 47px; height: 47px; display: grid; place-items: center; flex: 0 0 47px; border-radius: 12px; color: #ffb17e; font-size: 24px; background: rgba(255,123,71,.13); }
@@ -760,7 +742,7 @@ body { font-size: 16px; }
 .section-kicker { color: #ffad86; }
 
 .portwatch-section { margin: 0 0 44px; }
-.pw-panel { overflow: hidden; padding: clamp(18px, 3vw, 30px); border-color: #3a2e49; background: radial-gradient(ellipse at 9% 0%, rgba(251, 118, 91, .095), transparent 34%), radial-gradient(ellipse at 100% 30%, rgba(167, 91, 220, .08), transparent 31%), rgba(19, 15, 31, .96); }
+.pw-panel { overflow: visible; padding: clamp(18px, 3vw, 30px); border-color: #3a2e49; background: radial-gradient(ellipse at 9% 0%, rgba(251, 118, 91, .095), transparent 34%), radial-gradient(ellipse at 100% 30%, rgba(167, 91, 220, .08), transparent 31%), rgba(19, 15, 31, .96); }
 .pw-overview { display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, .95fr); align-items: center; gap: 26px; }
 .pw-overview-main .section-kicker { max-width: 560px; font-size: 11px; line-height: 1.65; letter-spacing: .8px; }
 .pw-overview-main h2 { margin: 9px 0 13px; font: 600 clamp(24px, 3vw, 31px)/1.2 var(--display); letter-spacing: -.8px; }
@@ -780,8 +762,8 @@ body { font-size: 16px; }
 .pw-timeline-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
 .pw-timeline-heading h3 { margin: 7px 0 0; color: #f8f2fa; font: 600 20px/1.25 var(--display); }
 .pw-timeline-heading .section-kicker { font-size: 10px; }
-.pw-timeline-viewport { margin: 12px -4px 0; overflow-x: auto; overflow-y: hidden; padding: 10px 4px 0; scrollbar-color: #574460 #211b2c; scrollbar-width: thin; }
-.pw-timeline { position: relative; min-width: 1080px; height: 300px; margin: 0 10px; }
+.pw-timeline-viewport { margin: 12px -4px 0; overflow: visible; padding: 10px 4px 0; }
+.pw-timeline { position: relative; width: 100%; min-width: 0; height: 205px; margin: 0; }
 .pw-connectors { position: absolute; z-index: 0; inset: 0 auto auto; width: 100%; height: 248px; overflow: visible; pointer-events: none; }
 .pw-connectors line { stroke: rgba(255, 161, 122, .52); stroke-width: 1.35; stroke-dasharray: 4 5; }
 .pw-connectors circle { fill: #ffc08f; filter: drop-shadow(0 0 5px rgba(255, 123, 71, .8)); }
@@ -828,7 +810,7 @@ body { font-size: 16px; }
 .pw-milestone:first-child:hover::after, .pw-milestone:first-child:focus-visible::after { transform: translate(0, 0); }
 .pw-milestone:last-child:hover::after, .pw-milestone:last-child:focus-visible::after { transform: translate(-100%, 0); }
 .pw-scroll-hint { display: none; margin: 0; color: #bcb2c5; font-size: 12px; }
-.pw-project-list { margin-top: 17px; border-top: 1px solid rgba(164, 145, 180, .2); }
+.pw-project-list { margin-top: 17px; padding-top: 50px; border-top: 1px solid rgba(164, 145, 180, .2); }
 .pw-project-list summary { min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #f5edf7; font-size: 14px; font-weight: 700; list-style: none; cursor: pointer; }
 .pw-project-list summary::-webkit-details-marker { display: none; }
 .pw-project-list summary::after { width: 24px; height: 24px; flex: 0 0 24px; display: grid; place-items: center; border: 1px solid #55445f; border-radius: 50%; color: #ffc09d; content: '+'; font-size: 17px; line-height: 1; }
@@ -1646,7 +1628,7 @@ html[data-theme="light"] .pw-changes-heading h3 { color: var(--white); }
 .portal-home .pw-overview-main h2 { font-size: clamp(34px, 4vw, 46px); }
 .portal-home .pw-overall-value { font-size: clamp(88px, 10vw, 128px); text-shadow: 0 0 34px rgba(255, 123, 71, .35), 0 0 72px rgba(226, 95, 190, .18); }
 .portal-home .pw-headline p { max-width: 400px; font-size: clamp(16px, 1.8vw, 20px); }
-.portal-home .pw-stats { gap: 14px; }
+.portal-home .pw-stats {gap: 14px; }
 .portal-home .pw-stat {
   min-height: 120px;
   padding: 20px;
@@ -1661,13 +1643,13 @@ html[data-theme="light"] .pw-changes-heading h3 { color: var(--white); }
 .portal-home .pw-divider { margin: 36px 0 30px; background: linear-gradient(90deg, rgba(255, 123, 71, .64), rgba(219, 108, 204, .42), rgba(72, 59, 88, .3), transparent); }
 .portal-home .pw-timeline-heading h3 { font-size: 25px; }
 .portal-home .pw-timeline-viewport { margin-top: 18px; padding-top: 12px; }
-.portal-home .pw-timeline { min-width: 1100px; height: 400px; }
-.portal-home .pw-connectors { height: 306px; }
+.portal-home .pw-timeline { width: 100%; min-width: 0; height: 205px; }
+.portal-home .pw-connectors { height: 168px; }
 .portal-home .pw-connectors line { stroke: rgba(255, 177, 142, .68); stroke-width: 1.7; }
 .portal-home .pw-project-marker { top: calc(var(--marker-lane) * 28px); width: 52px; height: 52px; min-height: 52px; padding: 3px; background: rgba(30, 20, 42, .98); box-shadow: 0 6px 20px rgba(0, 0, 0, .35), 0 0 20px rgba(255, 123, 71, .13); }
 .portal-home .pw-project-marker--xlaunch { border-color: rgba(225, 133, 214, .9); box-shadow: 0 0 0 3px rgba(225, 133, 214, .14), 0 0 22px rgba(225, 96, 193, .3); }
 .portal-home .pw-avatar { width: 44px; height: 44px; flex-basis: 44px; font-size: 12px; }
-.portal-home .pw-progress-track { top: 306px; height: 18px; border-color: rgba(255, 181, 145, .5); background: #21182e; box-shadow: inset 0 2px 6px rgba(0, 0, 0, .5), 0 0 16px rgba(255, 105, 117, .12); }
+.portal-home .pw-progress-track { top: 168px; height: 11px; border-color: rgba(255, 181, 145, .5); background: #21182e; box-shadow: inset 0 2px 6px rgba(0, 0, 0, .5), 0 0 16px rgba(255, 105, 117, .12); }
 .portal-home .pw-progress-fill { background: linear-gradient(90deg, #ff704f, #ffd06b 52%, #ed72c6); box-shadow: 0 0 22px rgba(255, 123, 71, .65), 0 0 38px rgba(225, 96, 193, .24); }
 .portal-home .pw-milestone { top: 342px; width: 156px; gap: 7px; }
 .portal-home .pw-milestone b { font-size: 15px; }
@@ -1683,7 +1665,7 @@ html[data-theme="light"] .portal-home .pw-progress-track { border-color: #d7c6de
 @media (max-width: 680px) {
   .portal-home .pw-panel { padding: 20px 16px; }
   .portal-home .pw-overall-value { font-size: clamp(68px, 17vw, 92px); }
-  .portal-home .pw-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .portal-home .pw-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
   .portal-home .pw-stat { min-height: 100px; padding: 14px; }
   .portal-home .pw-stat span { font-size: 12px; }
   .portal-home .pw-stat strong { font-size: 21px; }
@@ -2191,40 +2173,6 @@ html[data-theme="light"] .xlaunch-repository-warning { color: #70520b; backgroun
 .brand { flex: 0 0 auto; }
 .main-nav { gap: clamp(8px, 1vw, 15px); }
 .main-nav .nav-link { white-space: nowrap; }
-.nav-more { position: relative; height: 100%; display: flex; align-items: center; flex: 0 0 auto; }
-.nav-more-toggle { gap: 5px; cursor: pointer; list-style: none; }
-.nav-more-toggle::-webkit-details-marker { display: none; }
-.nav-more-toggle span { color: var(--muted); font-size: 15px; }
-.nav-more[open] .nav-more-toggle { color: var(--white); }
-.nav-more.has-active .nav-more-toggle { color: var(--white); }
-.nav-more.has-active .nav-more-toggle::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--orange); box-shadow: 0 0 10px var(--orange); }
-.nav-more-panel {
-  position: absolute;
-  z-index: 60;
-  top: calc(100% - 1px);
-  right: -14px;
-  width: 260px;
-  padding: 12px;
-  display: grid;
-  gap: 5px;
-  border: 1px solid var(--line);
-  border-radius: 0 0 10px 10px;
-  background: rgba(18, 14, 28, .98);
-  box-shadow: 0 16px 34px rgba(0, 0, 0, .3);
-}
-.nav-more-status { padding: 2px 3px 8px; display: grid; gap: 8px; border-bottom: 1px solid var(--line); }
-.nav-more-status .section-kicker { font-size: 8px; }
-.nav-more-status .header-freshness { width: fit-content; min-height: 32px; }
-.nav-more-panel .nav-more-link {
-  min-height: 44px;
-  height: auto;
-  padding: 0 10px;
-  border-radius: 6px;
-}
-.nav-more-panel .nav-more-link:hover,
-.nav-more-panel .nav-more-link.active { background: rgba(255, 255, 255, .055); }
-.nav-more-panel .nav-more-link.active::after { display: none; }
-.nav-more-cta { min-height: 44px; margin-top: 5px; white-space: nowrap; }
 .header-freshness { white-space: nowrap; }
 
 @media (min-width: 901px) and (max-width: 1180px) {
@@ -2243,8 +2191,6 @@ html[data-theme="light"] .xlaunch-repository-warning { color: #70520b; backgroun
     background: transparent;
   }
   .main-nav .nav-link { min-height: 44px; height: 100%; font-size: 11px; }
-  .nav-more { height: 100%; }
-  .nav-more-panel .nav-more-link { height: auto; font-size: 13px; }
   .menu-toggle { display: none; }
   .header-actions { order: 0; gap: 5px; }
   .header-cta { width: 44px; min-width: 44px; padding: 0; gap: 2px; font-size: 0; }
@@ -2256,21 +2202,6 @@ html[data-theme="light"] .xlaunch-repository-warning { color: #70520b; backgroun
 @media (max-width: 900px) {
   .site-header { gap: 5px; }
   .main-nav { z-index: 55; }
-  .nav-more { height: auto; display: block; }
-  .nav-more-toggle { min-height: 44px; height: 44px !important; }
-  .nav-more-panel {
-    position: static;
-    width: 100%;
-    margin: 0 0 7px;
-    padding: 8px;
-    border-radius: 8px;
-    box-shadow: none;
-  }
-  .nav-more-status .header-freshness { width: fit-content; min-width: 0; min-height: 34px; padding: 0 9px; justify-content: flex-start; }
-  .nav-more-status .header-freshness-full { display: inline; }
-  .nav-more-status .header-freshness-short { display: none; }
-  .nav-more-cta { width: 100%; }
-  html[data-theme="light"] .nav-more-panel { background: rgba(250, 247, 252, .99); }
 }
 
 @media (max-width: 420px) {
@@ -2532,9 +2463,9 @@ html[data-theme="light"] .xlaunch-repository-warning { color: #70520b; backgroun
   border-radius: 999px;
 }
 .pw-project-marker .pw-avatar {
-  width: 22px;
-  height: 22px;
-  flex-basis: 22px;
+  width: 24px;
+  height: 24px;
+  flex-basis: 24px;
 }
 .pw-project-marker-copy b {
   font-size: 9px;
@@ -2542,23 +2473,12 @@ html[data-theme="light"] .xlaunch-repository-warning { color: #70520b; backgroun
 .pw-project-marker-copy small {
   font-size: 9px;
 }
-.pw-leader-history {
-  margin-top: 7px;
-  padding-top: 8px;
-}
-.pw-leader-history p {
-  margin-bottom: 3px;
-  font-size: 10px;
-}
-.pw-leader-history svg {
-  height: 58px;
-}
 .pw-project-list {
   margin-top: 8px;
 }
 .pw-project-list summary {
   min-height: 40px;
-  font-size: 12px;
+  font-size: 20px;
 }
 
 @media (max-width: 980px) {
@@ -2625,6 +2545,7 @@ html[data-theme="light"] .xlaunch-repository-warning { color: #70520b; backgroun
   grid-template-columns: minmax(280px, 1fr) minmax(430px, 1.45fr);
   align-items: center;
   gap: 12px;
+  
 }
 .portwatch-section .pw-panel .pw-stats {
   display: grid;
@@ -2633,9 +2554,9 @@ html[data-theme="light"] .xlaunch-repository-warning { color: #70520b; backgroun
   gap: 5px;
 }
 .portwatch-section .pw-panel .pw-stat {
-  height: 50px;
+  height: 100px;
   min-height: 50px;
-  padding: 6px 8px;
+  padding: 5px 5px;
 }
 .portwatch-section .pw-panel .pw-stat span {
   min-height: 22px;
@@ -2691,13 +2612,6 @@ html[data-theme="light"] .xlaunch-repository-warning { color: #70520b; backgroun
   top: calc(12px + var(--marker-lane) * 24px);
   width: 118px;
   min-height: 32px;
-}
-.portwatch-section .pw-panel .pw-leader-history {
-  margin-top: 5px;
-  padding-top: 7px;
-}
-.portwatch-section .pw-panel .pw-leader-history svg {
-  height: 48px;
 }
 
 @media (max-width: 980px) {
@@ -2788,6 +2702,159 @@ html[data-theme="light"] .xlaunch-repository-warning { color: #70520b; backgroun
   transform: translateX(-100%) scale(1.12);
 }
 
+.pw-project-progress-item,
+.pw-project-marker,
+.nav-link,
+.tracker-accordion,
+.tracker-accordion summary,
+.button,
+.tool-button,
+.target-option,
+.storage-choice,
+.discord-card,
+.news-card {
+  transition: transform .18s ease, opacity .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+.pw-project-progress-item:hover,
+.pw-project-marker:hover,
+.nav-link:hover,
+.tracker-accordion summary:hover,
+.button:hover,
+.tool-button:hover,
+.target-option:hover,
+.storage-choice:hover,
+.discord-card:hover,
+.news-card:hover {
+  transform: translateY(-2px);
+}
+.nav-link {
+  flex: 0 0 auto;
+}
+.main-nav {
+  gap: clamp(8px, .8vw, 13px);
+  flex-wrap: nowrap;
+}
+.header-freshness {
+  margin-left: 5px;
+  font-size: 9px;
+}
+.pw-project-marker {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  padding: 4px;
+  border-radius: 50%;
+}
+.pw-project-marker .pw-avatar {
+  width: 34px;
+  height: 34px;
+  flex-basis: 34px;
+}
+.pw-project-progress-item {
+  min-height: 58px;
+}
+.pw-project-list-avatar {
+  width: 38px;
+  height: 38px;
+  flex-basis: 38px;
+}
+.pw-project-progress-item:hover {
+  border-color: rgba(255, 166, 119, .55);
+  box-shadow: 0 8px 22px rgba(7, 4, 15, .24);
+}
+.pw-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.pw-stat span {
+  min-height: 30px;
+  font-size: 11px;
+  line-height: 1.25;
+}
+.pw-stat strong {
+  font-size: 16px;
+  line-height: 1.12;
+}
+.pw-stat:first-child strong {
+  font-size: 13px;
+}
+.pw-headline p {
+  font-size: 14px;
+}
+.pw-headline p b,
+.pw-headline p strong {
+  color: #ffb995;
+}
+.tracker-accordion {
+  display: block;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255,255,255,.018);
+}
+.tracker-accordion summary {
+  min-height: 48px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  color: var(--white);
+  font-weight: 700;
+  list-style: none;
+}
+.tracker-accordion summary::-webkit-details-marker {
+  display: none;
+}
+.tracker-accordion summary::after {
+  content: '+';
+  color: var(--orange);
+  font-size: 18px;
+}
+.tracker-accordion[open] summary::after {
+  content: '-';
+}
+.tracker-accordion summary:hover {
+  background: rgba(255,255,255,.045);
+}
+.tracker-accordion-body {
+  padding: 12px;
+  border-top: 1px solid var(--line);
+}
+@media (max-width: 980px) {
+  .main-nav {
+    flex-wrap: wrap;
+  }
+  .main-nav .nav-link {
+    height: 44px;
+  }
+  .pw-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-width: 680px) {
+  .pw-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pw-stat {
+    min-height: 58px;
+  }
+  .pw-project-marker {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+  }
+  .pw-project-marker .pw-avatar {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+  }
+  .pw-project-progress-item {
+    min-height: 54px;
+  }
+}
+
 .portwatch-section .pw-panel .pw-timeline {
   position: relative;
 }
@@ -2809,4 +2876,42 @@ html[data-theme="light"] .xlaunch-repository-warning { color: #70520b; backgroun
 .portwatch-section .pw-panel .pw-curve-dot {
   fill: #ffc08f;
   filter: drop-shadow(0 0 5px rgba(255, 123, 71, .8));
+}
+
+.portwatch-section .pw-panel .pw-project-marker[data-marker-progress="75"] {
+  border-color: #ffd079;
+  box-shadow: 0 0 0 3px rgba(255, 208, 121, .16), 0 0 22px rgba(255, 123, 71, .42);
+}
+.main-nav {
+  min-width: 0;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  gap: clamp(6px, .7vw, 11px);
+}
+.main-nav .nav-link {
+  font-size: clamp(11px, .85vw, 13px);
+}
+.main-nav .header-freshness {
+  display: inline-flex;
+  margin-left: 4px;
+  min-height: 24px;
+  height: 24px;
+  padding: 0 5px;
+  border-width: 1px;
+}
+@media (min-width: 901px) {
+  .main-nav {
+    display: flex;
+  }
+  .header-actions {
+    flex: 0 0 auto;
+  }
+}
+@media (max-width: 900px) {
+  .main-nav {
+    width: 100%;
+  }
+  .main-nav.open .nav-link {
+    width: 100%;
+  }
 }
