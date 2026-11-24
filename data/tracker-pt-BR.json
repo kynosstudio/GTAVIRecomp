@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-24T20:59:04.000Z",
+  "updatedAt": "2026-11-24T22:10:46.371Z",
   "lastSyncedAt": "2026-11-24T05:07:48.307Z",
   "sourceFile": "data/tracker.json",
   "teams": {
@@ -76,6 +76,20 @@
     }
   },
   "news": [
+    {
+      "id": "2026-11-24-take-two-dmca-leonida-forks",
+      "date": "2026-11-24",
+      "category": "Takedown",
+      "title": "Take-Two's first GTA VI port takedown disables Leonida and 3,007 forks",
+      "summary": "A DMCA notice published by GitHub on Tuesday targets the Leonida repository, and GitHub applied it to the project's entire fork network.",
+      "sources": [
+        {
+          "outlet": "GitHub",
+          "title": "DMCA notice from Take-Two Interactive, 2026-11-24",
+          "url": "https://github.com/github/dmca/blob/master/2026/11/2026-11-24-take-two.md"
+        }
+      ]
+    },
     {
       "id": "2026-11-24-new-progress-scale",
       "date": "2026-11-24",
@@ -565,16 +579,15 @@
   ],
   "efforts": [
     {
-      "id": "hyphennn",
-      "name": "hyphennn",
+      "id": "suri",
+      "name": "suri",
       "repo": null,
       "url": "",
       "tier": "tracked",
       "status": "acompanhado",
       "nuked": null,
-      "percent": 65.0,
-      "manualScore": 65.0,
-      "portwatchPercent": 65.0,
+      "percent": 61.0,
+      "portwatchPercent": 61.0,
       "portwatchMilestonePercent": 50,
       "groundworkFraction": 0.0,
       "reached": "playable",
@@ -605,7 +618,7 @@
         "world": 1,
         "playable": 1,
         "story": 0,
-        "render": 0.75,
+        "render": 0.8,
         "fps": 3,
         "stability": "unknown"
       },
@@ -781,23 +794,23 @@
     },
     {
       "id": "victory-gta6",
-      "name": "victory-gta6",
-      "repo": "fxceless/victory-gta6",
-      "url": "https://github.com/fxceless/victory-gta6",
+      "name": "hyphennn",
+      "repo": "fxceless/victory-fork",
+      "url": "https://github.com/fxceless/victory-fork",
       "tier": "tracked",
       "status": "acompanhado",
       "nuked": null,
-      "percent": 57.2,
-      "portwatchPercent": 57.2,
+      "percent": 59.8,
+      "portwatchPercent": 59.8,
       "portwatchMilestonePercent": 50,
       "groundworkFraction": 0.0,
       "reached": "playable",
       "stage": "Jogável",
       "summary": "O tracker registra atividade de inicialização, mas o resultado é autodeclarado e ainda não foi verificado de forma independente.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 179,
-      "forks": 24,
-      "lastRepositoryUpdate": "2026-11-24T19:32:07Z",
+      "stars": 1258,
+      "forks": 274,
+      "lastRepositoryUpdate": "2026-11-24T22:00:21Z",
       "repositoryMissing": false,
       "repositoryHttpStatus": null,
       "repositoryAssessedAt": "2026-11-24",
@@ -819,7 +832,7 @@
         "world": 1,
         "playable": 1,
         "story": 0,
-        "render": 0.5,
+        "render": 0.7,
         "fps": 3,
         "stability": "unknown"
       },
@@ -866,9 +879,9 @@
       "stage": "Dentro do mundo (relato)",
       "summary": "Camada em Rust. Relata telas iniciais a 30 FPS e chegada ao mundo, com iluminação parcial e áudio; a cena ainda não é jogável e os relatos são autodeclarados.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 10576,
-      "forks": 1530,
-      "lastRepositoryUpdate": "2026-11-24T09:55:08Z",
+      "stars": 11099,
+      "forks": 1608,
+      "lastRepositoryUpdate": "2026-11-24T21:37:26Z",
       "repositoryMissing": false,
       "repositoryHttpStatus": null,
       "repositoryAssessedAt": "2026-11-24",
@@ -945,8 +958,8 @@
       "stage": "Preparação",
       "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 1792,
-      "forks": 119,
+      "stars": 1813,
+      "forks": 118,
       "lastRepositoryUpdate": "2026-11-23T11:58:17Z",
       "repositoryMissing": false,
       "repositoryHttpStatus": null,
@@ -1021,9 +1034,9 @@
       "stage": "Carregamento do mundo (relato)",
       "summary": "Camada de compatibilidade que executa código de Xbox Series no Windows. Testes relatam menus e carregamento do mundo; a imagem ainda fica presa na tela de carregamento e os resultados não foram reproduzidos de forma independente.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 7528,
-      "forks": 962,
-      "lastRepositoryUpdate": "2026-11-24T18:29:22Z",
+      "stars": 7737,
+      "forks": 1012,
+      "lastRepositoryUpdate": "2026-11-24T22:07:23Z",
       "repositoryMissing": false,
       "repositoryHttpStatus": null,
       "repositoryAssessedAt": "2026-11-24",
@@ -1105,8 +1118,8 @@
       "stage": "Preparação",
       "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 256,
-      "forks": 24,
+      "stars": 259,
+      "forks": 23,
       "lastRepositoryUpdate": "2026-11-22T10:38:07Z",
       "repositoryMissing": false,
       "repositoryHttpStatus": null,
@@ -1181,9 +1194,9 @@
       "stage": "Primeiro quadro",
       "summary": "Camada voltada a Linux/Proton. Registrou a tela de seleção de jogador em 4K, sem interação; o marco é um primeiro quadro, não um menu.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 296,
-      "forks": 22,
-      "lastRepositoryUpdate": "2026-11-24T17:30:45Z",
+      "stars": 309,
+      "forks": 24,
+      "lastRepositoryUpdate": "2026-11-24T22:06:48Z",
       "repositoryMissing": false,
       "repositoryHttpStatus": null,
       "repositoryAssessedAt": "2026-11-24",
@@ -1337,7 +1350,7 @@
       "status": "offline",
       "nuked": {
         "at": "2026-11-23",
-        "note": "Discord gone, GitHub repo deleted and creator quit on Nov 23. The code lives on in contributors' forks and a frozen mirror."
+        "note": "Discord gone, GitHub repo deleted and creator quit on Nov 23. On Nov 24 a Take-Two DMCA notice disabled its network of 3,007 GitHub forks; separately uploaded copies and a frozen mirror remain."
       },
       "percent": 10.0,
       "portwatchPercent": 10.0,
@@ -1431,9 +1444,9 @@
       "stage": "Preparação",
       "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 86,
-      "forks": 12,
-      "lastRepositoryUpdate": "2026-11-24T06:47:57Z",
+      "stars": 89,
+      "forks": 11,
+      "lastRepositoryUpdate": "2026-11-24T21:43:43Z",
       "repositoryMissing": false,
       "repositoryHttpStatus": null,
       "repositoryAssessedAt": "2026-11-23",
@@ -1507,8 +1520,8 @@
       "stage": "Preparação",
       "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 40,
-      "forks": 4,
+      "stars": 41,
+      "forks": 3,
       "lastRepositoryUpdate": "2026-11-24T00:30:36Z",
       "repositoryMissing": false,
       "repositoryHttpStatus": null,
@@ -1583,9 +1596,9 @@
       "stage": "Menus parciais (relato)",
       "summary": "Pesquisa de recompilação estática. O README relata uma introdução e telas de configuração em um executável de diagnóstico modificado; o executável original e os menus continuam sem confirmação.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 1877,
-      "forks": 211,
-      "lastRepositoryUpdate": "2026-11-24T19:13:11Z",
+      "stars": 1892,
+      "forks": 215,
+      "lastRepositoryUpdate": "2026-11-24T22:10:17Z",
       "repositoryMissing": false,
       "repositoryHttpStatus": null,
       "repositoryAssessedAt": "2026-11-24",
@@ -1667,9 +1680,9 @@
       "stage": "Preparação",
       "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 233,
-      "forks": 25,
-      "lastRepositoryUpdate": "2026-11-24T17:19:25Z",
+      "stars": 266,
+      "forks": 28,
+      "lastRepositoryUpdate": "2026-11-24T22:09:37Z",
       "repositoryMissing": false,
       "repositoryHttpStatus": null,
       "repositoryAssessedAt": "2026-11-24",
@@ -1743,7 +1756,7 @@
       "stage": "Preparação",
       "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 217,
+      "stars": 222,
       "forks": 11,
       "lastRepositoryUpdate": "2026-11-23T19:24:06Z",
       "repositoryMissing": false,
@@ -1819,7 +1832,7 @@
       "stage": "Preparação",
       "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 59,
+      "stars": 60,
       "forks": 6,
       "lastRepositoryUpdate": "2026-11-24T13:09:35Z",
       "repositoryMissing": false,
@@ -2123,7 +2136,7 @@
       "stage": "Executável em execução",
       "summary": "Relata executar o código até uma sequência de quadros pretos antes de a GPU travar; ainda sem imagem utilizável.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 38,
+      "stars": 39,
       "forks": 3,
       "lastRepositoryUpdate": "2026-11-24T09:38:35Z",
       "repositoryMissing": false,
@@ -2282,7 +2295,7 @@
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
       "stars": 2,
       "forks": 1,
-      "lastRepositoryUpdate": "2026-11-24T19:07:33Z",
+      "lastRepositoryUpdate": "2026-11-24T20:33:36Z",
       "repositoryMissing": false,
       "repositoryHttpStatus": null,
       "repositoryAssessedAt": "2026-11-22",
@@ -2356,7 +2369,7 @@
       "stage": "Preparação",
       "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 7,
+      "stars": 8,
       "forks": 0,
       "lastRepositoryUpdate": "2026-11-23T22:48:15Z",
       "repositoryMissing": false,
@@ -2586,7 +2599,7 @@
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
       "stars": 4,
       "forks": 0,
-      "lastRepositoryUpdate": "2026-11-24T18:47:59Z",
+      "lastRepositoryUpdate": "2026-11-24T22:08:07Z",
       "repositoryMissing": false,
       "repositoryHttpStatus": null,
       "repositoryAssessedAt": "2026-11-23",
@@ -2663,7 +2676,7 @@
       "verification": "Estimativa editorial baseada em relato; não é medição oficial nem marco confirmado no GitHub.",
       "stars": 4,
       "forks": 1,
-      "lastRepositoryUpdate": "2026-11-24T19:04:46Z",
+      "lastRepositoryUpdate": "2026-11-24T21:48:05Z",
       "repositoryMissing": false,
       "repositoryHttpStatus": null,
       "repositoryAssessedAt": "2026-11-23",
@@ -2798,9 +2811,9 @@
       "stage": "Preparação",
       "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 69,
+      "stars": 70,
       "forks": 3,
-      "lastRepositoryUpdate": "2026-11-24T17:44:54Z",
+      "lastRepositoryUpdate": "2026-11-24T21:26:16Z",
       "repositoryMissing": false,
       "repositoryHttpStatus": null,
       "repositoryAssessedAt": "2026-11-24",
@@ -2874,9 +2887,9 @@
       "stage": "Menu principal parcial (relato)",
       "summary": "O README relata telas iniciais e de configuração respondendo a comandos simulados, mas sem captura pública; o carregamento da história para em memória corrompida.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 174,
-      "forks": 8,
-      "lastRepositoryUpdate": "2026-11-24T19:12:57Z",
+      "stars": 190,
+      "forks": 9,
+      "lastRepositoryUpdate": "2026-11-24T22:08:32Z",
       "repositoryMissing": false,
       "repositoryHttpStatus": null,
       "repositoryAssessedAt": "2026-11-24",
@@ -2958,7 +2971,7 @@
       "stage": "Preparação",
       "summary": "Em acompanhamento; o tracker ainda não registra um marco de GTA VI confirmado para este projeto.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 7,
+      "stars": 8,
       "forks": 0,
       "lastRepositoryUpdate": "2026-11-24T07:52:34Z",
       "repositoryMissing": false,
@@ -3110,9 +3123,9 @@
       "stage": "Executável em execução",
       "summary": "Continuação aberta da Leonida. Registra a execução do executável até uma interrupção na criação de recursos, sem exibir um quadro.",
       "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
-      "stars": 134,
-      "forks": 54,
-      "lastRepositoryUpdate": "2026-11-24T19:13:18Z",
+      "stars": 0,
+      "forks": 0,
+      "lastRepositoryUpdate": "2026-11-24T22:07:17Z",
       "repositoryMissing": false,
       "repositoryHttpStatus": null,
       "repositoryAssessedAt": "2026-11-24",
@@ -3176,6 +3189,78 @@
         ],
         "groundworkNote": "Indicadores técnicos do snapshot; não representam progresso de GTA VI."
       }
+    },
+    {
+      "id": "hyphennn",
+      "name": "hyphennn",
+      "repo": null,
+      "url": "",
+      "tier": "tracked",
+      "status": "acompanhado",
+      "nuked": null,
+      "percent": 65.0,
+      "manualScore": 65.0,
+      "portwatchPercent": 65.0,
+      "portwatchMilestonePercent": 50,
+      "groundworkFraction": 0.0,
+      "reached": "playable",
+      "stage": "Jogável",
+      "summary": "O tracker registra atividade de inicialização, mas o resultado é autodeclarado e ainda não foi verificado de forma independente.",
+      "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
+      "stars": null,
+      "forks": null,
+      "lastRepositoryUpdate": null,
+      "repositoryMissing": false,
+      "repositoryHttpStatus": null,
+      "repositoryAssessedAt": "2026-11-24",
+      "provenOn": null,
+      "gtaMilestones": {
+        "loads": 1,
+        "boots": 1,
+        "menu": 1,
+        "world": 1,
+        "playable": 1,
+        "ingame": 0,
+        "fps": 3,
+        "stability": "unknown"
+      },
+      "gta": {
+        "loads": 1,
+        "boots": 1,
+        "menu": 1,
+        "world": 1,
+        "playable": 1,
+        "story": 0,
+        "render": 0.75,
+        "fps": 3,
+        "stability": "unknown"
+      },
+      "groundwork": {},
+      "technicalDetails": {
+        "approach": "",
+        "target": "",
+        "highlights": [],
+        "blockers": [],
+        "groundwork": [
+          {
+            "label": "Carregador PE e bibliotecas",
+            "percent": 0
+          },
+          {
+            "label": "Tradutor de shaders",
+            "percent": 0
+          },
+          {
+            "label": "Backend gráfico D3D12",
+            "percent": 0
+          },
+          {
+            "label": "Execução comprovada",
+            "percent": 0
+          }
+        ],
+        "groundworkNote": "Indicadores técnicos do snapshot; não representam progresso de GTA VI."
+      }
     }
   ],
   "editorial": {
@@ -3223,7 +3308,80 @@
         "basis": "manual-local-report"
       }
     },
-    "manualEfforts": [],
+    "manualEfforts": [
+      {
+        "id": "hyphennn",
+        "name": "hyphennn",
+        "repo": null,
+        "url": "",
+        "tier": "tracked",
+        "status": "acompanhado",
+        "nuked": null,
+        "percent": 65.0,
+        "manualScore": 65.0,
+        "portwatchPercent": 65.0,
+        "portwatchMilestonePercent": 50,
+        "groundworkFraction": 0.0,
+        "reached": "playable",
+        "stage": "Jogável",
+        "summary": "O tracker registra atividade de inicialização, mas o resultado é autodeclarado e ainda não foi verificado de forma independente.",
+        "verification": "Relato dos próprios projetos; não equivale a reprodução independente.",
+        "stars": null,
+        "forks": null,
+        "lastRepositoryUpdate": null,
+        "repositoryMissing": false,
+        "repositoryHttpStatus": null,
+        "repositoryAssessedAt": "2026-11-24",
+        "provenOn": null,
+        "gtaMilestones": {
+          "loads": 1,
+          "boots": 1,
+          "menu": 1,
+          "world": 1,
+          "playable": 1,
+          "ingame": 0,
+          "fps": 3,
+          "stability": "unknown"
+        },
+        "gta": {
+          "loads": 1,
+          "boots": 1,
+          "menu": 1,
+          "world": 1,
+          "playable": 1,
+          "story": 0,
+          "render": 0.75,
+          "fps": 3,
+          "stability": "unknown"
+        },
+        "groundwork": {},
+        "technicalDetails": {
+          "approach": "",
+          "target": "",
+          "highlights": [],
+          "blockers": [],
+          "groundwork": [
+            {
+              "label": "Carregador PE e bibliotecas",
+              "percent": 0
+            },
+            {
+              "label": "Tradutor de shaders",
+              "percent": 0
+            },
+            {
+              "label": "Backend gráfico D3D12",
+              "percent": 0
+            },
+            {
+              "label": "Execução comprovada",
+              "percent": 0
+            }
+          ],
+          "groundworkNote": "Indicadores técnicos do snapshot; não representam progresso de GTA VI."
+        }
+      }
+    ],
     "news": []
   },
   "tools": [
@@ -3233,7 +3391,7 @@
       "url": "https://github.com/lynxnathan/rage-tools-vi",
       "kind": "Ferramentas de arquivos",
       "description": "Ferramentas Python para inspecionar arquivos RPF9, áudio e esquemas de scripts.",
-      "stars": 9
+      "stars": 11
     },
     {
       "name": "GTA VI PC port hub",
@@ -3265,7 +3423,7 @@
       "url": "https://github.com/breadbbbb/rpf9-explorer",
       "kind": "Explorador de arquivos",
       "description": "Explorador para Windows com visualização de modelos, texturas, áudio e vídeo.",
-      "stars": 95
+      "stars": 96
     },
     {
       "name": "bcpack-rs",
@@ -3305,7 +3463,7 @@
       "url": "https://github.com/Ahmet-Dedeler/awesome-gta6-reverse-engineering",
       "kind": "Lista curada",
       "description": "Lista curada de ferramentas abertas de engenharia reversa e camadas de compatibilidade.",
-      "stars": 674
+      "stars": 684
     },
     {
       "name": "gta6-explorer",
@@ -3313,7 +3471,7 @@
       "url": "https://github.com/HolyRoses/gta6-explorer",
       "kind": "Ferramenta",
       "description": "Ferramenta somente de leitura para navegar por pacotes e extrair recursos.",
-      "stars": 11
+      "stars": 12
     },
     {
       "name": "6stars",
@@ -3361,7 +3519,7 @@
       "url": "https://github.com/Librett0/vice-lens",
       "kind": "Ferramenta",
       "description": "Explorador de mapas, modelos, animações, vídeos e sons de arquivos locais.",
-      "stars": 7
+      "stars": 8
     },
     {
       "name": "xseriesrecomp",
@@ -3421,14 +3579,14 @@
       "kind": "effort"
     },
     {
-      "repo": "AlexeySamosadov/Daiana",
-      "name": "Daiana",
+      "repo": "Steinkoloss/port-of-the-americas",
+      "name": "port-of-the-americas",
       "status": "new",
       "kind": "effort"
     },
     {
-      "repo": "synrgizeross/leonida-sys",
-      "name": "leonida-sys",
+      "repo": "darkstarnow/LNDA-V2",
+      "name": "LNDA-V2",
       "status": "new",
       "kind": "effort"
     },
@@ -3445,8 +3603,26 @@
       "kind": "effort"
     },
     {
-      "repo": "emanuele-giuseppe/main-leonida",
-      "name": "main-leonida",
+      "repo": "NightVibes33/Leo",
+      "name": "Leo",
+      "status": "new",
+      "kind": "effort"
+    },
+    {
+      "repo": "ODanielAtaide/GTA6VORTEXRECOMP",
+      "name": "GTA6VORTEXRECOMP",
+      "status": "new",
+      "kind": "effort"
+    },
+    {
+      "repo": "felicienradio/victory-gta6-fr",
+      "name": "victory-gta6-fr",
+      "status": "new",
+      "kind": "effort"
+    },
+    {
+      "repo": "0x0007b/XBVK",
+      "name": "XBVK",
       "status": "new",
       "kind": "effort"
     },
@@ -3457,8 +3633,8 @@
       "kind": "effort"
     },
     {
-      "repo": "Click2x/BananaTheftAuto",
-      "name": "BananaTheftAuto",
+      "repo": "LeonardWernke/WaveSpan",
+      "name": "WaveSpan",
       "status": "new",
       "kind": "effort"
     },
@@ -3471,6 +3647,12 @@
     {
       "repo": "saics/xlayer",
       "name": "xlayer",
+      "status": "new",
+      "kind": "effort"
+    },
+    {
+      "repo": "NUXX-G/gta6-pc-tracker",
+      "name": "gta6-pc-tracker",
       "status": "new",
       "kind": "effort"
     },
@@ -3529,44 +3711,20 @@
       "kind": "effort"
     },
     {
+      "repo": "schizoidcock/palmwave",
+      "name": "palmwave",
+      "status": "new",
+      "kind": "effort"
+    },
+    {
       "repo": "Archivist-Atlas/gta-vi-astral",
       "name": "gta-vi-astral",
       "status": "new",
       "kind": "effort"
     },
     {
-      "repo": "LPortVI/VILauncher",
-      "name": "VILauncher",
-      "status": "new",
-      "kind": "effort"
-    },
-    {
-      "repo": "JokiiiBoy/GTA6-btw",
-      "name": "GTA6-btw",
-      "status": "new",
-      "kind": "effort"
-    },
-    {
       "repo": "7jycwjmbfn-eng/scenegate-vi",
       "name": "scenegate-vi",
-      "status": "new",
-      "kind": "effort"
-    },
-    {
-      "repo": "TheoBIET/OpenVI",
-      "name": "OpenVI",
-      "status": "new",
-      "kind": "effort"
-    },
-    {
-      "repo": "nineforge0/forge9",
-      "name": "forge9",
-      "status": "new",
-      "kind": "effort"
-    },
-    {
-      "repo": "Yhozen/series-web",
-      "name": "series-web",
       "status": "new",
       "kind": "effort"
     }
@@ -3607,7 +3765,7 @@
     {
       "id": "auto-clone-networks",
       "title": "Redes de repositórios clonados",
-      "count": 19,
+      "count": 23,
       "summary": "A triagem automática sinalizou cópias e iscas de instaladores que repetem nomes ou descrições de projetos conhecidos.",
       "examples": [
         "FREE-GTA6-LOADING/.github",
@@ -3616,12 +3774,12 @@
         "GTA-VI-Launcher/.github",
         "Free-GTA-VI/.github"
       ],
-      "membersCount": 19
+      "membersCount": 23
     },
     {
       "id": "copies",
       "title": "Reenvios de projetos acompanhados",
-      "count": 60,
+      "count": 66,
       "summary": "O tracker lista reenvios sob outras contas. Cópias podem ser alteradas para incluir malware; prefira os links dos repositórios originais.",
       "examples": [
         "FaelSemW/RafaVI",
@@ -3630,18 +3788,18 @@
         "elmoudir12/Leonida",
         "pixl27/ProjectReCity"
       ],
-      "membersCount": 60
+      "membersCount": 66
     }
   ],
   "ignored": {
-    "count": 387,
+    "count": 407,
     "summary": "Itens fora do escopo, cópias, páginas sem código funcional e projetos ainda sem evidência suficiente.",
     "categories": {
-      "clones": 95,
-      "foraDoEscopo": 144,
-      "semReadme": 27,
-      "poucoConteudo": 89,
-      "outros": 32
+      "clones": 105,
+      "foraDoEscopo": 146,
+      "semReadme": 30,
+      "poucoConteudo": 93,
+      "outros": 33
     }
   },
   "history": [
@@ -3674,10 +3832,10 @@
     },
     {
       "date": "2026-11-24",
-      "leaderId": "hyphennn",
-      "leaderName": "hyphennn",
-      "leader": 65.0,
-      "top3": 60.1,
+      "leaderId": "suri",
+      "leaderName": "suri",
+      "leader": 61.0,
+      "top3": 59.6,
       "furthest": "Jogável",
       "tracked": 33
     }
@@ -3685,39 +3843,44 @@
   "changes": [
     {
       "date": "2026-11-24",
-      "kind": "novo",
-      "sourceText": "victory-gta6, fxceless's public fork of VIctory, joins at #1 with 74% (“In-game”): its README reports the prologue rendering with HUD, pause menu and pad input at 2-4 fps, with shadowed areas black (self-reported). omonkey's private build is based on it.",
-      "summary": "Novo candidato ou atividade registrada para triagem; ainda sem confirmação."
-    },
-    {
-      "date": "2026-11-24",
       "kind": "alerta",
-      "sourceText": "New scale: Playable is now 50%, and the other half comes from story progress, rendering, performance and stability; 100% means the game can be finished. Every project was re-scored, so the numbers are lower: hyphennn's private build leads at 59.4%.",
+      "sourceText": "hyphennn's private build re-rated at 59.8%: on his Rumble stream the opening prison scenes look very good, with ray-traced lighting and detailed textures and hair, but at about 3 fps.",
       "summary": "Novo alerta sinalizado pelo tracker e encaminhado para triagem."
     },
     {
       "date": "2026-11-24",
       "kind": "novo",
-      "sourceText": "hyphennn's private build joins at 59.4% (“Playable”): it's built on victory-gta6 and streamed on Rumble, and its shaders look a lot better than other builds'. Its code isn't public, so it isn't ranked in the race.",
+      "sourceText": "hyphennn's build is public: victory-gta6 was renamed fxceless/victory-fork, the code behind his Rumble streams. The two entries are now one, and it leads the race at 59.8%. Its README still lists shadows as black; the streams show a newer build with ray-traced lighting.",
       "summary": "Novo candidato ou atividade registrada para triagem; ainda sem confirmação."
     },
     {
       "date": "2026-11-24",
-      "kind": "progresso",
-      "sourceText": "hyphennn's private build rises to 59.9%: ray tracing now shows on his Rumble stream, a step further for its rendering. Score 59.4% → 59.9%.",
-      "summary": "Atualização de progresso registrada no tracker; o resultado é autodeclarado e aguarda confirmação independente."
+      "kind": "novo",
+      "sourceText": "suri's private build joins at 61% (“Playable”): working in private on hyphennn's victory-fork, it moves around Lucia's prologue at about 3 fps, confirmed by PortWatch, and looks almost like the retail game. Its code isn't public, so it isn't ranked in the race.",
+      "summary": "Novo candidato ou atividade registrada para triagem; ainda sem confirmação."
     },
     {
       "date": "2026-11-24",
-      "kind": "progresso",
-      "sourceText": "hyphennn's private build rises to 65%: on his Rumble stream the opening prison scenes now look very close to the console, with ray-traced lighting, detailed textures and hair, though at about 3 fps. Score 59.9% → 65%.",
-      "summary": "Atualização de progresso registrada no tracker; o resultado é autodeclarado e aguarda confirmação independente."
+      "kind": "atualização",
+      "sourceText": "Take-Two's DMCA notice against Leonida, published Nov 24, disabled the project's whole GitHub network of 3,007 forks. Other ports, such as VIctory and XCL, aren't named in it.",
+      "summary": "Novo candidato ou atividade registrada para triagem; ainda sem confirmação."
+    },
+    {
+      "date": "2026-11-24",
+      "kind": "alegação",
+      "sourceText": "AnyXboxX's README may claim a new milestone (perf): “- ✅ The Xbox Series 1.0.2.1 build of GTA VI launches on PC: boot, profile screen, first-run settings, legal screens, loa”",
+      "summary": "Nova alegação registrada pelo tracker; ainda sem confirmação independente."
+    },
+    {
+      "date": "2026-11-24",
+      "kind": "novo",
+      "summary": "O scout sinalizou 16 candidatos a possíveis esforços; todos aguardam confirmação. Exemplos: ODanielAtaide/GTA6VORTEXRECOMP, chvabalo-interactive/sludgemu, LeonardWernke/WaveSpan, 0x0007b/XBVK."
     }
   ],
   "scout": {
     "since": "2026-11-19",
-    "lastRun": "2026-11-24T19:14:06.668Z",
-    "summary": "Última varredura: 24 repositórios atualizados, 4 READMEs alterados, 10 candidatos novos e 11 itens sinalizados.",
+    "lastRun": "2026-11-24T22:10:46.371Z",
+    "summary": "Última varredura: 25 repositórios atualizados, 8 READMEs alterados, 16 candidatos novos e 10 itens sinalizados.",
     "sources": [
       "GitHub",
       "Reddit",
@@ -3730,10 +3893,52 @@
   },
   "headlines": [
     {
-      "title": "New Take-Two DMCA notice filed on GitHub (1 repositories)",
-      "outlet": "GitHub DMCA log",
-      "date": "2026-11-24T12:00:00.000Z",
-      "url": "https://github.com/github/dmca/blob/master/2026/11/2026-11-24-take-two.md"
+      "title": "GTA 6 on PC: Rockstar and Take-Two Prevented Unofficial Port to Happen",
+      "outlet": "EGW.News",
+      "date": "2026-11-24T21:46:58.000Z",
+      "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxOdEVlUjU3b1Q5SU5hSTBrRzRsV1F1WU5fcHZ3cm1uX0s0X3l5N1RmajNpZk04N3dBYUpzRzBWVlhPVmZRZlU5dDFCdUVTcnQ2dzJ3UDl0Zlk4cjgtMG5CT2stUHozTzZQdjdfN1J0SWszMVNrVHFUNEFyYXBiRVloeURhTmZQNm1PM080cV9kcVBpUWhOMS1fMnZIUQ?oc=5"
+    },
+    {
+      "title": "GTA VI PC recompilation project shut down by Take-Two",
+      "outlet": "The Verge",
+      "date": "2026-11-24T21:39:14.000Z",
+      "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxPVkRLMVJOdU9mMGpFb2pZemhod0s5YkJ6Slk3emJwYUtQb3IxNGpUMmItZkNzYTU4YUJrdkJGaW8wTHB0c3d3OEQyMHZFdjhrZVhKWVQ5bEZ4Sk5xOURtdkZsdENqWGwwdmEwalR1QVdpdWlMLUs3eHYtMi1IQXF3dGlMR2FBR0VYN1JmVGVsMThEYW5ZRVJlaTl4WWoxdEhiTWgtTzdkV2JPQzA?oc=5"
+    },
+    {
+      "title": "GTA 6 PC Port on GitHub Shut Down Following Take-Two DMCA Complaint",
+      "outlet": "PCMag",
+      "date": "2026-11-24T21:22:03.000Z",
+      "url": "https://news.google.com/rss/articles/CBMimgFBVV95cUxQbGxOOGlzdlhQRDBDdFRxXzBmM3VTbXh5R29OOGZGNkt6UmhKcW14UHpCSTZIMkdfQmsyQXgtWjlvZ1hoaF94LXhTY1NKYWZTUFdKUFNfVkFZWWNzMlZZT1NTeC1ZRzdiZXJRT2FyV3pZZUktNnd3dWRaY2t2aWJta3Y0Y21ndGNpVEEwaXdTV3RUYjVPY2RRU0dn?oc=5"
+    },
+    {
+      "title": "GTA 6 no PC: o que se sabe sobre uma possível versão",
+      "outlet": "Mashable",
+      "date": "2026-11-24T21:01:22.000Z",
+      "url": "https://news.google.com/rss/articles/CBMid0FVX3lxTE9TdXBVeWdzSDFQU1VJdDRtWk81ck9yOVV6U0dEMEMycDFjQ084V244QmNBcDRMcDBCcWRRMGd0UlBqUTc4TjNackQwS0EzVC0xVDNlN1hISlRRMldhcEZYZ0ZZT2c2X1pxVFA0bVZKY0l1TXZqWFVJ?oc=5"
+    },
+    {
+      "title": "Cyberleek pushes GTA 6 PC efforts forward with the Xbox build .exe release",
+      "outlet": "DLCompare.com",
+      "date": "2026-11-24T21:00:00.000Z",
+      "url": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxQRkJHeVI5VWpHZE5QZnpTeEtveXlOYU9RenNuR1d2eXQyVlB3YnVEZzhSVFdBc3NoODVOUjE5OHNSWEdjQXdHeU4za3dCdHdoNkhsZWFUQ2l4WkhFclllNnpsR1lUQllCWEtYa2phYUhuNmFkYzRfSWlsUktWTFNMWDBSM0xxU0d2QVFJUVdreWJ1bDNNQmFhcWdOQjBENDFGay0zVW84UFBBaFJQTWFFUjZVYnFIVnpj?oc=5"
+    },
+    {
+      "title": "GTA 6 Launches at $79.99 on PS5 and Xbox, PC Undated",
+      "outlet": "shattered.io",
+      "date": "2026-11-24T19:21:29.000Z",
+      "url": "https://news.google.com/rss/articles/CBMiggFBVV95cUxNWkNPMUw3SnpRQlozekFuM1RVb1VGa29RUS1aTjZTemlpbFhVSTFnaHRFaDhuVGgwdUFKMTNYMldYeS1nQWlkZDFuVU5STUJWR2hial9rcEc3c0VNbDRwMTFzX0oyVUdseFJpZE10Y0twZ3l6bllyTWxPYTVRRkpuVVZR?oc=5"
+    },
+    {
+      "title": "GTA 6 PC Recompile Odds Hit 63% on Manifold as Traders Pile In Before Nov 30",
+      "outlet": "shattered.io",
+      "date": "2026-11-24T19:17:38.000Z",
+      "url": "https://news.google.com/rss/articles/CBMif0FVX3lxTFBSYnJtdmljYUtoZGhnYV96b1RSZlk3V1owMUlNT1B2anJuTlhLalpBWnNINmdWNlV2Mk50UUV5SW5jMUYyTC01cVl3MHdVY25XOHNiRVMxRHhQQXZKZG03c18teV95SV9YaEpqZnRuRnpkTkdGLTY3STl3cEdTamM?oc=5"
+    },
+    {
+      "title": "Project Leonida, the GTA 6 PC Recompilation Effort, Goes Dark as Fake Builds Start Spreading Malware",
+      "outlet": "Hardware Busters",
+      "date": "2026-11-24T19:11:08.000Z",
+      "url": "https://news.google.com/rss/articles/CBMixAFBVV95cUxNQTlua0ZBYUxZS2loVjRybDhQMGJBeVNsNGlmbE9EZHBDMFUtYjJhcU1nODI2RExYQ1RZOTNlVDVmNTJ6WXRZS3NWSEVOYnVMY0xxMGZHRk9SQTIwaXJWMWRteVVCQjhiaVBGSkNPS0lHSjlvdVBFeWFmREZTQzhDX0hlbFpTT2JZYU9VOGFXUWNjRUZlRTlSZ0RnOG9kUy1GdlBSQWNFX2ZWcXpBSTdOc2FqZERXVndLN1RXRnlVWUgtbzBx?oc=5"
     },
     {
       "title": "Catastrophic GTA 6 leak officially kickstarts race for PC port",
@@ -3748,16 +3953,58 @@
       "url": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxQUERCeGRvZHFhb0dZYlkwZ0pfYjBlakhSazZEUTdBT3NlWFRMUjRiMXQ2OGg0anIyYVV4RGEwcno0NUdqbnZzYTloOVd6VWxELWJvclg3aFgwYVp1d3I1dXlTSmhaSXJOb3Z1QmI2a0o0Y2Jadk5ncURnU3hjT3ExVDhNaEZFejVkNXNhMzNUM1A4TDVkRkpvY0ttZ0l2cnVhR0diRXE4V3JicjMzTTZJNmRQWkN0MTg0WUJwc2Z5ZDZ3TElpeDNyM2pBeFRsOU1L?oc=5"
     },
     {
+      "title": "Community Efforts to Port GTA 6 to PC and Mac Show Early Success",
+      "outlet": "PCMag",
+      "date": "2026-11-24T17:55:56.000Z",
+      "url": "https://news.google.com/rss/articles/CBMilgFBVV95cUxPMGxvdlo0QzBpZlBuNjdBVTMycDQ2M0ttemRyTG8zeTJHbUM1bkE4NUFFdHlmeVpwOFYtWEpreEtWZjdVTEVxc0hlZmZObmp6dk12MWk2TlhIZW9qN1VvUnBFY0F0RWRzMUdTSjJkN0U2U291dkNaSnkwa3dNQWRtZW02blAxbHRXWGxmeTBBZHA5UkNERVE?oc=5"
+    },
+    {
       "title": "GTA 6 Rakes In approximately $3.7 Billion on Launch Day; Hacked Leak Raises Specter of Unofficial PC Version",
       "outlet": "BigGo Finance",
       "date": "2026-11-24T17:55:00.000Z",
       "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE9uaDcyTi0xRWgxRTFPb0hHV25YRlFCZXpWQy0yMjVtZmlUNFBlMUtBVllxU0RIa0N2dXpmcXJURkMzaUpCMjlMeHJBLWE1R3E5ZVdLN2tMWldOWWRFVUtMOVNDWldFZm1jSXItMDV6RWZQRHVJWlE?oc=5"
     },
     {
+      "title": "GTA 6 recomp leaders bail out as Take-Two cracks down on illicit efforts to get the game running on PC",
+      "outlet": "PC Gamer",
+      "date": "2026-11-24T17:42:34.000Z",
+      "url": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxPWlRaWWx0Ykcxdm03ZlVrVm5hdDFoTGJfQm12Y1BKM1VpN3lBLWp0R3pJdjdlcjQtMXRObi1FWFItVmJlZ1Zkc1hpckpJeVhfbmFXLWU1anZrWmZsVlNnNVBYcGhvekp1LXNUblloQXgwLVNqOVNkcHlqYndpUmh3TEFCZk8zLVJUMXZXQ3dTeEVjUzNMYU8wYzg1Q294QnVNOHRmVHoyOGp4b09uYlpZRXNIY0YyM1Z5NFcxZk5WcGFGWHREOU11bWlGOHh0SWh0b3NONW1YS2dOWmJ1alZnbGxxa2o?oc=5"
+    },
+    {
+      "title": "Unofficial GTA 6 PC ports are already going offline",
+      "outlet": "Tbreak UAE",
+      "date": "2026-11-24T17:28:00.000Z",
+      "url": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE1rd18tRnF2OGFqQzg4NHY1NkhnQ2g3bHNoTFdEUjJDVDlWZTJtcHJFNnNsNlNwM0JBVzVsV1R1ZnU5SzJHUWhlVmNGdzktQkswd0JWRi1rXzZxVjhWUjlN?oc=5"
+    },
+    {
       "title": "GTA 6 PC port projects are already going offline",
       "outlet": "tbreak.com",
       "date": "2026-11-24T17:28:00.000Z",
       "url": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE1rd18tRnF2OGFqQzg4NHY1NkhnQ2g3bHNoTFdEUjJDVDlWZTJtcHJFNnNsNlNwM0JBVzVsV1R1ZnU5SzJHUWhlVmNGdzktQkswd0JWRi1rXzZxVjhWUjlN?oc=5"
+    },
+    {
+      "title": "Modders have launched GTA 6 on PC at around 4 FPS.",
+      "outlet": "GameGPU",
+      "date": "2026-11-24T17:27:30.000Z",
+      "url": "https://news.google.com/rss/articles/CBMikAFBVV95cUxNWXI2WEJINHFWdlc1Q0NEeUUzVzYzdWVfSG8xZlBCemZFS0tqcVRJSHdROGJ4c2FLWTdlQVk5cXlsN01jTV9XRkNuTjJBZnpYUDZzcXhDQmhzaTg5QlR3Njc0WGt3X3FlZHg4N3A4U1pkX0k1dExqMUVTSWlhWWZIX0g3bm9IdlZoZEtQQS13dFg?oc=5"
+    },
+    {
+      "title": "Rockstar shuts down GTA 6 PC ports after Xbox build leaks",
+      "outlet": "Metro.co.uk",
+      "date": "2026-11-24T17:04:00.000Z",
+      "url": "https://news.google.com/rss/articles/CBMikAFBVV95cUxPN0ZidjNFbzlBM2ZzeGhPTjI3dDlhTUJ0Nl9xLVMyMW9SYktteTBPVW1sU3NrX3hTbE9VMVFkOVBMZEtUVzNiNUR2ajJNSVZiUGRBTTZDclZGV25VWTg3R3NlNjF1RWhfUUdsZ0xBUWh5Y1pWeGVyd212clJ1aFpCanNVRnI3SU1GeEpuZ1BsdWjSAZYBQVVfeXFMTkxFeFR6UmpvOVgtNzVVT01GX0NPSUVOeTZLczhGcExfRWxOSjlVR19QXy1ZdEFENzhISE8yWGhocHFKSlN5WmhUcEdFQldhR1ZmOW9TdTZyZ3ViQlZIdk1CaTAwSEU4a1lMZDQyX1ZTb2VJZXZaXzh4cTc2OW5uR1JUYXN1bDJUd1gwbTdRSVRZdnpJM293?oc=5"
+    },
+    {
+      "title": "GTA 6 PC Port Boots 3 Hours After Exe Leak, Looks Rough",
+      "outlet": "shattered.io",
+      "date": "2026-11-24T16:27:04.000Z",
+      "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPaURtSHVmT0lLcFJyQjdtd1FFRU5BclJZZ0xFaS1HV0psVWtiQ0Zsd1o0aEpEeGI2YldGVGhQRkdxUk8taGN5UmRKczdYZGYzMkJRVHFMeDV6NUFzNmZ5QldwcXowWGNSMERJZVJxTk9yOU5vbEZJaUZTLXExZHJFSFlYSm82Mkdq?oc=5"
+    },
+    {
+      "title": "“I quit”: Creator of GTA 6’s unofficial PC project steps away, but community developers are carrying on",
+      "outlet": "MIXED News",
+      "date": "2026-11-24T15:58:22.000Z",
+      "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxOS2dmNDkwSkFqRkdmYjN5UEVqZTBPVXpBOEhiNFJyNUoxMUM5N3VfcDc4RHd3Z2dhZVFFbXJkaVRSR0FBRjlDR1BVOGpvUFEyWUptd1A2eGtPdzhMckxBZmd2dHpfUVNENXgxUFZhRjYxNFlubXlmak5pcWE5YVVmdkJxdEVDUHlBNmdfU3h6U3dNUEJCeDA4Sw?oc=5"
     },
     {
       "title": "GTA 6 might play best when it hits PC, but it'll be best played with a controller",
@@ -3767,15 +4014,9 @@
     },
     {
       "title": "The Hacker Who Leaked GTA 6 in 2022 Has Been Sentenced: Judge Calls Him “A Very Talented Young Man” Before Handing Down His Punishment",
-      "outlet": "www.levelup.com",
+      "outlet": "LevelUp",
       "date": "2026-11-24T15:34:10.000Z",
       "url": "https://news.google.com/rss/articles/CBMi9wFBVV95cUxNTDhIeE9VSmJSSEZxbG1TQW8zam54MlJPSWlqU3FZWEdXTWdaLWdsRzFXbndURXBKQ0pUMVFlYW5xWXE5RmtyWXVwRDlEOXdHZlIzSXFuek9Ya0thVXVRSXpLa2FndkZyRjA1SEhsRUlLcWJmR3RtMXRwbENUU0ZDQzc1Sm5qR2pIS0xZcHR3ZHF3TlpDdkFZMDctUTY1ZDlpNTJ3VURtVDNwcTQ4NjNmVEp0ckpra0pzdnktck5kWXc2N1ItTHY2RFdGcmpGVEoyUnBqMm05cF9QakE4SDZyZEJFV2tLeUgtbVlHRFEwUVBjNS1ORDEw?oc=5"
-    },
-    {
-      "title": "GTA 6 PC Port Boots 3 Hours After Exe Leak, Looks Rough",
-      "outlet": "shattered.io",
-      "date": "2026-11-24T15:28:21.000Z",
-      "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPaURtSHVmT0lLcFJyQjdtd1FFRU5BclJZZ0xFaS1HV0psVWtiQ0Zsd1o0aEpEeGI2YldGVGhQRkdxUk8taGN5UmRKczdYZGYzMkJRVHFMeDV6NUFzNmZ5QldwcXowWGNSMERJZVJxTk9yOU5vbEZJaUZTLXExZHJFSFlYSm82Mkdq?oc=5"
     },
     {
       "title": "GTA 6 Decompile Market Sits at a Coin Flip After Xbox .exe Leak",
@@ -3784,10 +4025,10 @@
       "url": "https://news.google.com/rss/articles/CBMie0FVX3lxTFB5WlB3eXpKQkZURS00c1lNZkUxb3FMT1hBRFRkcHF3LV9KUVJIMWl1V3BGcEFNSnVGT3RoS1ZCQVpLOHB0djhmcXk1VVRhZXp3MktkakpjbHIyeGFYSWV6elJqRmdESjAtZFJhNFdHbFZmQmtzaW4yWkhqQQ?oc=5"
     },
     {
-      "title": "GTA 6 PC Recompile Odds Hit 63% on Manifold as Traders Pile In Before Nov 30",
-      "outlet": "shattered.io",
-      "date": "2026-11-24T15:21:42.000Z",
-      "url": "https://news.google.com/rss/articles/CBMif0FVX3lxTFBSYnJtdmljYUtoZGhnYV96b1RSZlk3V1owMUlNT1B2anJuTlhLalpBWnNINmdWNlV2Mk50UUV5SW5jMUYyTC01cVl3MHdVY25XOHNiRVMxRHhQQXZKZG03c18teV95SV9YaEpqZnRuRnpkTkdGLTY3STl3cEdTamM?oc=5"
+      "title": "Rockstar nukes 15-year-old’s GTA 6 recompilation project, Discord and GitHub servers taken down — Project Leonida had almost 180,000 Discord members, host account banned for two years",
+      "outlet": "Tom's Hardware",
+      "date": "2026-11-24T15:24:03.000Z",
+      "url": "https://news.google.com/rss/articles/CBMizgJBVV95cUxQOVFGY3Jram5oakdmTnYyS2pyLWRnLUZpd2pMdG5IZWtvY2d2QXBaRk8tQ1ZPNXR0VHN6eDkzWnlEa1h2MVBoR1hjdVdjeTBQbmRJc01nanpQWVp0U2poeFljOTdtVFRWVTVlekJaV2puMU5pZnp1NXRYaGdmR3prRDNvTUh4RGpFNkVkN1FaNEhYZE1WNmFsYmhpTE13V2tSWFRvZDk1eXh0elhuMndJUjhUaGFoT1FSQjMyMUdEN2RSYjZZNGF3dnFkSHpuY2p1WGFReGFVclgyb0tFaTIwSk1lOTY3bkNIR0JFUEFvZXN1aC11cmJjRnhyUDhZcVdjYWt1dkRvR2hmN3BCNnJGY2ZvVmpCX0FoZTFZVjVjYi1iTVMzZE5oUUdIUnMxYnZLdGJ2UnVVeVQxbGxUTjhXYzFiVUtpc3V3aHpPNnlR?oc=5"
     },
     {
       "title": "CyberLeek Leaks GTA 6’s Executable File, and Modders Are Already Working on a Playable PC Version",
@@ -3802,16 +4043,22 @@
       "url": "https://news.google.com/rss/articles/CBMihwFBVV95cUxNUXk2Yjl3UGFiN0llRG93MzByQk5SYy1hMGQ1aXZKV21Zb3UxN2dlV0RNcWFPbVZjQTFqRjhPZE1EbmJaSGVDclVheVJpRmQ5cXR2c2Nrbmp2ZXBoOXVzcDVTakFXZkppUnV2RFpaZzZVWlVnekRuMTNuNV9ZamFGOTZsQ2dTVnc?oc=5"
     },
     {
+      "title": "Unofficial GTA 6 PC ports are already getting shut down",
+      "outlet": "Video Games Chronicle",
+      "date": "2026-11-24T15:06:16.000Z",
+      "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxNX3VsN3ZFY1dIVWZuVVNsc2hPMjRieUtnZzU0TDdsVTh0ZGlQZDBfX1FCZEU3QTYyZDdJNC1xby1iT2tWdE1QdXF6Ul9tN2t2M1o4MGZrUS1LbmNTUFFDOERFZTRkMEZwNWNlYklVMkxzV0pJQkpvQ1I0UDdzbm91ME41ZkhSb3VUU2k3RTM5OGNjNnBaaTZSc1FHZWJVQQ?oc=5"
+    },
+    {
       "title": "An unofficial GTA 6 PC port is making progress, and developers have the first in-game visuals to show for it",
       "outlet": "XDA",
       "date": "2026-11-24T14:58:45.000Z",
       "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxPcWJZSlJvTldQT1JnZGs4bVJNcUFHSkk1ZVFwaC1BYTRSeTdpNnJ5WWZvTlg2cERWdy11WWdKM1lMTUZhQ3MxY2E0ZWJBY3g4aDVockFEWDJnQXd4YmdWQkpJYVdUR01VX0dZUVJpbmNVZm1VS083Vi1YQ19naWtiUHBpTkVaeVRoLXlZZXdILTlGRjJlWGpmWHoyY2hWdUtlTkhZSWdzalBUSWpOV3A4?oc=5"
     },
     {
-      "title": "GTA 6 no PC: o que se sabe sobre uma possível versão",
-      "outlet": "Mashable",
-      "date": "2026-11-24T14:39:32.000Z",
-      "url": "https://news.google.com/rss/articles/CBMid0FVX3lxTE9TdXBVeWdzSDFQU1VJdDRtWk81ck9yOVV6U0dEMEMycDFjQ084V244QmNBcDRMcDBCcWRRMGd0UlBqUTc4TjNackQwS0EzVC0xVDNlN1hISlRRMldhcEZYZ0ZZT2c2X1pxVFA0bVZKY0l1TXZqWFVJ?oc=5"
+      "title": "Rockstar Squashes \"Leonida,\" the Biggest GTA 6 PC Recompilation Effort",
+      "outlet": "TechPowerUp",
+      "date": "2026-11-24T14:04:45.000Z",
+      "url": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPcC15dlNjZ2lBY3BKQWpKV2tfdVFvWVVBTWs5bDBLamczd0dqMFlhMnlfOFBEV3Vhdmw0c3N6U2ZjTEFqaXBMaTY2NUh0ZzJaSTJRRDdITVNUalgzZnAteWNBOWRYejVfbl9Ldm9qN3lHc01QeUxqeHY5SWowQWxSeWRmVE5YVVhLX0RjWWFxZFpQMkllN3pWdGRHMmZSWmZsTDBLN9IBqgFBVV95cUxNZldkUncySlN1SUlqRUkxM2IxRVN3ODN2ZnF2MVNTVVk5WV9QNlFraV9kRW5ZWnBfWkNMN00tX2M1cEpaZ19XdzA4NmdiVHgzUHVzN1MyWmZvWWdSLWZ6UkpKWDVUb3FkR2d1azMtaWV2MGpBTzZzZ2o2VUxuRUEwVVV3RGJSWDQtZ2dHZ3F6MV9EYmh5bFQ2aldoRlVEZUNWZm53QzJvMHZ6dw?oc=5"
     },
     {
       "title": "GTA VI: Cyberleek is distributing the game’s executable file!",
@@ -3820,94 +4067,10 @@
       "url": "https://news.google.com/rss/articles/CBMikAFBVV95cUxQQUlaS0t5YzlndmJ2M2RtSzh1QnFWNTE5NU1HbDdYZlZBX0JmQTl4elZpSVF5REU4WGplZU9qZXpBV1ByUmE3WXg5Rk9Kd1ZBYW41WExUQ3ZXMkZGT0d3QlM1NEliNHRLUkZfam9QeUdmZ3FxYTdYQ2QxZ003SUVVcGxuTVd2Z3R6UEFCV21FRG0?oc=5"
     },
     {
-      "title": "Unofficial GTA 6 PC port effort suffers setback as Rockstar seemingly takes down Project Leonida, one of the internet's biggest recompilation projects",
-      "outlet": "Eurogamer.net",
-      "date": "2026-11-24T13:40:00.000Z",
-      "url": "https://news.google.com/rss/articles/CBMiigFBVV95cUxOaFJtY19mV2xyVUVRVlZJMldsMy11SGEyeHZfZ3pzdVpBbVZ4Z2l4eVpWZnc1ajR0c0ZyX3hBS25VMzRGS2Y3UWl5U2stVjVkbC1nbW1aVVRITEEyNmhaZmN1SXROaXZoNUNMS1BPMDhORlk5RnRGMHBPWHU4VFplYWxWOUV2bWJlc2c?oc=5"
-    },
-    {
-      "title": "Waiting for GTA 6 on PC? These 5 games capture some of its magic",
-      "outlet": "PCWorld",
-      "date": "2026-11-24T13:01:58.000Z",
-      "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxPX2p1Y0ZIT3FReFFnSWs5N2ZOeWxpaWUxVXB0aGNLWFZJX3RQSVpDWFo4X0ZlZ1NESUFNcWVIb2oyMUJKZlNxWjBuc0N0aGY2ZVNGUXZHQUk0Vjk5Z0gtYkczUnB6SlpaXzBTVl90V21uOG0wcUo5RkIxZjNPYkNTOVMzYXFIZVBXdWMxRU9FeDhUb1hhSHFqNUdsSkFtSEJWV09vZlpkbjNsQ3lk?oc=5"
-    },
-    {
-      "title": "GTA 6 PC Ports ‘Nuked’ Just Days Before Devs Expected It to Be Playable",
-      "outlet": "Decrypt",
-      "date": "2026-11-24T13:01:30.000Z",
-      "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxNb1c2cmVxclNfSVdlRElGWkd5Y3BvOExZaXNCZHRBVXFlUVZGSFQzc3JMeHBEcV91SzlPV3dub1RQYno2NVNWTUd5WUNSSFdNb1JyNm9takdYRXZHT3J5SE10MVFzVm9McDZPVWhENXpuY3hlVkthQzVDdkRSMklHcVByaHgzS2g1Qi1ZZjA3TjBHc25lTURmeDVmRQ?oc=5"
-    },
-    {
-      "title": "GTA 6: This website lets you track the PC recompilation live",
-      "outlet": "Notebookcheck",
-      "date": "2026-11-24T12:59:00.000Z",
-      "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxPV19YWWluMUpOY2w4Nmh5OUFyTUZNMlcyTnhmbFhQTHprc3UxdFJjNTFqRjc2Qjg2WThjRzZTTUdGandval9KX0phSkN1ZUJYa3pzdzZyWS1oa1lhSXVnYWhYOXItei1sOFBMa2EybFI0akdFUUQxdlBLaDVhb3hmWVZwVDQzTmZIdW1NUEZZSDhWTExwQS1fbUt0ZVVZY0pGUUVCWVg5WQ?oc=5"
-    },
-    {
-      "title": "Hackers leak GTA 6 Xbox file, fueling PC speculation",
-      "outlet": "Kursiv Media",
-      "date": "2026-11-24T12:52:22.000Z",
-      "url": "https://news.google.com/rss/articles/CBMiogFBVV95cUxOejI4UnN2T1lsemJheEpielp2clI5a2FSNjd0UkdCRTZ3SjZ6MWo3dnk2NlZCcVhOZ25PR1JWb01Zalhza0FpTFBxY2Fhd3hHa042TWlZNUtMQU5UTDdtYzhiLUtfUE1zSElPMEoxei14WHM3bnQ3c1hyOEltMUFCZjAwVjhmVUJpcDN3UmdLODRVWTFWM050eEpzZGpHQ1JUa1E?oc=5"
-    },
-    {
-      "title": "Leaker Cyberleek Releases The Xbox Build Executable for GTA 6",
-      "outlet": "80 Level",
-      "date": "2026-11-24T12:38:35.000Z",
-      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOYVc1ZmdkX0JXSFVTUkZSa3VrSGl3QVFwaWhCVkozU2VMSE90ejBJQUlRUmpMaFlzVjlqdU1LVHJKUVJrcThtNExWR2ltZV93SzdOeVdlSE5jc055MWswT1NucUhSRDViLWFDRmRocVM4N0pZeFkyck5kWXpuNnRscTlKZzZjT2RjU0lhQg?oc=5"
-    },
-    {
-      "title": "GTA 6 Praised for Its Accurate Portrayal of Felon Rehabilitation",
-      "outlet": "IGN",
-      "date": "2026-11-24T12:21:46.000Z",
-      "url": "https://news.google.com/rss/articles/CBMiswFBVV95cUxQTmw3TkVUUWxTWE5pOExBOFdSb0dKR1RiTS1VNk8zc1JYa3lrRFRnZTMwOXY5T1Ayb01HVlMyZVNnd2VtUHRFZzVuT09tdnJtbGFBRnhEMmpCVDk5enZTdnBGRUdZVkZGVGhtLU5HVkpPWUc4d0ktSHJaWlR3OTE3Vm9TZlRQajRjSUx0d3JyM01hQmNSLVZ0MWpwNkxqcWtJZC0xZmhYb2xXSDZwRmNHNGM3Yw?oc=5"
-    },
-    {
-      "title": "'Like watching the Mona Lisa getting painted': Unofficial GTA 6 PC port makes rapid progress as game is now bootable — albeit in a rough state visually",
-      "outlet": "TechRadar",
-      "date": "2026-11-24T12:18:13.000Z",
-      "url": "https://news.google.com/rss/articles/CBMihgJBVV95cUxOWWFjNEp3S183SHRmNlFiZjJ5T19DVm9BUmxSSkl5cGR5cUdaal9GclRjRnB4YW9WWS0xdlJUX1hUeDl6bXUwS0tnU0xLVEZNRmF3WjRLUmFhamtISlo5TlYtSkQxcjlOOWV0dHlHcUMtakV2VndUMUtTc0swUTh1LUlNU0dmU0c2ekU5bnB3X1JTTUVhN2RYclgzcUVJcTZ4OW9zbTktSW94OTRlaGYwSWhUS1pSRUhxeDdvd0pnc09RRGp6VDk2Ym1PTGYzNzhueTJQdC1Id05EVVRwLU1fS2lnRVJlZkRPNzhSWkNRZkpVam5MeDVLbVd4Slpsa2JvazNRaE13?oc=5"
-    },
-    {
-      "title": "GTA 6 unofficial PC port closer than ever as notorious leaker reportedly drops Xbox build",
-      "outlet": "PC Guide",
-      "date": "2026-11-24T12:05:58.000Z",
-      "url": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxQZ19mVVY0QmF0SG92ekZtS0dpNGVqLWVmRm54TUx5MG1xVFlHUkR0bGlILV9HRTZqd0ZXYk5qRDB3Yll2X0Vucl9uVnM2LTA4RTUzUkl0UDJicmhtNHUzSDRpV2pORFdKTkRQQWtKeXIza0xBdjk3UURhUXhaU0pUNEFMTEhxd0gyX09VUE5XQV9UMWx0eDFLNHFqakRmV1ZwdVdYaTVRVllxTE5ZaHZ1M0JPSUxnNndnRS1V?oc=5"
-    },
-    {
-      "title": "Grand Theft Auto 6 Unofficial PC Port CGBJ Now Reaches In-Game",
-      "outlet": "DSOGaming",
-      "date": "2026-11-24T12:01:11.000Z",
-      "url": "https://news.google.com/rss/articles/CBMimgFBVV95cUxNZHh2MUJnWVAyLW5sWkFVR2oyTFhSUHVyS2hvSmNrWmZBSzBncGFnZVJzNlozYnl2VHI0Q0VzTENEWW5VdnR1dG93dndVNVNuTjlENWV3QmN6UzBTWHZiRVg3TDRjNW8wdE1ERkdxY2ZhU0RzczVseW1WSjRmMlNjaDktMnBiRTRESVZFYVU1MUVOMzl5aUJibjNn?oc=5"
-    },
-    {
-      "title": "\"The torch passes to the open source recomp and emulation projects\": GTA 6 leaker Cyberleek claims to have released crimsim's Xbox executable and denies crypto grifting",
-      "outlet": "Rock Paper Shotgun",
-      "date": "2026-11-24T11:38:50.000Z",
-      "url": "https://news.google.com/rss/articles/CBMiowJBVV95cUxORFM5R25GM2xnSlNISUE0aXRxS19LdENvN29ZYWdSRDZVV3libm81WE82RzlUSGtqcGdXVTRNT3VwRUlEa1lQWERHOXFCSXhpVFNnTEdUWUlpeEM4bnJScUNJMGc1SUR4RHB6ZVIyVVM1a1ctM2g2RWt1SC1ERWhMZklBMWNDVG9XMkFmenFwcXFLUWNCWUl6Zk5yNUh0b3I2NVVLc2Q1T3VvWG13X0VqSjl4bkdvd1ZkZmkxMTFPOG5hbHNSbEIxaFJwcFlPdjZuV1JDckhsM2tzazYtb196NHVpYzRqSWlQUFRSV0MzTFRXN3NBdk9ndzFFajhmZXBBM2pxeDdfNWp0cTZkaklwS2IxZXYxalBkUEJjaG9vY3l5QmM?oc=5"
-    },
-    {
-      "title": "GTA VI Is Coming To PC Thanks To Major Leak",
-      "outlet": "RockstarINTEL",
-      "date": "2026-11-24T11:14:31.000Z",
-      "url": "https://news.google.com/rss/articles/CBMiekFVX3lxTE5RUGNDVmZKTXF1UVlPdUFMcFF3eGloRzc2eXlrNjJ1YXNQYW11SWhQcEVQUG9SUUpZRzB5eG0tcWxLRjFsdndzaHd5Nm9ISkN6S0JpUDZSVjNFanM0RUdfMEFLTEZlOXdiRDdOVkpMc0o2YnR3Q0hGMlhR?oc=5"
-    },
-    {
-      "title": "Why isn't GTA 6 on PC? Rockstar's console-first habit, and why fans got it booting anyway",
-      "outlet": "Nacionale",
-      "date": "2026-11-24T11:11:30.000Z",
-      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxOQ1A3NDFQakZMcGJ5MXFQanUwRG5MZGJFMnl0X1BTTWxFSVIyRWRHbmJtTlpxNTNoWElOVEV6RTNpXzhsNXEtQXRpZFN0QUN1cXo1QmxIbGlqQ3BWbHZ5WFp6M1A4RW9TQkV2dV9tSnlCMUhwOWZWbEdFTllfNTdXb1FPa0ZyT3I5XzhDMkpycUl5cVZXcmRKcG5DXy1mbGFxMXE4azU5c044OWNvWGplYQ?oc=5"
-    },
-    {
-      "title": "21-year-old GTA 6 hacker is not going to jail, judge tells him you are very talented",
-      "outlet": "India Today",
-      "date": "2026-11-24T09:56:15.000Z",
-      "url": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxOY1VzRmJ3UVR0WUFucEZZT2w1Rm42dGIzN05oTkRaRmNtQ1lodmtRX3U2bjFONlVwcmwyNmd3eGF5T1NxQ3lhTVZrUFNTRGlMNXp6bWt4S3k1bVVsZmhudFNIMmJKRU1YYUJUeXQxVnpYUkh3YTl3QWFfUkJWeUtMbzJiZ1hYWFJnb0FlN3RwZ1U4Rnh0RmduSVltd3pmNjMzekJjU01pVEhSeW1KNVJpaWFNMU5zdW50R0ZpQ1dBUVAxTmZnb1F3dGxRXzRlNHA1MDFYeTBZMUlzbXlSV2hQbGdicHTSAeoBQVVfeXFMT0NkdU83RGdXUnZNUE9IN2lZWU9hUWdkTi1XLTZ3LTdUckhsdlp3U0lLVEMtM08wdWxsbmJoa2docE9Jc0JMWHNvdVBkS1FKNkd5UTljV21rMEYyTXZmSWhCQXBlN1FyNFNSYXBpQ0IxenpnYmcyYV8wMEdubEszRUxNUENTQzBxa0tMT1lkaUZDYVV6SXpyOURfS3hqNmxOdW9IakQ4TXVxUnZzVzlqMXJXOGFxekZRdHVDVTJaaERyTWNUT1ZBZTZMYkNkalJORUJJLS05LXk1a2NRaHR2U1JzVFJaRHB5UzdR?oc=5"
-    },
-    {
-      "title": "GTA 6 fully pirated, but no PC can boot it (for now)",
-      "outlet": "Korben",
-      "date": "2026-11-24T09:27:00.000Z",
-      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE1oTFUwZzlmR2lYbmN4QzhRQXJvbWZxc0hla1JZVVJGbzREQ2V3MTFNYUc5a1JMOWtGRXlHWDRyWFJMVnl1Z3ZQSGJETlhXUkNmLVdVLWR5eVNxVnpwYXlIdUhtdmZ3WEdJS1ZsN2RnU0p0UGs?oc=5"
+      "title": "Take-Two halts Leonida project over leaked GTA VI code",
+      "outlet": "Crypto Briefing",
+      "date": "2026-11-24T13:42:00.000Z",
+      "url": "https://cryptobriefing.com/take-two-halts-leonida-project-over-leaked-gta-vi-code/"
     }
   ],
   "dmca": [
