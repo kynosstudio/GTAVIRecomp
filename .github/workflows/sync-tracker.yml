@@ -28,17 +28,25 @@ jobs:
         with:
           node-version: 20
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Sync tracker from upstream
         run: node scripts/sync-tracker.mjs
 
+      - name: Build localized data and file protocol fallback
+        run: python scripts/build_tracker_ptbr.py
+
       - name: Validate tracker JSON and local translations
-        run: node -e "const fs=require('fs'); const tracker=JSON.parse(fs.readFileSync('data/tracker.json','utf8')); const pt=JSON.parse(fs.readFileSync('data/tracker-pt-BR.json','utf8')); if(!tracker||typeof tracker!== 'object') throw new Error('tracker.json invalido'); if(!Array.isArray(tracker.efforts)||!Array.isArray(tracker.news)) throw new Error('Arrays principais ausentes'); const x=pt.teams?.xlaunchvi?.latestReport; if(!x) throw new Error('Customizacao XLaunchVI ausente'); if(x.estimatedPercent!==50) throw new Error('XLaunchVI deve permanecer em 50%'); console.log('JSON validado:',tracker.efforts.length,'projetos,',tracker.news.length,'noticias');"
+        run: node -e "const fs=require('fs'); const tracker=JSON.parse(fs.readFileSync('data/tracker.json','utf8')); const pt=JSON.parse(fs.readFileSync('data/tracker-pt-BR.json','utf8')); if(!tracker||typeof tracker!=='object') throw new Error('tracker.json invalido'); if(!Array.isArray(tracker.efforts)||!Array.isArray(tracker.news)) throw new Error('Arrays principais ausentes'); const x=pt.teams?.xlaunchvi?.latestReport; if(!x||x.estimatedPercent!==55) throw new Error('Relato local do XLaunchVI deve permanecer em 55%'); const scores=new Map(pt.efforts.map(e=>[e.id,e.manualScore])); if(scores.get('xlaunchvi')!==55||scores.get('cgbj')!==75) throw new Error('Overrides manuais do Kynos foram alterados'); const fb=fs.readFileSync('data/file-fallback.js','utf8'); if(!fb.includes('trackerRaw')||!fb.includes('trackerLocalized')) throw new Error('Fallback file:// incompleto'); console.log('JSON validado:',tracker.efforts.length,'projetos,',tracker.news.length,'noticias');"
 
       - name: Detect real tracker changes
         id: changes
         shell: bash
         run: |
-          if git diff --quiet -- data/tracker.json; then
+          if git diff --quiet -- data/tracker.json data/tracker-pt-BR.json data/file-fallback.js; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -50,7 +58,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/tracker.json
+          git add data/tracker.json data/tracker-pt-BR.json data/file-fallback.js
           git diff --cached --quiet && exit 0
           git commit -m "chore: sync tracker snapshot" -m "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
           git push

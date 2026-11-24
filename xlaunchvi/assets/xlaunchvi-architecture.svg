@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="930" viewBox="0 0 1200 930" role="img" aria-labelledby="t d">
+  <title id="t">XlaunchVI architecture</title>
+  <desc id="d">Layers from the XlaunchVI Home dashboard down to the Windows GPU drivers. Solid borders: merged into the
+    integration branch. Dashed: in an open pull request. Dotted: planned or not yet integrated.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0B120D"/><stop offset="1" stop-color="#060807"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0" r="0.8">
+      <stop offset="0" stop-color="#107C10" stop-opacity="0.22"/><stop offset="1" stop-color="#107C10" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#18201B"/><stop offset="1" stop-color="#101512"/>
+    </linearGradient>
+    <linearGradient id="abi" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0E5E16"/><stop offset="0.5" stop-color="#107C10"/><stop offset="1" stop-color="#0E5E16"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#4CC94C"/>
+    </marker>
+    <marker id="arrowDim" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6B756E"/>
+    </marker>
+    <style>
+      .h  { font: 600 19px 'Segoe UI','Helvetica Neue',Arial,sans-serif; fill: #FFFFFF; }
+      .s  { font: 400 14px 'Segoe UI','Helvetica Neue',Arial,sans-serif; fill: #A9B3AC; }
+      .m  { font: 400 13px Consolas,'SF Mono',Menlo,monospace; fill: #7FD27F; }
+      .tag{ font: 600 12px 'Segoe UI','Helvetica Neue',Arial,sans-serif; letter-spacing: 1px; }
+      .lane{ font: 700 13px 'Segoe UI','Helvetica Neue',Arial,sans-serif; letter-spacing: 3px; fill: #5E6862; }
+      .merged  { stroke: #2FAA2F; stroke-width: 1.6; }
+      .pr      { stroke: #2FAA2F; stroke-width: 1.6; stroke-dasharray: 8 6; }
+      .planned { stroke: #6B756E; stroke-width: 1.6; stroke-dasharray: 2 5; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="930" rx="18" fill="url(#bg)"/>
+  <rect width="1200" height="930" rx="18" fill="url(#glow)"/>
+  <rect x="0.5" y="0.5" width="1199" height="929" rx="17.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.07"/>
+
+  <text x="48" y="58" style="font: 700 28px 'Segoe UI','Helvetica Neue',Arial,sans-serif; fill:#FFFFFF">XlaunchVI architecture</text>
+  <text x="48" y="86" class="s">From the dashboard to the GPU: one loader process per title, versioned C ABIs between every layer</text>
+
+  <!-- lane labels -->
+  <text x="48" y="146" class="lane">FRONTEND</text>
+  <text x="48" y="286" class="lane">RUNTIME</text>
+  <text x="48" y="506" class="lane">PLATFORM</text>
+  <text x="48" y="596" class="lane">GRAPHICS</text>
+  <text x="48" y="796" class="lane">HOST</text>
+
+  <!-- FRONTEND -->
+  <rect x="210" y="118" width="400" height="92" rx="14" fill="url(#card)" class="pr" fill-opacity="1"/>
+  <text x="232" y="152" class="h">XlaunchVI Home</text>
+  <text x="232" y="176" class="s">Win32 + Direct2D dashboard · library · Guide</text>
+  <text x="232" y="198" class="m">XlaunchVI-Home.exe</text>
+  <rect x="520" y="132" width="72" height="22" rx="11" fill="#107C10" fill-opacity="0.18"/><text x="556" y="148" text-anchor="middle" class="tag" fill="#7FD27F">PR #7</text>
+
+  <rect x="700" y="118" width="440" height="92" rx="14" fill="url(#card)" class="merged"/>
+  <text x="722" y="152" class="h">Universal launcher</text>
+  <text x="722" y="176" class="s">hardware check · title validation · runtime report JSON</text>
+  <text x="722" y="198" class="m">xlaunchvi_launcher.exe</text>
+  <line x1="612" y1="164" x2="696" y2="164" stroke="#4CC94C" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="654" y="154" text-anchor="middle" class="s" style="font-size:12px">--launch</text>
+
+  <!-- RUNTIME -->
+  <rect x="210" y="258" width="930" height="96" rx="14" fill="url(#card)" class="merged"/>
+  <text x="232" y="292" class="h">Native x64 guest loader</text>
+  <text x="232" y="316" class="s">PE32+ mapping · relocations · imports / delay imports · TLS · SEH + unwind registration · read-only mounts</text>
+  <text x="232" y="340" class="m">loader/tbx_loader.cpp</text>
+  <rect x="760" y="326" width="360" height="22" rx="11" fill="#107C10" fill-opacity="0.18"/>
+  <text x="940" y="342" text-anchor="middle" class="tag" fill="#7FD27F">PE VALIDATION · LIFECYCLE · PINS · ROUTING: PR #6 #8 #9</text>
+  <line x1="920" y1="212" x2="920" y2="254" stroke="#4CC94C" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="210" y="382" width="450" height="92" rx="14" fill="url(#card)" class="merged"/>
+  <text x="232" y="416" class="h">KernelX compatibility</text>
+  <text x="232" y="440" class="s">memory (XMemAlloc / XMemFree) · synchronization · file guards</text>
+  <text x="232" y="462" class="m">compat/xmem.*  compat/ro_guard.h</text>
+  <rect x="690" y="382" width="450" height="92" rx="14" fill="url(#card)" class="merged"/>
+  <text x="712" y="416" class="h">XGameRuntime</text>
+  <text x="712" y="440" class="s">task queues · persistent storage · XInput / XAudio2 (Windows)</text>
+  <text x="712" y="462" class="m">compat/xgameruntime.*  xtaskqueue.*</text>
+  <line x1="435" y1="356" x2="435" y2="378" stroke="#4CC94C" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="915" y1="356" x2="915" y2="378" stroke="#4CC94C" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- PLATFORM ABI -->
+  <rect x="210" y="490" width="930" height="56" rx="14" fill="url(#abi)"/>
+  <text x="675" y="525" text-anchor="middle" style="font: 700 19px 'Segoe UI','Helvetica Neue',Arial,sans-serif; fill:#FFFFFF">Shared platform ABI v1.0.0  ·  platform/include/xlaunchvi/  ·  versioned C tables</text>
+  <line x1="675" y1="476" x2="675" y2="486" stroke="#4CC94C" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- GRAPHICS -->
+  <rect x="210" y="572" width="290" height="160" rx="14" fill="url(#card)" class="merged"/>
+  <text x="230" y="606" class="h">D3D12X device wrapper</text>
+  <text x="230" y="630" class="s">evidence-verified slots only;</text>
+  <text x="230" y="650" class="s">every other slot traps</text>
+  <text x="230" y="674" class="s">Xbox DXIL → Windows DXIL</text>
+  <text x="230" y="716" class="m">compat/d3d12x_device.*</text>
+
+  <rect x="525" y="572" width="300" height="160" rx="14" fill="url(#card)" class="pr"/>
+  <text x="545" y="606" class="h">D3D12 backend</text>
+  <text x="545" y="630" class="s">RDNA 2 → HLSL → DXIL (CS/VS/PS)</text>
+  <text x="545" y="650" class="s">GPU VA window · MRT · depth/stencil</text>
+  <text x="545" y="670" class="s">mips · arrays · BC1–BC7 · indirect</text>
+  <text x="545" y="690" class="s">AMD-validated (RGA) · device loss</text>
+  <text x="545" y="716" class="m">gfx/xgfx.h</text>
+  <rect x="740" y="702" width="72" height="22" rx="11" fill="#107C10" fill-opacity="0.18"/><text x="776" y="718" text-anchor="middle" class="tag" fill="#7FD27F">PR #5</text>
+
+  <rect x="850" y="572" width="290" height="160" rx="14" fill="url(#card)" class="pr"/>
+  <text x="870" y="606" class="h">Vulkan backend</text>
+  <text x="870" y="630" class="s">textured 3D · depth · indexed draws</text>
+  <text x="870" y="650" class="s">GPU readback · wave32/64</text>
+  <text x="870" y="670" class="s">RDNA 2 → SPIR-V experiments</text>
+  <text x="870" y="716" class="m">vulkan/  tools/rdna/</text>
+  <rect x="1055" y="702" width="72" height="22" rx="11" fill="#107C10" fill-opacity="0.18"/><text x="1091" y="718" text-anchor="middle" class="tag" fill="#7FD27F">PR #3</text>
+
+  <line x1="355" y1="548" x2="355" y2="568" stroke="#4CC94C" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="675" y1="548" x2="675" y2="568" stroke="#4CC94C" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="995" y1="548" x2="995" y2="568" stroke="#4CC94C" stroke-width="2" marker-end="url(#arrow)"/>
+
+
+  <!-- HOST -->
+  <rect x="210" y="764" width="930" height="56" rx="14" fill="#0D110F" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="1.2"/>
+  <text x="675" y="799" text-anchor="middle" style="font: 600 18px 'Segoe UI','Helvetica Neue',Arial,sans-serif; fill:#E8ECE9">Windows 10/11 x64  ·  Direct3D 12  ·  Vulkan  ·  vendor GPU drivers</text>
+  <line x1="355" y1="734" x2="355" y2="760" stroke="#4CC94C" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="675" y1="734" x2="675" y2="760" stroke="#4CC94C" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="995" y1="734" x2="995" y2="760" stroke="#4CC94C" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- legend -->
+  <g transform="translate(210 856)">
+    <rect x="0" y="-13" width="40" height="18" rx="5" fill="none" class="merged"/><text x="50" y="1" class="s">merged into the integration branch</text>
+    <rect x="300" y="-13" width="40" height="18" rx="5" fill="none" class="pr"/><text x="350" y="1" class="s">open pull request</text>
+    <rect x="510" y="-13" width="40" height="18" rx="5" fill="none" class="planned"/><text x="560" y="1" class="s">planned / not integrated:</text>
+    <text x="0" y="30" class="s" style="fill:#7A847D">guest draw commands (the guest Xgfx table in PR #4 is compute-only) · console texture tiling · NGG vertex shaders · D3D12X command lists</text>
+  </g>
+</svg>

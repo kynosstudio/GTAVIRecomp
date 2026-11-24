@@ -1,6 +1,7 @@
 import json
 import math
 import re
+import argparse
 from pathlib import Path
 
 
@@ -19,6 +20,21 @@ def normalized_groundwork_percent(value):
 
 
 NEWS_PT = {
+    "2026-11-24-new-progress-scale": (
+        "Kynos RecompVI muda a escala: ser jogável vale metade; concluir o jogo, 100%",
+        "Tracker",
+        "A nova escala separa chegar ao jogo de conseguir jogá-lo bem. A preparação técnica vale até 10%; executável, primeiro quadro, menus, mundo e personagem jogável marcam 10%, 20%, 30%, 40% e 50%. Depois, história, renderização, desempenho e estabilidade completam os outros 50%.",
+    ),
+    "2026-11-24-omonkey-shaders-prison": (
+        "omonkey carrega shaders de GTA VI e movimenta personagem na cena da prisão",
+        "Progresso",
+        "O snapshot registra omonkey em 76%, no marco Dentro do jogo: os shaders começaram a carregar e o personagem se move lentamente pela cena inicial da prisão, a cerca de 5 FPS. O desenvolvimento foi transmitido ao vivo no canal Swaggely, mas não há código público nem build para testes externos.",
+    ),
+    "2026-11-24-cgbj-in-game": (
+        "CGBJ chega a 75%: cut-scenes a 4 FPS e cenas ainda sem iluminação",
+        "Progresso",
+        "O tracker registra o CGBJ em 75%, no marco Dentro do jogo · cut-scenes a 4 FPS. Na build privada, o personagem se move com controle, anda pelo mapa, conversa com NPCs e abre menus. O vídeo mostra cenas em cores chapadas e sem iluminação; o resultado não pode ser reproduzido externamente porque o código não é público.",
+    ),
     "2026-11-24-xcl-30fps-in-game": (
         "Exclusivo: XCL relata 30 FPS em GTA VI e testes já chegam ao mundo aberto",
         "Atualização",
@@ -137,7 +153,7 @@ HEADLINES_PT = {
 PROJECT_SUMMARIES_PT = {
     "xcl": "Camada de compatibilidade que executa código de Xbox Series no Windows. Testes relatam menus e carregamento do mundo; a imagem ainda fica presa na tela de carregamento e os resultados não foram reproduzidos de forma independente.",
     "marvis": "Camada em Rust. Relata telas iniciais a 30 FPS e chegada ao mundo, com iluminação parcial e áudio; a cena ainda não é jogável e os relatos são autodeclarados.",
-    "xlaunchvi": "A equipe relata a tela de carregamento; o portal registra 50% como estimativa editorial. O contexto do XLaunch Dashboard foi informado ao portal, mas não é confirmado pelo snapshot público.",
+    "xlaunchvi": "Os menus abrem a 30 FPS, ainda sem texturas. A equipe foca em otimizar memória e shaders; 55% é uma estimativa editorial local, não uma medição oficial.",
     "tuxbox": "Camada voltada a Linux/Proton. Registrou a tela de seleção de jogador em 4K, sem interação; o marco é um primeiro quadro, não um menu.",
     "leonida": "Projeto fora do ar desde 23/11: repositório removido, Discord indisponível e criador afastado. O último marco relatado foi o executável em execução, com quadros pretos.",
     "xbox2windows": "Pesquisa de recompilação estática. O README relata uma introdução e telas de configuração em um executável de diagnóstico modificado; o executável original e os menus continuam sem confirmação.",
@@ -284,12 +300,12 @@ XLAUNCH_EDITORIAL_DEFAULTS = {
                 "reporter": "JPTuba",
                 "date": "2026-11-24",
                 "loggedAt": "2026-11-24T05:07:48.307Z",
-                "reportedStage": "loading_screen",
-                "estimatedPercent": 50,
+                "reportedStage": "menu_30fps_no_textures",
+                "estimatedPercent": 55,
                 "pauseHours": "2–3",
                 "aiUsageExhausted": True,
                 "claudeRecharged": True,
-                "objective": "Alcançar o carregamento do mundo e disputar/ultrapassar XCL e VIctory.",
+                "objective": "Otimizar memória e shaders sem textura até os menus ganharem texturas e o jogo ficar quase jogável.",
                 "dashboardFeatures": [
                     "Reconhecimento de jogos e mídia física",
                     "Detecção de build",
@@ -297,7 +313,7 @@ XLAUNCH_EDITORIAL_DEFAULTS = {
                     "Login e troca de perfil",
                     "Biblioteca de jogos",
                 ],
-                "source": "Relato atribuído a JPTuba no Discord; estimativa de 50% informada ao portal",
+                "source": "Relato atribuído à equipe; estimativa editorial local de 55%",
             },
             "repositoryCheck": {
                 "checkedAt": "2026-11-24",
@@ -309,16 +325,22 @@ XLAUNCH_EDITORIAL_DEFAULTS = {
     },
     "effortOverrides": {
         "xlaunchvi": {
-            "percent": 50,
-            "stage": "Tela de carregamento (estimativa editorial)",
+            "percent": 55,
+            "stage": "Menu principal a 30 FPS (sem texturas)",
             "basis": "team-report-estimate",
+        },
+        "cgbj": {
+            "percent": 75,
+            "stage": "Dentro do jogo · cut-scenes a 4 FPS",
+            "basis": "manual-local-report",
         }
     },
+    "manualEfforts": [],
     "news": [],
 }
 
 
-def translated_xlaunch_report(source, editorial):
+def translated_xlaunch_report(source, editorial, preserved_report=None):
     source_teams = editorial.get("teams") if isinstance(editorial.get("teams"), dict) else {}
     team = source_teams.get("xlaunchvi") if isinstance(source_teams.get("xlaunchvi"), dict) else {}
     report = team.get("latestReport") if isinstance(team.get("latestReport"), dict) else None
@@ -328,34 +350,46 @@ def translated_xlaunch_report(source, editorial):
     project = next((item for item in source.get("efforts", []) if item.get("id") == "xlaunchvi"), {})
     portwatch_percent = snapshot_percent(project)
     portwatch_milestone_percent = score_effort(project)["milestonePercent"]
-    estimated_percent = report.get("estimatedPercent", 50)
+    local_report = preserved_report or team.get("localReport")
+    if isinstance(local_report, dict):
+        return {
+            **local_report,
+            "portwatchPercent": portwatch_percent,
+            "portwatchMilestonePercent": portwatch_milestone_percent,
+        }
+    estimated_percent = report.get("estimatedPercent", 55)
     try:
         estimated_percent = round(max(0, min(100, float(estimated_percent))), 1)
     except (TypeError, ValueError):
-        estimated_percent = 50
+        estimated_percent = 55
+    reported_stage = str(report.get("reportedStage") or "")
+    stage_label = {
+        "menu_30fps_no_textures": "Menu principal a 30 FPS · sem texturas",
+        "loading_screen": "Tela de carregamento",
+    }.get(reported_stage, "Progresso informado pela equipe")
     translations = {
         "en": {
-            "title": "XlaunchVI: 50% editorial estimate at the loading-screen milestone",
-            "summary": "A report attributed to JPTuba on Discord places XlaunchVI at the loading screen. The team said work paused for about 2–3 hours after its AI usage ran out, then resumed after Claude was recharged. The portal now records 50% as an editorial estimate supplied for this update, not an official measurement or a GitHub milestone. The reported XLaunch Dashboard scope includes game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. The team aims to reach world loading and catch or overtake XCL and VIctory, with support from the Brazilian community.",
-            "teaser": "The portal lists 50% as an editorial estimate; the reported milestone is the loading screen.",
-            "stage": "Loading screen · editorial estimate (~50%)",
-            "transparency": "The 50% estimate was supplied for this portal update; it is not an official measurement. The loading-screen report is attributed to JPTuba on Discord, but the invite does not link to the original message. The public snapshot gives XlaunchVI 3.5% overall from technical groundwork, with no GTA VI milestone yet; Dashboard details have not been independently verified there.",
+            "title": f"XlaunchVI: {estimated_percent:g}% estimate, menus at 30 FPS without textures",
+            "summary": f"The team reports that XlaunchVI menus now run at 30 FPS without textures. The next focus is memory and shader optimization. The {estimated_percent:g}% figure is a local editorial estimate, not an official measurement or a GitHub milestone; no public release is available.",
+            "teaser": f"{estimated_percent:g}% editorial estimate · menus at 30 FPS without textures · next: memory and shaders.",
+            "stage": f"Main menu at 30 FPS · no textures · editorial estimate (~{estimated_percent:g}%)",
+            "transparency": f"The {estimated_percent:g}% figure is a local editorial estimate, not an official measurement. Team reports describe menus at 30 FPS without textures and a focus on memory and shaders. The public snapshot calculates {portwatch_percent:g}% overall from technical groundwork and records {portwatch_milestone_percent:g}% in GTA VI milestones.",
             "dashboardContext": "XLaunch Dashboard scope supplied to the portal: game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. These details are not independently confirmed in the public GitHub snapshot.",
         },
         "es": {
-            "title": "XlaunchVI: estimación editorial del 50% en la pantalla de carga",
-            "summary": "Un relato atribuido a JPTuba en Discord sitúa a XlaunchVI en la pantalla de carga. El equipo dijo que el trabajo se pausó durante unas 2–3 horas al agotarse el uso de IA y se reanudó después de recargar Claude. El portal registra ahora un 50% como estimación editorial proporcionada para esta actualización; no es una medición oficial ni un hito de GitHub. El alcance informado de XLaunch Dashboard incluye reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y una biblioteca. El objetivo es llegar a la carga del mundo y alcanzar o superar a XCL y VIctory, con apoyo de la comunidad brasileña.",
-            "teaser": "El portal registra un 50% como estimación editorial; el hito informado es la pantalla de carga.",
-            "stage": "Pantalla de carga · estimación editorial (~50%)",
-            "transparency": "La estimación del 50% se proporcionó para esta actualización del portal; no es una medición oficial. El informe sobre la pantalla de carga se atribuye a JPTuba en Discord, pero la invitación no enlaza al mensaje original. El snapshot público asigna a XlaunchVI un 3,5% global por el trabajo técnico previo, sin hitos de GTA VI; los detalles del Dashboard no se verificaron de forma independiente allí.",
+            "title": f"XlaunchVI: estimación del {estimated_percent:g}%, menús a 30 FPS sin texturas",
+            "summary": f"El equipo informa que los menús de XlaunchVI ya funcionan a 30 FPS sin texturas. El siguiente foco es optimizar memoria y shaders. El {estimated_percent:g}% es una estimación editorial local, no una medición oficial ni un hito de GitHub; no hay una versión pública disponible.",
+            "teaser": f"{estimated_percent:g}% estimado · menús a 30 FPS sin texturas · próximo paso: memoria y shaders.",
+            "stage": f"Menú principal a 30 FPS · sin texturas · estimación editorial (~{estimated_percent:g}%)",
+            "transparency": f"El {estimated_percent:g}% es una estimación editorial local, no una medición oficial. El equipo informa menús a 30 FPS sin texturas y un foco en memoria y shaders. El snapshot público calcula {portwatch_percent:g}% global por preparación técnica y registra {portwatch_milestone_percent:g}% en hitos de GTA VI.",
             "dashboardContext": "Alcance de XLaunch Dashboard informado al portal: reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y biblioteca. Estos detalles no están confirmados de forma independiente en el snapshot público de GitHub.",
         },
         "zh": {
-            "title": "XlaunchVI：加载画面阶段的编辑估算为 50%",
-            "summary": "归于 JPTuba 在 Discord 发布的报告称，XlaunchVI 已到达加载画面。团队表示，AI 使用额度耗尽后暂停了约 2–3 小时，补充 Claude 额度后恢复开发。门户在本次更新中将 50% 记录为编辑估算；这不是官方测量，也不是 GitHub 里程碑。获提供的 XLaunch Dashboard 范围包括游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。团队目标是进入世界加载阶段并追赶或超过 XCL 和 VIctory，同时获得巴西社区支持。",
-            "teaser": "门户记录的 50% 是编辑估算；报告的里程碑为加载画面。",
-            "stage": "加载画面 · 编辑估算（约 50%）",
-            "transparency": "50% 估算是为本次门户更新提供的信息，并非官方测量。加载画面的报告归于 JPTuba 在 Discord 发布，但邀请链接未指向原始消息。公开快照根据技术准备工作将 XlaunchVI 的整体进度记为 3.5%，尚无 GTA VI 里程碑；Dashboard 详情未在该快照中得到独立验证。",
+            "title": f"XlaunchVI：估算进度 {estimated_percent:g}%，菜单以 30 FPS 运行且无贴图",
+            "summary": f"团队称 XlaunchVI 菜单现可在无贴图时以 30 FPS 运行，下一阶段将优化内存和着色器。{estimated_percent:g}% 是本地编辑估算，并非官方测量或 GitHub 里程碑；目前没有公开版本。",
+            "teaser": f"编辑估算 {estimated_percent:g}% · 菜单 30 FPS 无贴图 · 下一步：内存与着色器。",
+            "stage": f"主菜单 30 FPS · 无贴图 · 编辑估算（约 {estimated_percent:g}%）",
+            "transparency": f"{estimated_percent:g}% 是本地编辑估算，并非官方测量。团队报告菜单以 30 FPS 运行且无贴图，当前重点为内存和着色器。公开快照根据技术准备工作计算总体进度 {portwatch_percent:g}%，GTA VI 里程碑为 {portwatch_milestone_percent:g}%。",
             "dashboardContext": "提供给门户的 XLaunch Dashboard 范围：游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。这些详情未在公开 GitHub 快照中得到独立确认。",
         },
     }
@@ -364,14 +398,14 @@ def translated_xlaunch_report(source, editorial):
         "reporter": str(report.get("reporter") or "JPTuba"),
         "date": str(report.get("date") or ""),
         "loggedAt": str(report.get("loggedAt") or ""),
-        "stage": f"Tela de carregamento · estimativa editorial (~{estimated_percent:g}%)",
+        "stage": f"{stage_label} · estimativa editorial (~{estimated_percent:g}%)",
         "estimatedPercent": estimated_percent,
         "portwatchPercent": portwatch_percent,
         "portwatchMilestonePercent": portwatch_milestone_percent,
-        "title": f"XlaunchVI: estimativa editorial de {estimated_percent:g}% na tela de carregamento",
-        "summary": f"Relato atribuído a JPTuba no Discord situa o XlaunchVI na tela de carregamento. A equipe informou uma pausa de cerca de 2–3 horas após esgotar o uso de IA e a retomada depois de recarregar o Claude. O portal registra agora {estimated_percent:g}% como estimativa editorial informada para esta atualização; não é medição oficial nem marco publicado no GitHub. O escopo informado do XLaunch Dashboard inclui reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. A equipe busca chegar ao carregamento do mundo e alcançar ou ultrapassar XCL e VIctory, com apoio da comunidade brasileira.",
-        "teaser": f"O portal registra {estimated_percent:g}% como estimativa editorial; o marco relatado é a tela de carregamento.",
-        "transparency": f"Os {estimated_percent:g}% foram informados como estimativa editorial para esta atualização, não como medição oficial. O relato da tela de carregamento é atribuído a JPTuba no Discord, mas o convite não aponta para a mensagem original. O snapshot público PortWatch/GitHub calcula {portwatch_percent:g}% de progresso geral a partir da preparação técnica e registra {portwatch_milestone_percent:g}% em marcos de GTA VI; os detalhes do Dashboard não foram verificados de forma independente nesse snapshot.",
+        "title": f"XlaunchVI: estimativa editorial de {estimated_percent:g}%, menus a 30 FPS sem texturas",
+        "summary": "Relatos da equipe indicam que os menus do XlaunchVI agora abrem cravados em 30 FPS, ainda sem texturas. A estabilidade está mais forte segundo Nesko. O próximo foco é otimizar o uso de memória e as shaders sem textura. O projeto já abriu The Matrix Awakens e busca executar outros jogos de Xbox; não há release pública para baixar.",
+        "teaser": f"{estimated_percent:g}% · menus a 30 FPS sem texturas · próximo passo: memória e shaders.",
+        "transparency": f"Os {estimated_percent:g}% são uma estimativa editorial local, não uma medição oficial. Relatos atribuídos à equipe descrevem menus a 30 FPS sem texturas e foco em memória/shaders; não há confirmação pública independente nem release disponível. O snapshot público calcula {portwatch_percent:g}% de progresso geral a partir da preparação técnica e registra {portwatch_milestone_percent:g}% em marcos de GTA VI.",
         "dashboardContext": "Escopo do XLaunch Dashboard informado ao portal: reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. Esses detalhes não estão confirmados de forma independente no snapshot público do GitHub.",
         "dashboardFeatures": report.get("dashboardFeatures", []),
         "translations": translations,
@@ -390,12 +424,14 @@ def translated_xlaunch_report(source, editorial):
     }
 
 
-def translated_news(source, editorial):
-    if set(NEWS_PT) != {item["id"] for item in source["news"]}:
-        raise ValueError("NEWS_PT precisa conter exatamente os IDs de news do tracker.json.")
+def translated_news(source, editorial, preserved_news=None, preserved_report=None):
     stories = []
     for item in source["news"]:
-        title, category, summary = NEWS_PT[item["id"]]
+        title, category, summary = NEWS_PT.get(item["id"], (
+            item.get("title") or "Atualização do tracker",
+            item.get("category") or "Atualização",
+            item.get("dek") or item.get("summary") or "Nova atualização registrada pelo tracker.",
+        ))
         sources = [
             {
                 "outlet": source_item.get("outlet", "Fonte"),
@@ -413,7 +449,7 @@ def translated_news(source, editorial):
             "summary": summary,
             "sources": sources,
         })
-    team_report = translated_xlaunch_report(source, editorial)
+    team_report = translated_xlaunch_report(source, editorial, preserved_report)
     if team_report:
         team_story = {
             **team_report,
@@ -424,12 +460,12 @@ def translated_news(source, editorial):
             -1,
         )
         stories.insert(lead_index + 1 if lead_index >= 0 else 0, team_story)
-    for story in editorial.get("news", []):
+    editorial_news = list(preserved_news or []) + list(editorial.get("news", []))
+    for story in editorial_news:
         if not isinstance(story, dict) or not story.get("id") or not story.get("title") or not story.get("summary"):
             continue
-        if any(existing["id"] == story["id"] for existing in stories):
-            continue
-        stories.append({
+        matching = next((index for index, existing in enumerate(stories) if existing["id"] == story["id"]), None)
+        preserved = {
             "id": str(story["id"]),
             "date": str(story.get("date") or ""),
             "category": str(story.get("category") or "Atualização editorial"),
@@ -440,8 +476,16 @@ def translated_news(source, editorial):
                 if isinstance(source_item, dict)
                 and str(source_item.get("url") or "").startswith(("https://", "http://"))
             ],
-            **({"translations": story["translations"]} if isinstance(story.get("translations"), dict) else {}),
-        })
+        }
+        for field in ("body", "image", "teaser", "transparency"):
+            if field in story:
+                preserved[field] = story[field]
+        if isinstance(story.get("translations"), dict):
+            preserved["translations"] = story["translations"]
+        if matching is not None:
+            stories[matching] = {**stories[matching], **preserved}
+            continue
+        stories.append(preserved)
     stories.sort(key=lambda story: story.get("date", ""), reverse=True)
     return stories
 
@@ -519,6 +563,9 @@ def translated_history(history, efforts):
         "loads": "Executável em execução",
         "boots": "Primeiro quadro",
         "menu": "Menu principal",
+        "world": "Dentro do mundo",
+        "playable": "Jogável",
+        "complete": "Jogo completo",
         "ingame": "Dentro do jogo",
         "fps30": "30 FPS",
         "stable": "Estável",
@@ -554,13 +601,16 @@ def clamp_fraction(value):
 
 def score_effort(effort):
     groundwork = effort.get("groundwork") if isinstance(effort.get("groundwork"), dict) else {}
-    gta = effort.get("gta") if isinstance(effort.get("gta"), dict) else {}
+    gta = dict(effort.get("gta")) if isinstance(effort.get("gta"), dict) else {}
+    if gta.get("ingame") is not None:
+        if gta.get("world") is None:
+            gta["world"] = gta["ingame"]
     weights = {"loader": 0.2, "shaders": 0.28, "graphics": 0.32, "proven": 0.2}
     groundwork_fraction = sum(weight * clamp_fraction(groundwork.get(key)) for key, weight in weights.items())
-    score = 25 * groundwork_fraction
+    score = 10 * groundwork_fraction
     reached = "groundwork"
     previous_tick = score
-    ticks = {"loads": 25, "boots": 40, "menu": 55, "ingame": 70}
+    ticks = {"loads": 10, "boots": 20, "menu": 30, "world": 40, "playable": 50}
     for key, tick in ticks.items():
         value = clamp_fraction(gta.get(key))
         if value >= 1:
@@ -572,9 +622,10 @@ def score_effort(effort):
             score = max(score, previous_tick + value * (tick - previous_tick))
             break
 
-    milestone_percent = max(0, score - 25 * groundwork_fraction)
-    if reached == "ingame":
-        fps_fraction = clamp_fraction((float(gta.get("fps") or 0) if math.isfinite(float(gta.get("fps") or 0)) else 0) / 30)
+    milestone_percent = ticks.get(reached, 0)
+    if reached == "playable":
+        fps = float(gta.get("fps") or 0)
+        fps_fraction = clamp_fraction(fps / 30 if math.isfinite(fps) else 0)
         stability = {
             "unknown": 0,
             "constant": 0,
@@ -583,15 +634,23 @@ def score_effort(effort):
             "rarely": 0.8,
             "stable": 1,
         }.get(gta.get("stability"), 0)
-        score = 70 + fps_fraction * 15 + stability * 15
-        milestone_percent = score
-        if fps_fraction >= 1:
-            reached = "fps30"
-        if fps_fraction >= 1 and stability >= 1:
-            reached = "stable"
+        quality = (
+            0.35 * clamp_fraction(gta.get("story"))
+            + 0.25 * clamp_fraction(gta.get("render"))
+            + 0.2 * fps_fraction
+            + 0.2 * stability
+        )
+        score = 50 + quality * 50
+        if quality >= 1:
+            reached = "complete"
+            milestone_percent = 100
+
+    manual_score = effort.get("manualScore")
+    if isinstance(manual_score, (int, float)) and math.isfinite(manual_score):
+        score = max(0, min(100, manual_score))
 
     return {
-        "score": round(score, 1),
+        "score": round(score * 10) / 10,
         "groundworkFraction": round(groundwork_fraction, 4),
         "milestonePercent": round(milestone_percent, 1),
         "reached": reached,
@@ -602,8 +661,7 @@ def snapshot_percent(effort):
     return score_effort(effort)["score"]
 
 
-def translated_efforts(source, editorial):
-    overrides = {}
+def translated_efforts(source, editorial, preserved_report=None):
     stage_overrides = {
         "xcl": "Carregamento do mundo (relato)",
         "marvis": "Dentro do mundo (relato)",
@@ -614,14 +672,12 @@ def translated_efforts(source, editorial):
     for project_id, override in editorial_overrides.items():
         if not isinstance(override, dict):
             continue
-        if override.get("percent") is not None:
-            overrides[project_id] = override["percent"]
         if override.get("stage"):
             stage_overrides[project_id] = str(override["stage"])
     milestones = [
-        ("stable", "Estável"),
-        ("fps30", "30 FPS"),
-        ("ingame", "Dentro do jogo"),
+        ("complete", "Jogo completo"),
+        ("playable", "Jogável"),
+        ("world", "Dentro do mundo"),
         ("menu", "Menu principal"),
         ("boots", "Primeiro quadro"),
         ("loads", "Executável em execução"),
@@ -632,10 +688,11 @@ def translated_efforts(source, editorial):
         gta = item.get("gta") or {}
         score = score_effort(item)
         source_percent = score["score"]
-        percent = overrides.get(item["id"])
-        if percent is None:
-            percent = source_percent
-        percent = round(float(percent), 1)
+        override = editorial_overrides.get(item["id"], {})
+        manual_score = override.get("percent") if isinstance(override, dict) else None
+        if manual_score is None:
+            manual_score = item.get("manualScore")
+        percent = round(float(manual_score if manual_score is not None else source_percent), 1)
         stage = stage_overrides.get(item["id"]) or dict(milestones).get(score["reached"], "Preparação")
         status = "offline" if item.get("nuked") else "acompanhado"
         summary = PROJECT_SUMMARIES_PT.get(
@@ -648,8 +705,11 @@ def translated_efforts(source, editorial):
         groundwork = item.get("groundwork") if isinstance(item.get("groundwork"), dict) else {}
         gta_milestones = {
             key: clamp_fraction(gta.get(key))
-            for key in ("loads", "boots", "menu", "ingame")
+            for key in ("loads", "boots", "menu", "world", "playable", "ingame")
         }
+        if gta.get("ingame") is not None:
+            if gta.get("world") is None:
+                gta_milestones["world"] = clamp_fraction(gta.get("ingame"))
         gta_milestones.update({
             "fps": gta.get("fps", 0),
             "stability": str(gta.get("stability") or "unknown"),
@@ -684,6 +744,7 @@ def translated_efforts(source, editorial):
             "status": status,
             "nuked": item.get("nuked"),
             "percent": percent,
+            **({"manualScore": round(float(manual_score), 1)} if manual_score is not None else {}),
             "portwatchPercent": source_percent,
             "portwatchMilestonePercent": score["milestonePercent"],
             "groundworkFraction": score["groundworkFraction"],
@@ -703,24 +764,33 @@ def translated_efforts(source, editorial):
             "repositoryAssessedAt": item.get("assessedAt"),
             "provenOn": item.get("provenOn"),
             "gtaMilestones": gta_milestones,
+            "gta": dict(gta),
+            "groundwork": dict(groundwork),
             "technicalDetails": technical_details,
         }
         if item["id"] == "xlaunchvi":
-            project["teamReport"] = translated_xlaunch_report(source, editorial)
+            project["teamReport"] = translated_xlaunch_report(source, editorial, preserved_report)
             project["progressBasis"] = "team-report-estimate"
         projects.append(project)
+    existing_ids = {project["id"] for project in projects}
+    for item in editorial.get("manualEfforts", []):
+        if not isinstance(item, dict) or not item.get("id") or item["id"] in existing_ids:
+            continue
+        project = dict(item)
+        override = editorial_overrides.get(project["id"], {})
+        manual_score = override.get("percent") if isinstance(override, dict) else project.get("manualScore")
+        if manual_score is not None:
+            project["percent"] = round(float(manual_score), 1)
+            project["manualScore"] = round(float(manual_score), 1)
+        if isinstance(override, dict) and override.get("stage"):
+            project["stage"] = str(override["stage"])
+        projects.append(project)
+        existing_ids.add(project["id"])
     return projects
 
 
-def build_tracker(source, editorial):
-    headline_translations = HEADLINES_PT
-    source_titles = {item["title"] for item in source["headlines"]}
-    if source_titles != set(headline_translations):
-        raise ValueError("HEADLINES_PT precisa conter exatamente os títulos de headlines do tracker.json.")
-
+def build_tracker(source, editorial, preserved_news=None, preserved_report=None):
     tools = []
-    if {item["name"] for item in source["tools"]} != set(TOOL_DESCRIPTIONS_PT):
-        raise ValueError("TOOL_DESCRIPTIONS_PT precisa conter exatamente os nomes de tools do tracker.json.")
     kind_labels = {
         "Archive toolkit": "Ferramentas de arquivos",
         "Coordination hub": "Hub de coordenação",
@@ -744,15 +814,16 @@ def build_tracker(source, editorial):
             "repo": item["repo"],
             "url": f"https://github.com/{item['repo']}",
             "kind": kind_labels.get(item.get("kind"), "Ferramenta"),
-            "description": TOOL_DESCRIPTIONS_PT[item["name"]],
+            "description": TOOL_DESCRIPTIONS_PT.get(item["name"], item.get("description") or "Ferramenta registrada pelo tracker."),
             "stars": (item.get("stats") or {}).get("stars"),
         })
 
     flagged = []
-    if {item["id"] for item in source["flagged"]} != set(FLAGGED_PT):
-        raise ValueError("FLAGGED_PT precisa conter exatamente os IDs de flagged do tracker.json.")
     for item in source["flagged"]:
-        title, summary = FLAGGED_PT[item["id"]]
+        title, summary = FLAGGED_PT.get(item["id"], (
+            item.get("title") or "Item sinalizado pelo tracker",
+            item.get("summary") or "Confira a fonte original e os dados atuais do tracker.",
+        ))
         flagged.append({
             "id": item["id"],
             "title": title,
@@ -772,6 +843,7 @@ def build_tracker(source, editorial):
         {
             "date": item["date"],
             "kind": {"up": "progresso", "new": "novo", "flag": "alerta", "claim": "alegação"}.get(item.get("kind"), "atualização"),
+            "sourceText": str(item.get("text") or ""),
             "summary": translated_change_summary(item),
         }
         for item in significant_changes[-5:]
@@ -800,7 +872,7 @@ def build_tracker(source, editorial):
 
     headlines = [
         {
-            "title": HEADLINES_PT[item["title"]],
+            "title": HEADLINES_PT.get(item["title"], item["title"]),
             "outlet": item.get("outlet", "Fonte"),
             "date": item.get("date", ""),
             "url": item.get("link", ""),
@@ -814,7 +886,7 @@ def build_tracker(source, editorial):
     xlaunch_source = next((item for item in source.get("efforts", []) if item.get("id") == "xlaunchvi"), {})
     xlaunch_stats = xlaunch_source.get("stats") or {}
     repository_missing = xlaunch_stats.get("missing") is True
-    team_report = translated_xlaunch_report(source, editorial)
+    team_report = translated_xlaunch_report(source, editorial, preserved_report)
     candidates = [
         {
             "repo": str(item.get("repo") or ""),
@@ -857,8 +929,8 @@ def build_tracker(source, editorial):
                 },
             }
         },
-        "news": translated_news(source, editorial),
-        "efforts": translated_efforts(source, editorial),
+        "news": translated_news(source, editorial, preserved_news, preserved_report),
+        "efforts": translated_efforts(source, editorial, preserved_report),
         "editorial": editorial,
         "tools": tools,
         "candidates": len(candidates),
@@ -907,24 +979,13 @@ def merge_editorial_defaults(defaults, overrides):
     return merged
 
 
-def main():
-    source_path = DATA / "tracker.json"
-    source = json.loads(source_path.read_text(encoding="utf-8"))
-    localized_path = DATA / "tracker-pt-BR.json"
-    previous_localized = {}
-    if localized_path.exists():
-        previous_localized = json.loads(localized_path.read_text(encoding="utf-8"))
-    editorial = merge_editorial_defaults(
-        XLAUNCH_EDITORIAL_DEFAULTS,
-        previous_localized.get("editorial", {}),
-    )
-    localized = build_tracker(source, editorial)
-    localized_path.write_text(json.dumps(localized, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
+def write_fallback(source, localized):
     fallback = {
         "hardware": json.loads((DATA / "hardware.json").read_text(encoding="utf-8")),
         "discords": json.loads((DATA / "discords.json").read_text(encoding="utf-8")),
         "tracker": localized,
+        "trackerLocalized": localized,
+        "trackerRaw": source,
         "portwatch": {
             "updated": source.get("updated", ""),
             "lastSyncedAt": source.get("lastSyncedAt", ""),
@@ -936,6 +997,73 @@ def main():
         "window.KynosFileData = " + json.dumps(fallback, ensure_ascii=False, separators=(",", ":")) + ";\n",
         encoding="utf-8",
     )
+    return fallback_path
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--fallback-only", action="store_true", help="Regenerate file:// data without rebuilding local translations.")
+    args = parser.parse_args()
+    source_path = DATA / "tracker.json"
+    source = json.loads(source_path.read_text(encoding="utf-8"))
+    localized_path = DATA / "tracker-pt-BR.json"
+    if args.fallback_only:
+        localized = json.loads(localized_path.read_text(encoding="utf-8"))
+        fallback_path = write_fallback(source, localized)
+        print(f"Gerado {fallback_path.relative_to(ROOT)} a partir dos dados atuais.")
+        return
+
+    previous_localized = {}
+    if localized_path.exists():
+        previous_localized = json.loads(localized_path.read_text(encoding="utf-8"))
+    editorial = merge_editorial_defaults(
+        XLAUNCH_EDITORIAL_DEFAULTS,
+        previous_localized.get("editorial", {}),
+    )
+    previous_teams = previous_localized.get("teams") if isinstance(previous_localized.get("teams"), dict) else {}
+    previous_xlaunch_team = previous_teams.get("xlaunchvi") if isinstance(previous_teams.get("xlaunchvi"), dict) else {}
+    previous_report = previous_xlaunch_team.get("latestReport")
+    editorial_teams = editorial.setdefault("teams", {})
+    editorial_xlaunch_team = editorial_teams.setdefault("xlaunchvi", {})
+    if not isinstance(previous_report, dict):
+        previous_report = editorial_xlaunch_team.get("localReport")
+    editorial_xlaunch_team.pop("localReport", None)
+
+    source_ids = {item.get("id") for item in source.get("efforts", []) if isinstance(item, dict)}
+    previous_efforts = previous_localized.get("efforts") if isinstance(previous_localized.get("efforts"), list) else []
+    manual_efforts = {
+        item["id"]: item for item in editorial.get("manualEfforts", [])
+        if isinstance(item, dict) and item.get("id")
+    }
+    for item in previous_efforts:
+        if isinstance(item, dict) and item.get("id") and item["id"] not in source_ids:
+            manual_efforts[item["id"]] = item
+    editorial["manualEfforts"] = list(manual_efforts.values())
+
+    existing_editorial_news = editorial.get("news") if isinstance(editorial.get("news"), list) else []
+    previous_news = previous_localized.get("news") if isinstance(previous_localized.get("news"), list) else []
+    preserved_news = {
+        item["id"]: item for item in previous_news
+        if isinstance(item, dict) and item.get("id") and item.get("title") and item.get("summary")
+    }
+    remaining_editorial_news = []
+    for item in existing_editorial_news:
+        if isinstance(item, dict) and item.get("id") and item.get("title") and item.get("summary"):
+            previous = preserved_news.get(item["id"], {})
+            generated_echo = all(item.get(field) == previous.get(field) for field in ("date", "category", "title", "summary"))
+            generated_echo = generated_echo and item.get("body") == previous.get("body")
+            if not generated_echo:
+                remaining_editorial_news.append(item)
+    editorial["news"] = remaining_editorial_news
+
+    localized = build_tracker(
+        source,
+        editorial,
+        list(preserved_news.values()),
+        previous_report if isinstance(previous_report, dict) else None,
+    )
+    localized_path.write_text(json.dumps(localized, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    fallback_path = write_fallback(source, localized)
     print(f"Gerados {localized_path.relative_to(ROOT)} e {fallback_path.relative_to(ROOT)}.")
 
 

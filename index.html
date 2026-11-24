@@ -136,8 +136,16 @@
             <div class="section-heading"><div><span class="section-kicker">RANKING DO SNAPSHOT</span><h2>Projetos mais <span>avançados.</span></h2></div></div>
             <div id="home-repository-list" class="repository-list"></div>
             <details class="tracked-projects-details">
-              <summary><span>Demais projetos monitorados</span><span class="tracked-projects-count" id="home-tracked-project-count"></span></summary>
+              <summary><span>Demais projetos públicos</span><span class="tracked-projects-count" id="home-tracked-project-count"></span></summary>
               <div id="home-tracker-all-projects" class="repository-list"></div>
+            </details>
+            <details class="tracked-projects-details" id="home-private-builds" hidden>
+              <summary><span>Builds privadas · fora do ranking público</span><span class="tracked-projects-count" id="home-private-build-count"></span></summary>
+              <div id="home-private-repository-list" class="repository-list"></div>
+            </details>
+            <details class="tracked-projects-details" id="home-watchlist-projects" hidden>
+              <summary><span>Lista de observação</span><span class="tracked-projects-count" id="home-watchlist-project-count"></span></summary>
+              <div id="home-watchlist-repository-list" class="repository-list"></div>
             </details>
             <section id="home-inactive-repositories" class="inactive-repositories" aria-labelledby="home-inactive-repositories-title" hidden>
               <div class="section-heading"><div><span class="section-kicker">REGISTRO HISTÓRICO</span><h2 id="home-inactive-repositories-title">Projetos fora do <span>ar.</span></h2></div><div class="estimate-pill">FORA DO RANKING ATIVO</div></div>
@@ -369,11 +377,35 @@
         <div class="content-wrap page-content">
           <div id="tracker-race-summary" class="race-summary-grid"></div>
           <div id="xlaunch-race-spotlight"></div>
-          <div class="section-heading"><div><span class="section-kicker">RANKING DO SNAPSHOT</span><h2>Projetos mais <span>avançados.</span></h2></div><div class="estimate-pill">EM ACOMPANHAMENTO <span id="repo-count" class="count-badge">0</span></div></div>
+          <div class="section-heading"><div><span class="section-kicker">RANKING DO SNAPSHOT</span><h2>Projetos mais <span>avançados.</span></h2></div><div class="estimate-pill">CORRIDA PÚBLICA <span id="repo-count" class="count-badge">0</span></div></div>
+          <div class="race-controls" role="group" aria-label="Filtrar e ordenar projetos públicos">
+            <label>Escopo
+              <select id="race-scope" aria-label="Filtrar escopo da corrida">
+                <option value="all">Todos os projetos públicos</option>
+                <option value="gta">Com alvo GTA VI</option>
+                <option value="generic">Infraestrutura geral</option>
+              </select>
+            </label>
+            <label>Ordenar por
+              <select id="race-sort" aria-label="Ordenar projetos da corrida">
+                <option value="score">Progresso</option>
+                <option value="stars">Estrelas</option>
+                <option value="active">Atividade recente</option>
+              </select>
+            </label>
+          </div>
           <div id="repository-list" class="repository-list"></div>
           <details class="tracked-projects-details">
-            <summary><span>Demais projetos monitorados</span><span class="tracked-projects-count" id="tracked-project-count"></span></summary>
+            <summary><span>Demais projetos públicos</span><span class="tracked-projects-count" id="tracked-project-count"></span></summary>
             <div id="tracker-all-projects" class="repository-list"></div>
+          </details>
+          <details class="tracked-projects-details" id="private-builds" hidden>
+            <summary><span>Builds privadas · fora do ranking público</span><span class="tracked-projects-count" id="private-build-count"></span></summary>
+            <div id="private-repository-list" class="repository-list"></div>
+          </details>
+          <details class="tracked-projects-details" id="watchlist-projects" hidden>
+            <summary><span>Lista de observação</span><span class="tracked-projects-count" id="watchlist-project-count"></span></summary>
+            <div id="watchlist-repository-list" class="repository-list"></div>
           </details>
           <section id="inactive-repositories" class="inactive-repositories" aria-labelledby="inactive-repositories-title" hidden>
             <div class="section-heading"><div><span class="section-kicker">REGISTRO HISTÓRICO</span><h2 id="inactive-repositories-title">Projetos fora do <span>ar.</span></h2></div><div class="estimate-pill">FORA DO RANKING ATIVO</div></div>
@@ -467,7 +499,7 @@
           <details class="tracker-accordion">
             <summary>Dados do snapshot</summary>
             <div class="tracker-accordion-body">
-              <p class="tracker-data-note">Snapshot de <time id="tracker-updated"></time> · origem: <code>data/tracker.json</code> · tradução editorial PT-BR em <code>data/tracker-pt-BR.json</code>.</p>
+              <p class="tracker-data-note">Snapshot de <time id="tracker-updated"></time> <span id="tracker-updated-relative" class="publication-relative"></span> · origem: <code>data/tracker.json</code> · tradução editorial PT-BR em <code>data/tracker-pt-BR.json</code>.</p>
             </div>
           </details>
         </div>
@@ -520,6 +552,7 @@
         : Promise.resolve();
     </script>
     <script src="i18n.js" defer></script>
+    <script src="data/portwatch-scoring.js" defer></script>
     <script src="app.js" defer></script>
   </body>
 </html>
