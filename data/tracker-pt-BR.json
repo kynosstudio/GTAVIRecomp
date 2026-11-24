@@ -841,7 +841,7 @@
         "date": "2026-11-24",
         "loggedAt": "2026-11-24T05:07:48.307Z",
         "stage": "Tela de carregamento · estimativa editorial (~50%)",
-        "estimatedPercent": 50.0,
+        "estimatedPercent": 50.0, 
         "portwatchPercent": 0.0,
         "title": "XlaunchVI: estimativa editorial de 50% na tela de carregamento",
         "summary": "Relato atribuído a JPTuba no Discord situa o XlaunchVI na tela de carregamento. A equipe informou uma pausa de cerca de 2–3 horas após esgotar o uso de IA e a retomada depois de recarregar o Claude. O portal registra agora 50% como estimativa editorial informada para esta atualização; não é medição oficial nem marco publicado no GitHub. O escopo informado do XLaunch Dashboard inclui reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. A equipe busca chegar ao carregamento do mundo e alcançar ou ultrapassar XCL e VIctory, com apoio da comunidade brasileira.",
