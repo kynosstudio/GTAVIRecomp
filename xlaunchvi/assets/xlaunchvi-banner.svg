@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-labelledby="t d">
+  <title id="t">XlaunchVI — Xbox Series X|S Compatibility Layer for Windows</title>
+  <desc id="d">Original XlaunchVI banner. Unofficial project; not affiliated with, endorsed by or sponsored by Microsoft or Xbox.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B120D"/><stop offset="0.55" stop-color="#080B09"/><stop offset="1" stop-color="#050706"/>
+    </linearGradient>
+    <radialGradient id="glowL" cx="0.2" cy="0.5" r="0.55">
+      <stop offset="0" stop-color="#107C10" stop-opacity="0.42"/><stop offset="0.6" stop-color="#0B4F12" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#0B4F12" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowR" cx="0.95" cy="1.05" r="0.6">
+      <stop offset="0" stop-color="#0E5E16" stop-opacity="0.30"/><stop offset="1" stop-color="#0E5E16" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1F2622"/><stop offset="1" stop-color="#080B09"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5BE35B"/><stop offset="0.55" stop-color="#107C10"/><stop offset="1" stop-color="#0B4F12"/>
+    </linearGradient>
+    <linearGradient id="word" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#C9CFCB"/>
+    </linearGradient>
+    <linearGradient id="rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#107C10"/><stop offset="0.6" stop-color="#107C10" stop-opacity="0.35"/><stop offset="1" stop-color="#107C10" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#FFFFFF" stroke-opacity="0.035" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="fade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0"/><stop offset="0.45" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="1"/>
+    </linearGradient>
+    <mask id="gridMask"><rect width="1280" height="400" fill="url(#fade)"/></mask>
+  </defs>
+
+  <rect width="1280" height="400" rx="18" fill="url(#bg)"/>
+  <rect width="1280" height="400" rx="18" fill="url(#grid)" mask="url(#gridMask)"/>
+  <rect width="1280" height="400" rx="18" fill="url(#glowL)"/>
+  <rect width="1280" height="400" rx="18" fill="url(#glowR)"/>
+
+  <!-- geometric accents: concentric open arcs echoing the launch ring, right side -->
+  <g fill="none" stroke-linecap="round" transform="translate(1110 200)">
+    <path d="M 118.4 -99.4 A 155 155 0 1 1 -26.9 -152.6" stroke="#107C10" stroke-opacity="0.22" stroke-width="2"/>
+    <path d="M 91.9 -77.1 A 120 120 0 1 1 -20.8 -118.2" stroke="#107C10" stroke-opacity="0.30" stroke-width="2"/>
+    <path d="M 65.3 -54.8 A 85 85 0 1 1 -14.8 -83.7" stroke="#5BE35B" stroke-opacity="0.35" stroke-width="3"/>
+  </g>
+  <g fill="#FFFFFF" fill-opacity="0.10">
+    <rect x="930" y="58" width="120" height="2" rx="1"/><rect x="960" y="70" width="70" height="2" rx="1"/>
+    <rect x="890" y="338" width="150" height="2" rx="1"/><rect x="930" y="350" width="80" height="2" rx="1"/>
+  </g>
+  <rect x="0.5" y="0.5" width="1279" height="399" rx="17.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.07"/>
+
+  <!-- mark -->
+  <g transform="translate(92 110) scale(0.703)">
+    <rect x="4" y="4" width="248" height="248" rx="56" fill="url(#tile)"/>
+    <rect x="4.5" y="4.5" width="247" height="247" rx="55.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <path d="M 189.3 76.6 A 80 80 0 1 1 114.1 49.2" fill="none" stroke="url(#ring)" stroke-width="20" stroke-linecap="round"/>
+    <path d="M 112 92 L 160 128 L 112 164 Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="10" stroke-linejoin="round"/>
+  </g>
+
+  <!-- wordmark and tagline -->
+  <text x="316" y="196" font-family="'Segoe UI Variable Display','Segoe UI',Inter,'Helvetica Neue',Arial,sans-serif"
+        font-size="104" font-weight="700" letter-spacing="-2" fill="url(#word)">Xlaunch<tspan fill="#2FAA2F">VI</tspan></text>
+  <rect x="320" y="222" width="560" height="3" rx="1.5" fill="url(#rule)"/>
+  <text x="320" y="264" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="30" font-weight="600"
+        fill="#E8ECE9">Xbox Series X|S Compatibility Layer for Windows</text>
+  <text x="320" y="302" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="19" font-weight="500"
+        letter-spacing="2.5" fill="#8C968F">NATIVE x86-64  ·  RDNA 2 SHADER TRANSLATION  ·  DIRECT3D 12  ·  VULKAN</text>
+  <text x="1248" y="380" text-anchor="end" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="13"
+        fill="#5E6862">Experimental · unofficial · not affiliated with Microsoft or Xbox</text>
+</svg>

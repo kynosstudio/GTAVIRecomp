@@ -7,6 +7,7 @@ const PRESETS_KEY = 'kynos-gta-vi-presets-v1';
 const NOTIFICATION_KEY = 'kynos-gta-vi-notifications-v1';
 const XCL_FEED_CACHE_KEY = 'kynos-xcl-feed-v1';
 const XCL_FEED_CACHE_TTL = 15 * 60 * 1000;
+const raceView = { scope: 'all', sort: 'score', initialized: false };
 const XCL_FEED_FALLBACK = {
   repository: 'ivall/xcl',
   updatedAt: '2026-11-23T20:57:00-03:00',
@@ -172,13 +173,13 @@ const PORTWATCH_FALLBACK = {
   overallProgress: 55,
   leaderId: 'xcl',
   milestones: [
-    { percent: 0, label: 'Preparação', description: 'Projeto em fase de preparação.' },
-    { percent: 25, label: 'Exe rodando', description: 'O executável inicia.', statusField: 'loads', statusValue: 1 },
-    { percent: 40, label: 'Primeiro frame', description: 'O jogo apresenta o primeiro quadro.', statusField: 'boots', statusValue: 1 },
-    { percent: 55, label: 'Menu principal', description: 'O menu principal é exibido.', statusField: 'menu', statusValue: 1 },
-    { percent: 70, label: 'Dentro do jogo', description: 'É possível entrar no jogo.', statusField: 'ingame', statusValue: 1 },
-    { percent: 85, label: '30 FPS', description: 'O jogo alcança cerca de 30 quadros por segundo.', statusField: 'fps', statusValue: 1 },
-    { percent: 100, label: 'Estável', description: 'A experiência está estável.', statusField: 'stability', statusValue: 'stable' }
+    { key: 'groundwork', percent: 0, label: 'Preparação', description: 'Carregador, bibliotecas e camada gráfica.' },
+    { key: 'loads', percent: 10, label: 'Executável em execução', description: 'O executável é mapeado e inicia o próprio código.' },
+    { key: 'boots', percent: 20, label: 'Primeiro quadro', description: 'O jogo apresenta os primeiros quadros.' },
+    { key: 'menu', percent: 30, label: 'Menu principal', description: 'Os menus são alcançados e respondem à entrada.' },
+    { key: 'world', percent: 40, label: 'Dentro do mundo', description: 'O modo história carrega e desenha o mundo.' },
+    { key: 'playable', percent: 50, label: 'Jogável', description: 'É possível controlar um personagem no mundo.' },
+    { key: 'complete', percent: 100, label: 'Jogo completo', description: 'O jogo pode ser concluído com qualidade e estabilidade.' }
   ],
   projects: [
     { id: 'xcl', name: 'XCL', author: 'ivall', gta: { loads: 1, boots: 1, menu: 1 }, avatar: 'XC', avatarUrl: 'https://github.com/ivall.png?size=88' },
@@ -538,30 +539,53 @@ function isTrackerPayload(value) {
 }
 
 function mergeTrackerPayloads(portwatch, localized, fallback) {
-  const fallbackTracker = fallback && isTrackerPayload(fallback.tracker) ? fallback.tracker : fallback;
+  const fallbackTracker = fallback && isTrackerPayload(fallback.trackerLocalized)
+    ? fallback.trackerLocalized
+    : fallback && isTrackerPayload(fallback.tracker) ? fallback.tracker : fallback;
+  const fallbackRaw = fallback && isTrackerPayload(fallback.trackerRaw) ? fallback.trackerRaw : null;
   const fallbackPortwatch = fallback && fallback.portwatch && typeof fallback.portwatch === 'object'
     ? fallback.portwatch
     : {};
-  const raw = isTrackerPayload(portwatch) ? portwatch : {};
+  const raw = isTrackerPayload(portwatch) ? portwatch : fallbackRaw || {};
   const base = isTrackerPayload(fallbackTracker) ? fallbackTracker : {};
   const translated = isTrackerPayload(localized) ? localized : {};
   const merged = { ...base, ...raw, ...translated };
 
-  const itemKey = (item) => item && (item.id || item.repo || item.name || item.title || item.url || item.path);
+  const itemKey = (item, field) => {
+    if (!item) return '';
+    if (item.id) return `${field}:id:${item.id}`;
+    if (field === 'changes') {
+      const sourceText = item.sourceText || item.text;
+      return sourceText ? `${field}:source:${sourceText}` : '';
+    }
+    if (field === 'history') {
+      const date = item.timestamp || item.updatedAt || item.at || item.date;
+      const project = item.leaderId || item.projectId || item.project || '';
+      return date ? `${field}:${date}:${project}` : '';
+    }
+    const url = item.url || item.link;
+    return item.repo ? `${field}:repo:${item.repo}`
+      : item.name ? `${field}:name:${item.name}`
+        : url ? `${field}:url:${url}`
+          : item.title ? `${field}:title:${item.title}`
+            : item.path ? `${field}:path:${item.path}` : '';
+  };
   const mergeArrayByKey = (field) => {
     const rawItems = Array.isArray(raw[field]) ? raw[field] : [];
     const baseItems = Array.isArray(base[field]) ? base[field] : [];
     const translatedItems = Array.isArray(translated[field]) ? translated[field] : [];
     const source = rawItems.length ? rawItems : baseItems;
-    const translatedMap = new Map(translatedItems.map((item) => [itemKey(item), item]).filter(([key]) => key));
+    const translatedMap = new Map(translatedItems.map((item) => [itemKey(item, field), item]).filter(([key]) => key));
     const result = source.map((item) => {
-      const translation = translatedMap.get(itemKey(item));
-      return translation ? { ...item, ...translation, translations: { ...(item.translations || {}), ...(translation.translations || {}) } } : { ...item };
+      const translation = translatedMap.get(itemKey(item, field));
+      if (translation) return { ...item, ...translation, translations: { ...(item.translations || {}), ...(translation.translations || {}) } };
+      return field === 'changes' ? { ...item, summary: item.summary || item.text || '' } : { ...item };
     });
-    const knownKeys = new Set(result.map(itemKey).filter(Boolean));
+    const knownKeys = new Set(result.map((item) => itemKey(item, field)).filter(Boolean));
     translatedItems.forEach((item) => {
-      const key = itemKey(item);
+      const key = itemKey(item, field);
       if (key && !knownKeys.has(key)) {
+        if (field === 'changes' && rawItems.length) return;
         result.push({ ...item });
         knownKeys.add(key);
       }
@@ -569,29 +593,52 @@ function mergeTrackerPayloads(portwatch, localized, fallback) {
     return result;
   };
 
-  ['tools', 'candidates', 'flagged', 'changes', 'headlines', 'dmca', 'history'].forEach((field) => {
+  ['tools', 'flagged', 'changes', 'headlines', 'dmca', 'history'].forEach((field) => {
     merged[field] = mergeArrayByKey(field);
   });
-  merged.candidateList = merged.candidates;
+  const rawCandidates = Array.isArray(raw.candidates) ? raw.candidates : [];
+  const localizedCandidates = Array.isArray(translated.candidateList) ? translated.candidateList : [];
+  const localizedCandidateMap = new Map(localizedCandidates.map((item) => [itemKey(item, 'candidateList'), item]).filter(([key]) => key));
+  merged.candidateList = rawCandidates.map((item) => {
+    const translation = localizedCandidateMap.get(itemKey(item, 'candidateList'));
+    return translation ? { ...item, ...translation } : { ...item };
+  });
+  const candidateKeys = new Set(merged.candidateList.map((item) => itemKey(item, 'candidateList')).filter(Boolean));
+  localizedCandidates.forEach((item) => {
+    const key = itemKey(item, 'candidateList');
+    if (key && !candidateKeys.has(key)) {
+      merged.candidateList.push({ ...item });
+      candidateKeys.add(key);
+    }
+  });
+  merged.candidates = Number.isFinite(Number(translated.candidates))
+    ? Number(translated.candidates)
+    : merged.candidateList.length;
 
   const rawEfforts = Array.isArray(raw.efforts) ? raw.efforts : (Array.isArray(base.efforts) ? base.efforts : []);
   const localizedEfforts = Array.isArray(translated.efforts) ? translated.efforts : [];
   const effortMap = new Map(localizedEfforts.map((item) => [item.id, item]).filter(([key]) => key));
+  const effortOverrides = translated.editorial && translated.editorial.effortOverrides
+    && typeof translated.editorial.effortOverrides === 'object' ? translated.editorial.effortOverrides : {};
   merged.efforts = rawEfforts.map((rawItem) => {
     const local = effortMap.get(rawItem.id);
     if (!local) return { ...rawItem };
-    const remoteScore = rawItem.manualScore ?? rawItem.percent;
-    const remotePercent = remoteScore != null && Number.isFinite(Number(remoteScore));
+    const override = effortOverrides[rawItem.id] && typeof effortOverrides[rawItem.id] === 'object'
+      ? effortOverrides[rawItem.id]
+      : {};
+    const manualScore = override.percent ?? local.manualScore ?? rawItem.manualScore;
+    const hasManualScore = manualScore != null && Number.isFinite(Number(manualScore));
     return {
       ...rawItem,
       ...local,
-      percent: remotePercent ? Number(remoteScore) : (local.percent != null ? Number(local.percent) : undefined),
-      stage: local.stage || rawItem.stage,
+      percent: hasManualScore ? Number(manualScore) : undefined,
+      manualScore: hasManualScore ? Number(manualScore) : undefined,
+      stage: override.stage || local.stage || rawItem.stage,
       status: rawItem.id === 'xlaunchvi'
         ? 'acompanhado'
         : (rawItem.nuked || rawItem.missing || rawItem.status === 'offline' ? 'offline' : rawItem.status),
-      gta: rawItem.gta || local.gta,
-      groundwork: rawItem.groundwork || local.groundwork,
+      gta: { ...(local.gta || {}), ...(rawItem.gta || {}) },
+      groundwork: { ...(local.groundwork || {}), ...(rawItem.groundwork || {}) },
       stats: rawItem.stats || local.stats,
       nuked: rawItem.nuked || local.nuked,
       missing: rawItem.missing || rawItem.stats?.missing || local.missing,
@@ -600,7 +647,18 @@ function mergeTrackerPayloads(portwatch, localized, fallback) {
     };
   });
   localizedEfforts.forEach((item) => {
-    if (item && item.id && !merged.efforts.some((effort) => effort.id === item.id)) merged.efforts.push({ ...item });
+    if (item && item.id && !merged.efforts.some((effort) => effort.id === item.id)) {
+      const override = effortOverrides[item.id] && typeof effortOverrides[item.id] === 'object'
+        ? effortOverrides[item.id]
+        : {};
+      const manualScore = override.percent ?? item.manualScore;
+      merged.efforts.push({
+        ...item,
+        percent: manualScore == null ? undefined : Number(manualScore),
+        manualScore: manualScore == null ? undefined : Number(manualScore),
+        stage: override.stage || item.stage
+      });
+    }
   });
 
   const rawNews = Array.isArray(raw.news) ? raw.news : (Array.isArray(base.news) ? base.news : []);
@@ -643,8 +701,8 @@ function mergeTrackerPayloads(portwatch, localized, fallback) {
     ...(raw.scout && typeof raw.scout === 'object' ? raw.scout : {}),
     ...(translated.scout && typeof translated.scout === 'object' ? translated.scout : {})
   };
-  const rawUpdated = portwatch && (portwatch.updated || portwatch.updatedAt);
-  const rawSynced = portwatch && portwatch.lastSyncedAt;
+  const rawUpdated = raw.updated || raw.updatedAt;
+  const rawSynced = raw.lastSyncedAt;
   const candidates = [merged.lastSyncedAt, rawSynced, merged.updatedAt, rawUpdated, fallbackPortwatch.lastSyncedAt, fallbackPortwatch.updated]
     .filter((timestamp) => typeof timestamp === 'string' && Number.isFinite(Date.parse(timestamp)));
   const latestTimestamp = candidates.sort((left, right) => Date.parse(right) - Date.parse(left))[0];
@@ -2040,78 +2098,27 @@ function progressPercent(value) {
 }
 
 function portwatchEffortScore(project) {
-  const explicitScore = project && (project.manualScore ?? project.percent);
-  if (explicitScore !== undefined && explicitScore !== null && Number.isFinite(Number(explicitScore))) {
-    return progressPercent(explicitScore);
+  return project ? window.PortWatchScoring.scoreEffort(normalizePortwatchEffort(project)).score : 0;
+}
+
+function normalizePortwatchEffort(project) {
+  const gta = { ...(project && project.gta && typeof project.gta === 'object' ? project.gta : {}) };
+  if (gta.ingame != null) {
+    if (gta.world == null) gta.world = gta.ingame;
   }
-  const gta = project && project.gta && typeof project.gta === 'object' ? project.gta : {};
-  const groundwork = project && project.groundwork && typeof project.groundwork === 'object'
-    ? project.groundwork
-    : {};
-  const clamp01 = (value) => {
-    const number = Number(value);
-    return Number.isFinite(number) ? Math.max(0, Math.min(1, number)) : 0;
-  };
-  const ladderValue = (value) => {
-    if (value === true) return 1;
-    if (value === false || value == null) return 0;
-    return clamp01(value);
-  };
-  const groundworkFraction =
-    clamp01(groundwork.loader) * 0.2 +
-    clamp01(groundwork.shaders) * 0.28 +
-    clamp01(groundwork.graphics) * 0.32 +
-    clamp01(groundwork.proven) * 0.2;
-  const ladder = [
-    ['loads', 25],
-    ['boots', 40],
-    ['menu', 55],
-    ['ingame', 70]
-  ];
-  let score = 25 * groundworkFraction;
-  let previous = score;
-  let reached = 'groundwork';
-  for (const [key, tick] of ladder) {
-    const value = ladderValue(gta[key]);
-    if (value >= 1) {
-      score = tick;
-      previous = tick;
-      reached = key;
-      continue;
-    }
-    if (value > 0) {
-      score = Math.max(score, previous + value * (tick - previous));
-    }
-    break;
-  }
-  if (reached === 'ingame') {
-    const fps = clamp01(Number(gta.fps || 0) / 30);
-    const stabilityValues = { unknown: 0, constant: 0, often: 0.25, sometimes: 0.55, rarely: 0.8, stable: 1 };
-    const stability = stabilityValues[String(gta.stability || 'unknown')] ?? 0;
-    score = 70 + fps * 15 + stability * 15;
-  }
-  return Math.round(score * 10) / 10;
+  return { ...project, gta };
 }
 
 function portwatchMilestone(project, milestones) {
-  const projectProgress = Number(project && project.percent);
-  if (Number.isFinite(projectProgress)) {
-    const reached = milestones
-      .filter((milestone) => progressPercent(milestone.percent) <= progressPercent(projectProgress))
-      .sort((left, right) => progressPercent(right.percent) - progressPercent(left.percent))[0];
-    return {
-      ...(reached || milestones.find((milestone) => progressPercent(milestone.percent) === 0) || { label: 'Preparação', percent: 0 }),
-      percent: progressPercent(projectProgress),
-      label: project.stage || (reached && reached.label) || 'Preparação'
-    };
-  }
-  const gta = project.gta || {};
-  const matched = milestones
-    .filter((milestone) => !milestone.statusField || gta[milestone.statusField] === milestone.statusValue)
-    .sort((left, right) => progressPercent(right.percent) - progressPercent(left.percent))[0]
-    || milestones.find((milestone) => progressPercent(milestone.percent) === 0)
-    || { percent: 0, label: 'Preparação' };
-  return matched;
+  const result = project ? window.PortWatchScoring.scoreEffort(normalizePortwatchEffort(project)) : null;
+  const matched = milestones.find((milestone) => milestone.key === (result && result.reached))
+    || milestones[0]
+    || { key: 'groundwork', label: 'Preparação', percent: 0 };
+  return {
+    ...matched,
+    label: project && project.stage || matched.label,
+    percent: progressPercent(matched.percent)
+  };
 }
 
 function portwatchProjectProgress(project, milestones) {
@@ -2419,7 +2426,9 @@ function renderRaceControlLog(snapshot, leader, efforts) {
 
 function renderPortwatchProgress(data, snapshot = trackerData) {
   const section = byId('portwatch-progress');
-  const milestones = Array.isArray(data.milestones) ? data.milestones : [];
+  const milestones = Array.isArray(data.milestones) && data.milestones.length
+    ? data.milestones
+    : PORTWATCH_FALLBACK.milestones;
   const legacyProjects = Array.isArray(data.projects) ? data.projects : [];
   const legacyById = new Map(legacyProjects.map((project) => [project.id, project]));
   const sourceProjects = snapshot && Array.isArray(snapshot.efforts) && snapshot.efforts.length
@@ -2440,31 +2449,27 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
       status: isInactiveProject(project) || isInactiveProject(legacy) ? 'offline' : project.status || legacy.status || ''
     };
   }).filter((project) => project.name);
-  const rankedProjects = projects.filter((project) => !isInactiveProject(project)).slice()
-    .sort((left, right) => portwatchProjectProgress(right, milestones) - portwatchProjectProgress(left, milestones)
-      || left.name.localeCompare(right.name));
+  const rankedScores = window.PortWatchScoring.overall(
+    projects.filter((project) => !isInactiveProject(project)).map(normalizePortwatchEffort)
+  );
+  const rankedProjects = rankedScores.ranked
+    .map((item) => projects.find((project) => project.id === item.effort.id))
+    .filter(Boolean);
   const leaderProject = rankedProjects[0];
   const leaderMilestone = leaderProject ? portwatchMilestone(leaderProject, milestones) : null;
-  const progress = leaderProject ? portwatchProjectProgress(leaderProject, milestones) : 0;
+  const progress = rankedScores.score;
   const leader = leaderProject ? { ...leaderProject, milestone: leaderMilestone.label } : null;
   renderHeroRaceClock(snapshot, leader, milestones, progress);
-  const topThree = rankedProjects.slice(0, 3);
-  const topThreeAverage = topThree.length
-    ? Math.round((topThree.reduce((total, project) => total + portwatchProjectProgress(project, milestones), 0) / topThree.length) * 10) / 10
-    : 0;
-  const latestMilestone = milestones
-    .filter((milestone) => progressPercent(milestone.percent) <= progress)
-    .sort((left, right) => progressPercent(right.percent) - progressPercent(left.percent))[0];
+  const topThreeAverage = rankedScores.top3;
+  const latestMilestone = milestones.find((milestone) => milestone.key === rankedScores.furthest.key);
   const latestMilestoneLabel = latestMilestone ? latestMilestone.label : 'Preparação';
-  const launchThreshold = milestones.find((milestone) => progressPercent(milestone.percent) > 0);
-  const launchingCount = launchThreshold
-    ? rankedProjects.filter((project) => portwatchProjectProgress(project, milestones) >= progressPercent(launchThreshold.percent)).length
-    : 0;
+  const launchThreshold = window.PortWatchScoring.MILESTONES.find((milestone) => milestone.key === 'loads').at;
+  const launchingCount = rankedScores.ranked.filter((project) => project.score >= launchThreshold).length;
   const stats = [
     { label: 'Marco mais avançado', value: leader ? leader.milestone : latestMilestoneLabel },
     { label: 'Média do top 3', markup: `${counterMarkup(topThreeAverage, 'percent')}%` },
-    { label: 'Iniciam o GTA VI', markup: `${counterMarkup(launchingCount)} / ${counterMarkup(rankedProjects.length)}` },
-    { label: 'Projetos acompanhados', markup: counterMarkup(projects.length) }
+    { label: 'Iniciam o GTA VI', markup: `${counterMarkup(launchingCount)} / ${counterMarkup(rankedScores.ranked.length)}` },
+    { label: 'Projetos acompanhados', markup: counterMarkup(rankedScores.ranked.length) }
   ];
   const timelineProjects = rankedProjects.slice(0, 8).filter((project) => portwatchProjectProgress(project, milestones) >= 0);
   const xlaunchReportProject = projects.find((project) => project.id === 'xlaunchvi' && project.teamReport);
@@ -3477,6 +3482,9 @@ function renderTrackerProjectCard(project, rank, leaderId) {
   const inactive = project.status === 'offline';
   const featured = !inactive && project.id === leaderId;
   const projectPercent = portwatchEffortScore(project);
+  const rankLabel = inactive ? t('FORA')
+    : rank == null ? t(project.tier === 'watchlist' ? 'OBSERVAÇÃO' : 'PRIVADO')
+      : `#${rank}`;
   const details = project.technicalDetails && typeof project.technicalDetails === 'object' ? project.technicalDetails : {};
   const highlights = Array.isArray(details.highlights) ? details.highlights.filter((item) => typeof item === 'string' && item.trim()) : [];
   const blockers = Array.isArray(details.blockers) ? details.blockers.filter((item) => typeof item === 'string' && item.trim()) : [];
@@ -3491,7 +3499,7 @@ function renderTrackerProjectCard(project, rank, leaderId) {
     project.forks != null ? `${counterMarkup(project.forks)} ${escapeHtml(t('forks'))}` : ''
   ].filter(Boolean).join(' · ');
   return `<article class="repo-card tracker-project-card ${inactive ? 'repo-card--inactive' : ''} ${featured ? 'tracker-project--featured' : ''}">
-    <div class="rank-badge ${inactive ? 'inactive-badge' : ''}">${inactive ? t('FORA') : `#${rank}`}</div>
+    <div class="rank-badge ${inactive || rank == null ? 'inactive-badge' : ''}">${escapeHtml(rankLabel)}</div>
     <div class="repo-main">
       <div class="repo-title-row"><div><h3>${escapeHtml(project.name)}</h3><span class="repo-slug">${escapeHtml(project.repo)}</span></div></div>
       <div class="badge-row"><span class="status-badge ${featured || inactive ? 'warning' : 'accent'}">${featured ? escapeHtml(t('Projeto mais avançado')) : badge}</span><span class="status-badge">${escapeHtml(t(project.tier === 'tracked' ? 'Projeto acompanhado' : 'Em observação'))}</span><span class="status-badge">${escapeHtml(t('Relato não verificado independentemente'))}</span></div>
@@ -3515,22 +3523,49 @@ function renderTrackerProjects(data) {
     percent: portwatchEffortScore(project),
     stage: project.stage || portwatchMilestone(project, PORTWATCH_FALLBACK.milestones).label
   })).sort((left, right) => right.percent - left.percent || left.name.localeCompare(right.name));
-  const active = projects.filter((project) => !isInactiveProject(project));
+  const publicTracked = projects.filter((project) => project.tier === 'tracked'
+    && !project.private && !window.PortWatchScoring.isPrivateBuild(project));
+  const activePublic = publicTracked.filter((project) => !isInactiveProject(project));
   const inactive = projects.filter((project) => isInactiveProject(project));
-  const top = active.slice(0, 5);
-  const leader = active[0];
-  const runnerUp = active[1];
-  const xlaunch = active.find((project) => project.id === 'xlaunchvi');
+  const activeCount = projects.length - inactive.length;
+  const privateBuilds = projects.filter((project) => project.tier === 'tracked'
+    && !isInactiveProject(project) && window.PortWatchScoring.isPrivateBuild(project));
+  const watchlist = projects.filter((project) => project.tier === 'watchlist' && !isInactiveProject(project));
+  const byScore = (left, right) => right.percent - left.percent
+    || window.PortWatchScoring.byStars(left, right)
+    || left.name.localeCompare(right.name);
+  const overallPublic = activePublic.slice().sort(byScore);
+  const filteredPublic = activePublic.filter((project) => raceView.scope === 'all'
+    || (raceView.scope === 'gta' ? /gta/i.test(project.target || '') : !/gta/i.test(project.target || '')));
+  const sorters = {
+    score: byScore,
+    stars: (left, right) => window.PortWatchScoring.byStars(left, right) || byScore(left, right),
+    active: (left, right) => (Date.parse(right.stats && right.stats.pushedAt || 0) || 0)
+      - (Date.parse(left.stats && left.stats.pushedAt || 0) || 0) || byScore(left, right)
+  };
+  const sortedPublic = filteredPublic.slice().sort(sorters[raceView.sort] || byScore);
+  const top = sortedPublic.slice(0, 5);
+  const leader = overallPublic[0];
+  const runnerUp = overallPublic[1];
+  const xlaunch = projects.find((project) => project.id === 'xlaunchvi');
   const xlaunchTeam = data.teams && data.teams.xlaunchvi;
-  byId('repo-count').innerHTML = counterMarkup(active.length);
+  byId('repo-count').innerHTML = counterMarkup(activePublic.length);
   byId('tracker-race-summary').innerHTML = `
     <article class="panel race-summary-card race-summary-card--featured"><span class="section-kicker">${escapeHtml(t('Projeto mais avançado'))}</span><strong>${leader ? `${escapeHtml(leader.name)} · ${counterMarkup(leader.percent, 'percent')}%` : '—'}</strong><p>${leader ? escapeHtml(t(leader.stage)) : escapeHtml(t('Sem dados de projetos'))}</p></article>
     <article class="panel race-summary-card"><span class="section-kicker">${escapeHtml(t('Segundo projeto ativo'))}</span><strong>${runnerUp ? `${escapeHtml(runnerUp.name)} · ${counterMarkup(runnerUp.percent, 'percent')}%` : '—'}</strong><p>${runnerUp ? escapeHtml(t(runnerUp.stage)) : ''}</p></article>
-    <article class="panel race-summary-card"><span class="section-kicker">${escapeHtml(t('Projetos acompanhados'))}</span><strong>${counterMarkup(projects.length)}</strong><p>${inactive.length} ${escapeHtml(t('fora do ar, sem contar no ranking ativo'))}</p></article>`;
-  byId('repository-list').innerHTML = top.map((project, index) => renderTrackerProjectCard(project, index + 1, leader && leader.id)).join('');
+    <article class="panel race-summary-card"><span class="section-kicker">${escapeHtml(t('Projetos acompanhados'))}</span><strong>${counterMarkup(activeCount)}</strong><p>${inactive.length} ${escapeHtml(t('fora do ar, sem contar no ranking ativo'))}</p></article>`;
+  const rankById = new Map(overallPublic.map((project, index) => [project.id, index + 1]));
+  byId('repository-list').innerHTML = top.map((project) => renderTrackerProjectCard(project, rankById.get(project.id), leader && leader.id)).join('')
+    || `<p class="race-empty">${escapeHtml(t('Nenhum projeto público corresponde a este filtro.'))}</p>`;
   byId('xlaunch-race-spotlight').innerHTML = renderXlaunchSpotlight(xlaunch, xlaunchTeam, data, 'xlaunch-spotlight--repositories');
-  byId('tracker-all-projects').innerHTML = active.slice(top.length).map((project, index) => renderTrackerProjectCard(project, top.length + index + 1, leader && leader.id)).join('');
-  byId('tracked-project-count').textContent = `${active.length - top.length} ${t('outros projetos')}`;
+  byId('tracker-all-projects').innerHTML = sortedPublic.slice(top.length).map((project) => renderTrackerProjectCard(project, rankById.get(project.id), leader && leader.id)).join('');
+  byId('tracked-project-count').textContent = `${Math.max(0, sortedPublic.length - top.length)} ${t('outros projetos')}`;
+  byId('private-builds').hidden = privateBuilds.length === 0;
+  byId('private-repository-list').innerHTML = privateBuilds.map((project) => renderTrackerProjectCard(project, null, leader && leader.id)).join('');
+  byId('private-build-count').textContent = `${privateBuilds.length} ${t('builds privadas')}`;
+  byId('watchlist-projects').hidden = watchlist.length === 0;
+  byId('watchlist-repository-list').innerHTML = watchlist.map((project) => renderTrackerProjectCard(project, null, leader && leader.id)).join('');
+  byId('watchlist-project-count').textContent = `${watchlist.length} ${t('em observação')}`;
   byId('inactive-repositories').hidden = inactive.length === 0;
   byId('inactive-repository-list').innerHTML = inactive.map((project) => renderTrackerProjectCard(project, 0, leader && leader.id)).join('');
   const homeTargets = [
@@ -3538,6 +3573,8 @@ function renderTrackerProjects(data) {
     ['xlaunch-race-spotlight', 'home-xlaunch-race-spotlight'],
     ['repository-list', 'home-repository-list'],
     ['tracker-all-projects', 'home-tracker-all-projects'],
+    ['private-repository-list', 'home-private-repository-list'],
+    ['watchlist-repository-list', 'home-watchlist-repository-list'],
     ['inactive-repository-list', 'home-inactive-repository-list']
   ];
   homeTargets.forEach(([sourceId, targetId]) => {
@@ -3545,23 +3582,45 @@ function renderTrackerProjects(data) {
   });
   byId('home-repo-count').innerHTML = byId('repo-count').innerHTML;
   byId('home-tracked-project-count').textContent = byId('tracked-project-count').textContent;
+  byId('home-private-builds').hidden = byId('private-builds').hidden;
+  byId('home-private-build-count').textContent = byId('private-build-count').textContent;
+  byId('home-watchlist-projects').hidden = byId('watchlist-projects').hidden;
+  byId('home-watchlist-project-count').textContent = byId('watchlist-project-count').textContent;
   byId('home-inactive-repositories').hidden = byId('inactive-repositories').hidden;
   const translatedTargets = [
     'tracker-race-summary', 'repository-list', 'xlaunch-race-spotlight',
-    'tracker-all-projects', 'inactive-repositories',
+    'tracker-all-projects', 'private-builds', 'watchlist-projects', 'inactive-repositories',
     'home-tracker-race-summary', 'home-repository-list', 'home-xlaunch-race-spotlight',
-    'home-tracker-all-projects', 'home-inactive-repositories'
+    'home-tracker-all-projects', 'home-private-builds', 'home-watchlist-projects', 'home-inactive-repositories'
   ];
   translatedTargets.forEach((id) => window.KynosI18n.translateDom(byId(id), state.language));
   attachAvatarFallbacks(byId('xlaunch-race-spotlight'));
   attachAvatarFallbacks(byId('home-xlaunch-race-spotlight'));
   ['repo-count', 'tracker-race-summary', 'repository-list', 'xlaunch-race-spotlight',
-    'tracker-all-projects', 'inactive-repositories', 'home-repo-count', 'home-tracker-race-summary',
+    'tracker-all-projects', 'private-repository-list', 'watchlist-repository-list', 'inactive-repositories',
+    'home-repo-count', 'home-tracker-race-summary',
     'home-repository-list', 'home-xlaunch-race-spotlight', 'home-tracker-all-projects',
-    'home-inactive-repositories'].forEach((id) => animateCounters(byId(id)));
-  ['repository-list', 'xlaunch-race-spotlight', 'tracker-all-projects', 'inactive-repositories',
+    'home-private-repository-list', 'home-watchlist-repository-list', 'home-inactive-repositories'].forEach((id) => animateCounters(byId(id)));
+  ['repository-list', 'xlaunch-race-spotlight', 'tracker-all-projects', 'private-repository-list',
+    'watchlist-repository-list', 'inactive-repositories',
     'home-repository-list', 'home-xlaunch-race-spotlight', 'home-tracker-all-projects',
-    'home-inactive-repositories'].forEach((id) => animateProgress(byId(id)));
+    'home-private-repository-list', 'home-watchlist-repository-list', 'home-inactive-repositories'].forEach((id) => animateProgress(byId(id)));
+}
+
+function setupRaceControls() {
+  if (raceView.initialized) return;
+  const scope = byId('race-scope');
+  const sort = byId('race-sort');
+  if (!scope || !sort) return;
+  scope.addEventListener('change', () => {
+    raceView.scope = scope.value;
+    if (trackerData) renderTrackerProjects(trackerData);
+  });
+  sort.addEventListener('change', () => {
+    raceView.sort = sort.value;
+    if (trackerData) renderTrackerProjects(trackerData);
+  });
+  raceView.initialized = true;
 }
 
 function renderNews(data) {
@@ -3590,8 +3649,8 @@ function renderTrackerDetails(data) {
     <div class="tracker-tags">${data.scout.sources.map((source) => `<span>${escapeHtml(source)}</span>`).join('')}</div>
     <small>${escapeHtml(t('Última varredura'))}: ${publicationTimeMarkup(data.scout.lastRun)} · ${data.candidates} ${escapeHtml(t('candidatos aguardam confirmação'))}</small>
     ${Array.isArray(data.candidateList) && data.candidateList.length ? `<details class="tracker-candidate-list"><summary>${escapeHtml(t('Ver candidatos sem confirmação'))}</summary><ul>${data.candidateList.map((candidate) => `<li><b>${escapeHtml(candidate.repo || candidate.name)}</b><span>${escapeHtml(t(candidate.kind === 'tool' ? 'Ferramenta em triagem' : 'Possível projeto · aguarda revisão'))}</span></li>`).join('')}</ul></details>` : ''}`;
-  byId('tracker-changes').innerHTML = data.changes.slice().reverse().map((change) => `
-    <article class="tracker-change panel"><span class="tracker-change-kind">${escapeHtml(t(change.kind))}</span>${publicationTimeMarkup(change.date)}<p>${escapeHtml(change.summary)}</p></article>`).join('');
+  byId('tracker-changes').innerHTML = data.changes.slice(0, 12).map((change) => `
+    <article class="tracker-change panel"><span class="tracker-change-kind">${escapeHtml(t(change.kind))}</span>${publicationTimeMarkup(change.date)}<p>${escapeHtml(localizedChangeSummary(change.summary || change.text))}</p></article>`).join('');
   byId('tracker-tools').innerHTML = data.tools.map((tool) => `
     <article class="tracker-tool panel"><span class="section-kicker">${escapeHtml(t(tool.kind))}</span><h3>${escapeHtml(tool.name)}</h3><p>${escapeHtml(tool.description)}</p><a class="text-link" href="${escapeHtml(safeUrl(tool.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(tool.repo)} ↗</a></article>`).join('');
   byId('tracker-flagged').innerHTML = data.flagged.map((item) => `
@@ -4113,10 +4172,11 @@ async function init() {
     if (window.location.protocol === 'file:') {
       const embedded = await ensureEmbeddedFallback();
       const localized = await loadOptionalJson('data/tracker-pt-BR.json');
+      const embeddedLocalized = embedded.trackerLocalized || embedded.tracker;
       data = {
         hardware: embedded.hardware,
         discords: embedded.discords,
-        tracker: mergeTrackerPayloads(null, localized || embedded.tracker, embedded)
+        tracker: mergeTrackerPayloads(embedded.trackerRaw || null, localized || embeddedLocalized, embedded)
       };
     } else {
       const [hardwareData, discords, trackerSource, localized] = await Promise.all([
@@ -4140,6 +4200,7 @@ async function init() {
     }
     hardware = data.hardware;
     trackerData = data.tracker;
+    setupRaceControls();
     renderHardware();
     renderPortalHome(trackerData);
     renderTrackerProjects(trackerData);

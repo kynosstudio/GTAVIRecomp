@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-24T20:10:10.000Z",
+  "updated": "2026-11-24T20:59:04.000Z",
   "site": {
     "title": "PortWatch VI",
     "heroImage": "assets/img/hero-miami.jpg"
@@ -15,6 +15,28 @@
     "source": "https://www.xda-developers.com/gta-6-xbox-executable-leaked-opening-door-for-pc-recompilation-projects-begin-testing/"
   },
   "news": [
+    {
+      "id": "2026-11-24-new-progress-scale",
+      "date": "2026-11-24",
+      "category": "Port",
+      "title": "PortWatch's new scale: Playable is halfway, finishing the game is 100%",
+      "dek": "Getting into GTA VI is now half the bar. The other half is how far you can play, how right it looks, how fast it runs and how long it keeps running.",
+      "body": [
+        "We've changed how PortWatch scores projects. The old bar climbed from groundwork to \"In-game\", then to 30 FPS and \"Stable\". Many of you pointed out that this mixed up two different things: getting the game to run at all, and having it play well. Walking around a dark world at 5 frames per second isn't three-quarters of the way to playing GTA VI on PC.",
+        "Getting in is now a ladder to 50%. Groundwork fills the first 10%. Then come Exe runs (10%), First frame (20%), Main menu (30%), In the world (40%), when story mode loads the world and draws it, however broken, and Playable (50%), when you control a character in it.",
+        "Past Playable, four tracks fill the other half side by side: story progress (35 points), from stuck in the opening to 100% completion; rendering (25), from black or broken to matching the console; performance (20), the average frame rate divided by 30; and stability (20). 100% now means the whole game can be finished, looking like the console, at 30 fps or better, without crashing.",
+        "Every project has been re-scored, and the numbers are lower. The furthest builds are now just past halfway: hyphennn's private build at 59.4%, omonkey's at 57.9%, victory-gta6 at 57.3% and CGBJ's at 54.5%. VIctory is at 40%, in the world but not yet playable, and XCL at 35%. Nobody went backwards: the same results now count for less of the whole game.",
+        "The history chart has been converted to the new scale too. The full rules, with the written steps for story and rendering, are in the scoring section at the bottom of the page."
+      ],
+      "sources": [
+        {
+          "outlet": "PortWatch",
+          "title": "How the progress bar works: the full scale, with the written steps",
+          "url": "https://portwatch-vi.xyz/#method"
+        }
+      ],
+      "image": null
+    },
     {
       "id": "2026-11-24-omonkey-shaders-prison",
       "date": "2026-11-24",
@@ -616,9 +638,48 @@
   ],
   "efforts": [
     {
+      "id": "hyphennn",
+      "name": "hyphennn",
+      "manualScore": 65,
+      "repo": null,
+      "basedOn": [
+        "victory-gta6"
+      ],
+      "evidence": "Live streams on Rumble",
+      "byline": "Streams on Rumble as hyphennn · built on victory-gta6, a VIctory fork",
+      "tier": "tracked",
+      "summary": "A private build on the public victory-gta6 fork of VIctory, streamed on Rumble. In the opening prison scenes, shaders, ray tracing, lighting, textures and hair look very close to the console, but it runs at about 3 fps. Code not public.",
+      "highlights": [
+        "Lighting, shadows, textures and hair look very close to the console",
+        "Ray tracing seen working on his Rumble stream",
+        "Playable in the opening prison scenes, built on victory-gta6"
+      ],
+      "blockers": [
+        "Runs at about 3 fps",
+        "Small rendering glitches remain, and it isn't past the opening yet",
+        "No public code or build, so nobody can test it outside the streams"
+      ],
+      "provenOn": null,
+      "gta": {
+        "loads": 1,
+        "boots": 1,
+        "menu": 1,
+        "world": 1,
+        "playable": 1,
+        "story": 0,
+        "render": 0.75,
+        "fps": 3,
+        "stability": "unknown"
+      },
+      "verification": "self-reported",
+      "stats": {},
+      "assessedAt": "2026-11-24",
+      "assessedBy": "manual",
+      "claims": []
+    },
+    {
       "id": "omonkey",
       "name": "omonkey",
-      "manualScore": 76,
       "avatar": "assets/img/efforts/omonkey.jpg",
       "repo": null,
       "basedOn": [
@@ -644,7 +705,10 @@
         "loads": 1,
         "boots": 1,
         "menu": 1,
-        "ingame": 1,
+        "world": 1,
+        "playable": 1,
+        "story": 0,
+        "render": 0.5,
         "fps": 5,
         "stability": "unknown"
       },
@@ -684,7 +748,10 @@
         "loads": 1,
         "boots": 1,
         "menu": 1,
-        "ingame": 1,
+        "world": 1,
+        "playable": 1,
+        "story": 0,
+        "render": 0.25,
         "fps": 4,
         "stability": "unknown"
       },
@@ -697,7 +764,6 @@
     {
       "id": "victory-gta6",
       "name": "victory-gta6",
-      "manualScore": 74,
       "repo": "fxceless/victory-gta6",
       "branch": "main",
       "tier": "tracked",
@@ -719,7 +785,10 @@
         "loads": 1,
         "boots": 1,
         "menu": 1,
-        "ingame": 1,
+        "world": 1,
+        "playable": 1,
+        "story": 0,
+        "render": 0.5,
         "fps": 3,
         "stability": "unknown"
       },
@@ -760,7 +829,10 @@
         "loads": 1,
         "boots": 1,
         "menu": 1,
-        "ingame": 0.8,
+        "world": 1,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -811,7 +883,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -865,7 +940,10 @@
         "loads": 1,
         "boots": 1,
         "menu": 1,
-        "ingame": 0.5,
+        "world": 0.5,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -917,7 +995,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -968,7 +1049,10 @@
         "loads": 1,
         "boots": 1,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1023,7 +1107,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1082,7 +1169,10 @@
         "loads": 1,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1139,7 +1229,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1189,7 +1282,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1240,7 +1336,10 @@
         "loads": 1,
         "boots": 1,
         "menu": 0.5,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1290,7 +1389,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1346,7 +1448,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1393,7 +1498,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1442,7 +1550,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1491,7 +1602,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1539,7 +1653,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1590,7 +1707,10 @@
         "loads": 1,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1637,7 +1757,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1685,7 +1808,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1735,7 +1861,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1786,7 +1915,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1835,7 +1967,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1884,7 +2019,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1935,7 +2073,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -1987,7 +2128,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -2039,7 +2183,10 @@
         "loads": 1,
         "boots": 1,
         "menu": 1,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -2090,7 +2237,10 @@
         "loads": 0,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -2139,7 +2289,10 @@
         "loads": 1,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -2189,7 +2342,10 @@
         "loads": 1,
         "boots": 0,
         "menu": 0,
-        "ingame": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
         "fps": 0,
         "stability": "unknown"
       },
@@ -6121,40 +6277,60 @@
       "date": "2026-11-24",
       "kind": "new",
       "text": "victory-gta6, fxceless's public fork of VIctory, joins at #1 with 74% (“In-game”): its README reports the prologue rendering with HUD, pause menu and pad input at 2-4 fps, with shadowed areas black (self-reported). omonkey's private build is based on it."
+    },
+    {
+      "date": "2026-11-24",
+      "kind": "flag",
+      "text": "New scale: Playable is now 50%, and the other half comes from story progress, rendering, performance and stability; 100% means the game can be finished. Every project was re-scored, so the numbers are lower: hyphennn's private build leads at 59.4%."
+    },
+    {
+      "date": "2026-11-24",
+      "kind": "new",
+      "text": "hyphennn's private build joins at 59.4% (“Playable”): it's built on victory-gta6 and streamed on Rumble, and its shaders look a lot better than other builds'. Its code isn't public, so it isn't ranked in the race."
+    },
+    {
+      "date": "2026-11-24",
+      "kind": "up",
+      "text": "hyphennn's private build rises to 59.9%: ray tracing now shows on his Rumble stream, a step further for its rendering. Score 59.4% → 59.9%."
+    },
+    {
+      "date": "2026-11-24",
+      "kind": "up",
+      "text": "hyphennn's private build rises to 65%: on his Rumble stream the opening prison scenes now look very close to the console, with ray-traced lighting, detailed textures and hair, though at about 3 fps. Score 59.9% → 65%."
     }
   ],
   "history": [
     {
       "date": "2026-11-21",
-      "leader": 15.8,
+      "leader": 6.3,
       "leaderId": "xbox-emulator",
-      "top3": 14.1,
+      "top3": 5.6,
       "furthest": "groundwork",
       "tracked": 17
     },
     {
       "date": "2026-11-22",
-      "leader": 22.1,
+      "leader": 8.8,
       "leaderId": "xcl",
-      "top3": 17,
+      "top3": 6.8,
       "furthest": "groundwork",
       "tracked": 20
     },
     {
       "date": "2026-11-23",
-      "leader": 55,
+      "leader": 30,
       "leaderId": "marvis",
-      "top3": 35,
+      "top3": 16.7,
       "furthest": "menu",
       "tracked": 27
     },
     {
       "date": "2026-11-24",
-      "leader": 76,
-      "leaderId": "omonkey",
-      "top3": 74,
-      "furthest": "ingame",
-      "tracked": 32
+      "leader": 65,
+      "leaderId": "hyphennn",
+      "top3": 60.1,
+      "furthest": "playable",
+      "tracked": 33
     }
   ],
   "scout": {
