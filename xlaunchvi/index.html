@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0d0a16">
+    <meta name="description" content="Acompanhe o XLaunchVI, launcher brasileiro: progresso, equipe, roadmap técnico e formas transparentes de apoiar.">
+    <title>XLaunchVI — Launcher 100% Brasileiro</title>
+    <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="xlaunch-header">
+      <a class="xlaunch-brand" href="../index.html" aria-label="Voltar para KynosRecompVI">
+        <span class="brand-mark">K</span>
+        <span>Kynos <b>RecompVI</b></span>
+      </a>
+      <nav class="xlaunch-nav" aria-label="Navegação XLaunchVI">
+        <a href="../index.html">Início</a>
+        <a href="../index.html#repositories">Corrida</a>
+        <a href="../index.html#tracker">Monitoramento</a>
+        <a href="https://discord.gg/DnjUSJcGXg" target="_blank" rel="noopener noreferrer">Discord ↗</a>
+      </nav>
+    </header>
+
+    <main class="xlaunch-page">
+      <section class="xlaunch-hero" aria-labelledby="xlaunch-title">
+        <div class="xlaunch-hero-copy">
+          <span class="xlaunch-br-badge">Projeto 100% Brasileiro</span>
+          <h1 id="xlaunch-title">O futuro da recompilação do GTA VI <span>começa no Brasil.</span></h1>
+          <p>Mais do que só pelo GTA VI — é para mostrar que o Brasil também tem gente foda desenvolvendo engenharia reversa e recompilação de alto nível.</p>
+          <div class="xlaunch-progress" role="progressbar" aria-label="Progresso do XLaunchVI" aria-valuemin="0" aria-valuemax="100" aria-valuenow="55">
+            <div class="xlaunch-progress-heading"><span>Status atual</span><strong id="xlaunch-percent">55%</strong></div>
+            <div class="xlaunch-progress-track"><span id="xlaunch-progress-fill"></span></div>
+            <small id="xlaunch-stage">Menu principal a 30 FPS · sem texturas</small>
+            <p class="xlaunch-tracker-summary" id="xlaunch-summary"></p>
+            <small class="xlaunch-data-status" id="xlaunch-data-status" role="status" aria-live="polite"></small>
+          </div>
+          <div class="xlaunch-actions">
+            <a class="button xlaunch-primary" href="https://github.com/JPTuba9/xlaunch-vi" target="_blank" rel="noopener noreferrer">Acompanhar no GitHub ↗</a>
+            <button class="button xlaunch-pix" type="button" data-copy-pix="50450a25-89df-446c-92cc-e56f64a5ab7a">Apoiar via PIX</button>
+          </div>
+          <p class="xlaunch-copy-status" role="status" aria-live="polite"></p>
+        </div>
+        <!-- Troque o src por uma captura real; os slots da galeria seguem o mesmo padrão. -->
+        <div class="xlaunch-hero-art" aria-label="Área reservada para captura do launcher">
+          <img src="assets/launcher-placeholder.svg" alt="Visualização ilustrativa do XLaunchVI">
+          <span>Captura do launcher</span>
+        </div>
+      </section>
+
+      <section class="xlaunch-section" aria-labelledby="gallery-title">
+        <div class="xlaunch-section-heading">
+          <span>GALERIA</span>
+          <h2 id="gallery-title">Launcher em <b>desenvolvimento.</b></h2>
+        </div>
+        <div class="xlaunch-gallery">
+          <!-- Substitua os SVGs por arquivos de captura; mantenha os textos alternativos descritivos. -->
+          <figure><img src="assets/placeholder-1.svg" alt="Espaço reservado para captura do launcher"><figcaption>Interface do launcher</figcaption></figure>
+          <figure><img src="assets/placeholder-2.svg" alt="Espaço reservado para menus a 30 FPS"><figcaption>Menus a 30 FPS</figcaption></figure>
+          <figure><img src="assets/placeholder-3.svg" alt="Espaço reservado para testes de build"><figcaption>Testes de build</figcaption></figure>
+        </div>
+      </section>
+
+      <section class="xlaunch-section" aria-labelledby="team-title">
+        <div class="xlaunch-section-heading">
+          <span>EQUIPE BR</span>
+          <h2 id="team-title">Quem está <b>construindo.</b></h2>
+        </div>
+        <div class="xlaunch-team" id="xlaunch-team"></div>
+      </section>
+
+      <section class="xlaunch-section" aria-labelledby="roadmap-title">
+        <div class="xlaunch-section-heading">
+          <span>ROADMAP TÉCNICO</span>
+          <h2 id="roadmap-title">Do protótipo ao <b>play.</b></h2>
+        </div>
+        <ol class="xlaunch-roadmap">
+          <li class="done"><span>01</span><div><b>Jogo abre</b><p>Inicialização e reconhecimento do ambiente já relatados pela equipe.</p></div></li>
+          <li class="done"><span>02</span><div><b>Menus a 30 FPS</b><p>Menus rodando de forma cravada, ainda sem texturas completas.</p></div></li>
+          <li><span>03</span><div><b>Memória e shaders</b><p>Foco atual: otimizar memória e o pipeline de shaders sem textura.</p></div></li>
+          <li><span>04</span><div><b>Texturas e quase jogável</b><p>Etapa necessária antes de uma eventual release pública.</p></div></li>
+        </ol>
+      </section>
+
+      <section class="xlaunch-support" aria-labelledby="support-title">
+        <div>
+          <span>VAQUINHA BR</span>
+          <h2 id="support-title">Ajude o XLaunchVI a ir <b>mais longe.</b></h2>
+          <p>O apoio é voluntário e ajuda a equipe a investir em hardware, testes e infraestrutura. Não há promessa de venda, jogo completo ou release pública garantida.</p>
+          <p>Transparência: contribuições voluntárias destinam-se ao desenvolvimento nacional, equipamentos e infraestrutura da equipe; não há meta ou prestação financeira publicada por este site.</p>
+        </div>
+        <div class="xlaunch-pix-card">
+          <span class="xlaunch-pix-label">PIX COPIA E COLA</span>
+          <code id="xlaunch-pix-key">50450a25-89df-446c-92cc-e56f64a5ab7a</code>
+          <button type="button" data-copy-pix="50450a25-89df-446c-92cc-e56f64a5ab7a">Copiar chave PIX</button>
+          <p class="xlaunch-pix-status" id="xlaunch-pix-status" role="status" aria-live="polite"></p>
+          <img class="xlaunch-pix-qr" src="assets/pix-qr-placeholder.svg" alt="Espaço reservado para inserir o QR Code Pix oficial da equipe">
+          <small>Para pagar, abra o app do seu banco, escolha Pix Copia e Cola e use a chave acima. Substitua o placeholder do QR pela imagem gerada no app da equipe; o gráfico atual não é escaneável.</small>
+        </div>
+      </section>
+    </main>
+    <script src="xlaunchvi.js"></script>
+  </body>
+</html>

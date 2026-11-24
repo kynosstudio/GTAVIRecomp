@@ -149,6 +149,8 @@ let newsData = null;
 let trackerData = null;
 let notificationPreferences = null;
 let notificationItems = [];
+let notificationSnapshot = null;
+let notificationHandlersBound = false;
 let quickProjects = [];
 let heroCountdownTimer = null;
 let headerFreshnessTimestamp = null;
@@ -2722,14 +2724,16 @@ function buildPortalNotifications(snapshot) {
     });
   }
 
-  (snapshot && Array.isArray(snapshot.news) ? snapshot.news : []).slice(0, 2).forEach((story) => {
+  (snapshot && Array.isArray(snapshot.news) ? snapshot.news : []).forEach((story) => {
+    const newsId = String(story.id || story.title || story.date || '');
     notifications.push({
-      id: `news:${story.id || story.title}`,
+      id: `news:${newsId}`,
       title: t('Notícia recente'),
       body: t(story.title || story.category || ''),
       page: 'news',
       kind: 'news',
-      date: story.date || ''
+      date: story.date || '',
+      newsId
     });
   });
   (snapshot && Array.isArray(snapshot.changes) ? snapshot.changes : []).slice(0, 2).forEach((change, index) => {
@@ -2749,12 +2753,6 @@ function renderNotificationCenter(snapshot) {
   const center = byId('notification-center');
   if (!center || !notificationPreferences) return;
   notificationItems = buildPortalNotifications(snapshot);
-  const validIds = new Set(notificationItems.map((item) => item.id));
-  const currentReadIds = notificationPreferences.readIds.filter((id) => validIds.has(id));
-  if (currentReadIds.length !== notificationPreferences.readIds.length) {
-    notificationPreferences.readIds = currentReadIds;
-    saveNotificationPreferences();
-  }
   const unreadCount = notificationItems.filter((item) => !notificationPreferences.readIds.includes(item.id)).length;
   const count = byId('notification-count');
   count.hidden = unreadCount === 0;
@@ -2767,7 +2765,7 @@ function renderNotificationCenter(snapshot) {
       return `<article class="notification-item ${unread ? 'is-unread' : ''} notification-${escapeHtml(item.kind)}">
         <span class="notification-dot" aria-hidden="true"></span>
         <div class="notification-copy"><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.body)}</p>${item.date ? publicationTimeMarkup(item.date) : ''}</div>
-        <a class="notification-link" href="#${escapeHtml(item.page)}" data-page-link="${escapeHtml(item.page)}" data-notification-id="${escapeHtml(item.id)}" aria-label="${escapeHtml(t('Abrir conteúdo relacionado'))}">↗</a>
+        <a class="notification-link" href="#${escapeHtml(item.page)}" data-notification-id="${escapeHtml(item.id)}" aria-label="${escapeHtml(t('Abrir conteúdo relacionado'))}">↗</a>
       </article>`;
     }).join('')
     : `<p class="notification-empty">${escapeHtml(t('Sem avisos novos por enquanto.'))}</p>`;
@@ -2786,42 +2784,61 @@ function setupNotificationCenter(snapshot) {
   const center = byId('notification-center');
   const toggle = byId('notification-toggle');
   const panel = byId('notification-panel');
-  notificationPreferences = loadNotificationPreferences();
+  notificationSnapshot = snapshot;
+  if (!notificationPreferences) notificationPreferences = loadNotificationPreferences();
 
-  toggle.addEventListener('click', () => {
-    if (panel.hidden) {
-      notificationPreferences.lastViewedAt = new Date().toISOString();
+  if (!notificationHandlersBound) {
+    notificationHandlersBound = true;
+    toggle.addEventListener('click', () => {
+      if (panel.hidden) {
+        notificationPreferences.lastViewedAt = new Date().toISOString();
+        saveNotificationPreferences();
+        renderNotificationCenter(notificationSnapshot);
+        panel.hidden = false;
+        toggle.setAttribute('aria-expanded', 'true');
+      } else {
+        closeNotificationPanel();
+      }
+    });
+    byId('notification-close').addEventListener('click', () => closeNotificationPanel(true));
+    byId('notification-mark-all').addEventListener('click', () => {
+      notificationPreferences.readIds = notificationItems.map((item) => item.id);
       saveNotificationPreferences();
-      renderNotificationCenter(snapshot);
-      panel.hidden = false;
-      toggle.setAttribute('aria-expanded', 'true');
-    } else {
+      renderNotificationCenter(notificationSnapshot);
+    });
+    panel.addEventListener('click', (event) => {
+      const link = event.target.closest('[data-notification-id]');
+      if (!link) return;
+      event.preventDefault();
+      const id = link.dataset.notificationId;
+      const item = notificationItems.find((notification) => notification.id === id);
+      if (!notificationPreferences.readIds.includes(id)) {
+        notificationPreferences.readIds.push(id);
+        saveNotificationPreferences();
+      }
+      renderNotificationCenter(notificationSnapshot);
       closeNotificationPanel();
-    }
-  });
-  byId('notification-close').addEventListener('click', () => closeNotificationPanel(true));
-  byId('notification-mark-all').addEventListener('click', () => {
-    notificationPreferences.readIds = notificationItems.map((item) => item.id);
-    saveNotificationPreferences();
-    renderNotificationCenter(snapshot);
-  });
-  panel.addEventListener('click', (event) => {
-    const link = event.target.closest('[data-notification-id]');
-    if (!link) return;
-    const id = link.dataset.notificationId;
-    if (!notificationPreferences.readIds.includes(id)) {
-      notificationPreferences.readIds.push(id);
-      saveNotificationPreferences();
-    }
-    renderNotificationCenter(snapshot);
-    closeNotificationPanel();
-  });
-  document.addEventListener('click', (event) => {
-    if (!center.contains(event.target)) closeNotificationPanel();
-  });
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !panel.hidden) closeNotificationPanel(true);
-  });
+      if (!item) return;
+      setPage(item.page);
+      if (item.kind === 'news') {
+        requestAnimationFrame(() => {
+          const story = [...document.querySelectorAll('#news [data-news-story-id]')]
+            .find((element) => element.dataset.newsStoryId === item.newsId);
+          if (!story) return;
+          const fullStory = story.querySelector('details');
+          if (fullStory) fullStory.open = true;
+          story.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          story.focus({ preventScroll: true });
+        });
+      }
+    });
+    document.addEventListener('click', (event) => {
+      if (!center.contains(event.target)) closeNotificationPanel();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !panel.hidden) closeNotificationPanel(true);
+    });
+  }
   renderNotificationCenter(snapshot);
 }
 
@@ -3204,6 +3221,8 @@ function renderStoryFeature(story, target) {
       <div class="news-source-links">${(story.sources || []).map((source) => `<a class="text-link" href="${escapeHtml(safeUrl(source.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(t(source.title))}">${escapeHtml(t(source.outlet))} ↗</a>`).join('')}</div>
     </div>
     <div class="news-feature-stamp" aria-hidden="true"><span>KYNOSRECOMPVI</span><strong>${escapeHtml(t(story.category || 'Notícia'))}</strong><small>${escapeHtml(formatNewsDate(story.date))}</small></div>`;
+  target.dataset.newsStoryId = String(story.id || story.title || story.date || '');
+  target.tabIndex = -1;
   window.KynosI18n.translateDom(target, state.language);
 }
 
@@ -3216,7 +3235,7 @@ function renderStoryCard(story, featured = false) {
       ${body.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('')}
       ${story.sources && story.sources.length ? `<div class="news-source-links">${story.sources.map((source) => `<a class="text-link" href="${escapeHtml(safeUrl(source.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t(source.outlet || 'Fonte original'))} ↗</a>`).join('')}</div>` : ''}
     </details>` : '';
-  return `<article class="news-card ${featured ? 'news-card--featured' : ''}">
+  return `<article class="news-card ${featured ? 'news-card--featured' : ''}" data-news-story-id="${escapeHtml(String(story.id || story.title || story.date || ''))}" tabindex="-1">
     <div class="news-card-top"><span class="news-category">${escapeHtml(t(story.category))}</span>${publicationTimeMarkup(story.date)}</div>
     <h3>${escapeHtml(localizedValue(story, 'title') || story.title)}</h3>
     <p>${escapeHtml(localizedValue(story, 'summary') || story.summary)}</p>
@@ -3956,6 +3975,7 @@ function setPage(page, updateHash = true, countVisit = true) {
   document.querySelectorAll('.nav-link').forEach((link) => link.classList.toggle('active', link.dataset.pageLink === page));
   document.querySelector('.main-nav').classList.remove('open');
   document.querySelector('.menu-toggle').setAttribute('aria-expanded', 'false');
+  document.querySelector('.menu-toggle').setAttribute('aria-label', t('Abrir navegação'));
   if (updateHash) history.replaceState(null, '', `#${page}`);
   if (isAnalytics) renderAnalytics();
   else if (byId('analytics-page')) byId('analytics-page').hidden = true;
@@ -4294,6 +4314,21 @@ async function init() {
 }
 
 document.body.addEventListener('click', (event) => {
+  const brPixButton = event.target.closest('[data-br-pix]');
+  if (brPixButton) {
+    const status = brPixButton.closest('.br-support-actions')?.querySelector('.br-support-status');
+    const originalLabel = 'Apoiar via PIX <span aria-hidden="true">♥</span>';
+    copyText(brPixButton.dataset.brPix).then(() => {
+      if (status) status.textContent = 'Chave PIX copiada!';
+      brPixButton.textContent = 'Chave PIX copiada!';
+      setTimeout(() => {
+        brPixButton.innerHTML = originalLabel;
+      }, 1800);
+    }).catch((error) => {
+      console.error('Não foi possível copiar a chave PIX:', error);
+      if (status) status.textContent = 'Copie a chave pelo app do banco.';
+    });
+  }
   const pixCopyButton = event.target.closest('[data-copy-pix]');
   if (pixCopyButton && !pixCopyButton.disabled) {
     const pixKey = pixCopyButton.dataset.copyPix || '';
@@ -4346,8 +4381,33 @@ document.body.addEventListener('click', (event) => {
 });
 byId('language-select').addEventListener('change', (event) => setLanguage(event.target.value));
 document.querySelector('.menu-toggle').addEventListener('click', (event) => {
-  const open = document.querySelector('.main-nav').classList.toggle('open');
+  const nav = document.querySelector('.main-nav');
+  const open = nav.classList.toggle('open');
   event.currentTarget.setAttribute('aria-expanded', String(open));
+  event.currentTarget.setAttribute('aria-label', t(open ? 'Fechar navegação' : 'Abrir navegação'));
+});
+document.querySelector('.main-nav').addEventListener('click', (event) => {
+  if (!event.target.closest('a')) return;
+  document.querySelector('.main-nav').classList.remove('open');
+  document.querySelector('.menu-toggle').setAttribute('aria-expanded', 'false');
+  document.querySelector('.menu-toggle').setAttribute('aria-label', t('Abrir navegação'));
+});
+document.addEventListener('click', (event) => {
+  const nav = document.querySelector('.main-nav');
+  const toggle = document.querySelector('.menu-toggle');
+  if (!nav.classList.contains('open') || nav.contains(event.target) || toggle.contains(event.target)) return;
+  nav.classList.remove('open');
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.setAttribute('aria-label', t('Abrir navegação'));
+});
+document.addEventListener('keydown', (event) => {
+  const nav = document.querySelector('.main-nav');
+  const toggle = document.querySelector('.menu-toggle');
+  if (event.key !== 'Escape' || !nav.classList.contains('open')) return;
+  nav.classList.remove('open');
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.setAttribute('aria-label', t('Abrir navegação'));
+  toggle.focus();
 });
 window.addEventListener('hashchange', () => setPage(window.location.hash.slice(1), false));
 init();

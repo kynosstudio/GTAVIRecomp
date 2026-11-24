@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 390" role="img" aria-label="Placeholder do launcher XLaunchVI">
+  <rect width="680" height="390" rx="24" fill="#171220"/>
+  <rect x="22" y="22" width="636" height="346" rx="18" fill="#100e19" stroke="#ffdf00" stroke-opacity=".24"/>
+  <circle cx="54" cy="54" r="18" fill="#009c3b"/>
+  <text x="54" y="59" text-anchor="middle" fill="#fff" font-family="Arial" font-weight="700" font-size="16">X</text>
+  <text x="86" y="60" fill="#fff" font-family="Arial" font-weight="700" font-size="22">XLaunchVI</text>
+  <rect x="48" y="92" width="584" height="210" rx="14" fill="#1e1829" stroke="#002776" stroke-width="3"/>
+  <path d="M48 248C150 210 250 270 350 220C450 170 530 210 632 178V302H48Z" fill="#009c3b" opacity=".18"/>
+  <text x="340" y="195" text-anchor="middle" fill="#ffdf00" font-family="Arial" font-weight="700" font-size="18">Espaço para captura do launcher</text>
+</svg>

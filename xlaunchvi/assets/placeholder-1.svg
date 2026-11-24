@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-label="Placeholder interface do launcher">
+  <rect width="640" height="400" fill="#171220"/>
+  <rect x="32" y="32" width="576" height="336" rx="18" fill="#21182b" stroke="#009c3b" stroke-opacity=".35"/>
+  <rect x="64" y="72" width="160" height="30" rx="15" fill="#ffdf00" opacity=".9"/>
+  <rect x="64" y="130" width="512" height="22" rx="11" fill="#30283b"/>
+  <rect x="64" y="176" width="512" height="22" rx="11" fill="#30283b"/>
+  <rect x="64" y="222" width="512" height="22" rx="11" fill="#30283b"/>
+  <rect x="64" y="284" width="220" height="44" rx="10" fill="#002776"/>
+</svg>

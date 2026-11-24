@@ -20,24 +20,22 @@
         <img class="brand-logo" src="assets/logo.svg" alt="" />
         <span class="brand-fallback" hidden><span class="brand-mark">K</span><span>Kynos<b>RecompVI</b></span></span>
       </a>
-      <button class="menu-toggle" type="button" aria-label="Abrir navegação" aria-expanded="false">☰</button>
-      <nav class="main-nav" aria-label="Navegação principal">
+      <button class="menu-toggle" type="button" aria-label="Abrir navegação" aria-expanded="false" aria-controls="main-navigation">☰</button>
+      <nav class="main-nav" id="main-navigation" aria-label="Navegação principal">
         <a class="nav-link active" href="#home" data-page-link="home">Início</a>
         <a class="nav-link" href="#news" data-page-link="news">Notícias</a>
         <a class="nav-link" href="#repositories" data-page-link="repositories">Corrida</a>
         <a class="nav-link nav-utility-link" href="#utility" data-page-link="utility">Meu PC Roda GTAVI</a>
-        <a class="nav-link" href="#xlaunchvi" data-page-link="xlaunchvi">XlaunchVI</a>
-        <a class="nav-link" href="#tracker" data-page-link="tracker">
-          <span>Monitoramento do tracker</span>
-          <div class="header-freshness" id="header-freshness" role="group" aria-label="Atualização do tracker" aria-live="off" hidden>
-            <span class="header-freshness-dot" aria-hidden="true"></span>
-            <span class="header-freshness-full" id="header-freshness-full"></span>
-            <span class="header-freshness-short" id="header-freshness-short" aria-hidden="true"></span>
-          </div>
-        </a>
-        <a class="nav-link" href="#discord" data-page-link="discord">Comunidades no Discord</a>
+        <a class="nav-link" href="xlaunchvi/index.html">XlaunchVI</a>
+        <a class="nav-link" href="#tracker" data-page-link="tracker">Monitoramento do tracker</a>
+        <a class="nav-link nav-discord-link" href="https://discord.gg/DnjUSJcGXg" target="_blank" rel="noopener noreferrer">Comunidades no Discord ↗</a>
       </nav>
       <div class="header-actions">
+        <div class="header-freshness" id="header-freshness" role="group" aria-label="Atualização do tracker" aria-live="off" hidden>
+          <span class="header-freshness-dot" aria-hidden="true"></span>
+          <span class="header-freshness-full" id="header-freshness-full"></span>
+          <span class="header-freshness-short" id="header-freshness-short" aria-hidden="true"></span>
+        </div>
         <div class="notification-center" id="notification-center">
           <button class="notification-toggle" id="notification-toggle" type="button" aria-label="Abrir notificações" aria-expanded="false" aria-controls="notification-panel" title="Abrir notificações">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" /><path d="M10 21h4" /></svg>
@@ -101,9 +99,21 @@
             <p class="hero-clock-status" role="status">Faltam amostras datadas recentes do mesmo projeto para calcular a contagem.</p>
             <small class="hero-clock-disclaimer">Não há data oficial para PC. Esta contagem especulativa extrapola o ritmo recente da comunidade; bloqueios, bugs e derrubadas podem alterar o prazo.</small>
           </aside>
-          <a class="scroll-cue" href="#news" data-page-link="news" aria-label="Ir para notícias"><span>↓</span></a>
         </div>
         <div class="content-wrap page-content portal-home">
+          <aside class="br-support-banner" aria-label="Apoio ao XLaunchVI">
+            <div class="br-support-copy">
+              <span class="br-support-kicker"><b>BR</b> COMUNIDADE KYNOS</span>
+              <h2>Fortaleça o <span>XLaunchVI</span> — launcher 100% brasileiro.</h2>
+              <p>Mais do que só pelo GTA VI — é para mostrar que o Brasil também tem gente foda desenvolvendo engenharia reversa e recompilação de alto nível.</p>
+            </div>
+            <div class="br-support-actions">
+              <a class="button br-support-primary" href="xlaunchvi/index.html">Conhecer o XLaunchVI <span aria-hidden="true">→</span></a>
+              <button class="button br-support-pix" type="button" data-br-pix="50450a25-89df-446c-92cc-e56f64a5ab7a">Apoiar via PIX <span aria-hidden="true">♥</span></button>
+              <code class="br-support-pix-key">50450a25-89df-446c-92cc-e56f64a5ab7a</code>
+              <small class="br-support-status" role="status" aria-live="polite"></small>
+            </div>
+          </aside>
           <section id="portwatch-progress" class="portwatch-section" aria-label="Progresso geral da corrida" aria-busy="true"></section>
           <section class="portal-lead" aria-labelledby="home-lead-title">
             <div class="section-heading"><div><span class="section-kicker">EM DESTAQUE</span><h2 id="home-lead-title">A notícia que <span>mudou a corrida.</span></h2></div><a class="text-link" href="#news" data-page-link="news">Ver todas as notícias →</a></div>
@@ -434,17 +444,6 @@
           </section>
           <p class="tracker-data-note">Snapshot de <time id="tracker-updated"></time> · origem: <code>data/tracker.json</code> · tradução editorial PT-BR em <code>data/tracker-pt-BR.json</code>.</p>
         </div>
-      </section>
-
-      <section class="page-section" id="xlaunchvi" data-page="xlaunchvi">
-        <div class="hero compact-hero xlaunch-hero">
-          <div class="hero-content">
-            <div class="eyebrow"><span class="eyebrow-dot"></span> PROJETO ACOMPANHADO <span class="eyebrow-line"></span> XLAUNCHVI</div>
-            <h1>Equipe <span>XlaunchVI.</span></h1>
-            <p class="hero-copy">Acompanhe o status técnico do projeto e encontre os canais comunitários e as formas de apoio voluntário.</p>
-          </div>
-        </div>
-        <div class="content-wrap page-content xlaunch-page-content" id="xlaunchvi-content" aria-busy="true"></div>
       </section>
 
       <section class="page-section" id="discord" data-page="discord">
