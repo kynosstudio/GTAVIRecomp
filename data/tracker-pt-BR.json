@@ -515,8 +515,8 @@
       "status": "acompanhado",
       "percent": 75,
       "stage": "Dentro do jogo · cut-scenes a 4 FPS",
-      "summary": "Build privada baseada em VIctory e XCL. Consegue movimentar no mundo, interagir com NPCs e abrir menus devagar; agora também reproduz cut-scenes a cerca de 4 FPS. Ainda não há texturas ou iluminação completas.",
-      "verification": "Resultado privado e autodeclarado; não reproduzido por pessoas de fora do grupo.",
+      "summary": "Build privada baseada em VIctory e XCL. VIctory é a camada de código aberto cujo autor mostrou os menus do GTA VI ao vivo na segunda-feira; XCL mantém código público no GitHub, enquanto as mudanças do CGBJ continuam privadas. Com controle, o CGBJ movimenta o personagem, anda pelo mapa, fala com NPCs e abre menus, tudo muito lentamente. A build ainda não é jogável: certas cenas ficam em tela preta e o vídeo de 77 segundos publicado no X na terça mostra interior de carro, rua com NPCs acenando, guarda e pátio de prisão em cores chapadas e sem iluminação completa.",
+      "verification": "Resultado privado e verificado pelo rastreador; não reproduzível externamente, pois o vídeo não mostra o nome do projeto.",
       "gta": {
         "loads": 1,
         "boots": 1,
