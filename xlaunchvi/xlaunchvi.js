@@ -65,7 +65,8 @@ async function copyText(value) {
 document.querySelectorAll('[data-copy-pix]').forEach((button) => {
   button.dataset.originalText = button.textContent.trim();
   button.addEventListener('click', async () => {
-    const status = document.getElementById('xlaunch-pix-status');
+    const status = button.closest('.xlaunch-pix-card')?.querySelector('.xlaunch-pix-status')
+      || button.closest('.xlaunch-hero-copy')?.querySelector('.xlaunch-copy-status');
     button.disabled = true;
     try {
       await copyText(PIX);
@@ -99,7 +100,6 @@ loadTracker().then((tracker) => {
   const effort = tracker && Array.isArray(tracker.efforts)
     ? tracker.efforts.find((item) => item.id === 'xlaunchvi')
     : null;
-  if (!effort) return;
   if (!effort) throw new Error('O tracker carregou, mas não contém o projeto XLaunchVI.');
   const percent = Math.max(0, Math.min(100, Number(effort.percent)));
   if (!Number.isFinite(percent)) throw new Error('O progresso informado para o XLaunchVI não é válido.');

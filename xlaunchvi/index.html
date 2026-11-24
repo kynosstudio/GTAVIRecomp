@@ -37,6 +37,23 @@
     </header>
 
     <main class="xlaunch-page">
+      <section class="xlaunch-support xlaunch-support--featured" aria-labelledby="support-title">
+        <div class="xlaunch-support-copy">
+          <span>VAQUINHA BR · APOIO VOLUNTÁRIO</span>
+          <h2 id="support-title">Fortaleça o XLaunchVI. <b>Fortaleça a engenharia brasileira.</b></h2>
+          <p>Mais do que só pelo GTA VI — é para mostrar que o Brasil também tem gente foda desenvolvendo engenharia reversa e recompilação de alto nível.</p>
+          <p class="xlaunch-transparency">O apoio é voluntário e pode ajudar com hardware, testes e infraestrutura. Não há promessa de venda, jogo completo ou release pública garantida; este site não publica prestação financeira da equipe.</p>
+        </div>
+        <div class="xlaunch-pix-card">
+          <span class="xlaunch-pix-label">PIX COPIA E COLA</span>
+          <code id="xlaunch-pix-key">50450a25-89df-446c-92cc-e56f64a5ab7a</code>
+          <button type="button" data-copy-pix="50450a25-89df-446c-92cc-e56f64a5ab7a">Copiar chave PIX</button>
+          <p class="xlaunch-pix-status" id="xlaunch-pix-status" role="status" aria-live="polite"></p>
+          <img class="xlaunch-pix-qr" src="assets/pix-qr-placeholder.svg" alt="Espaço reservado para inserir o QR Code Pix oficial da equipe">
+          <small>Abra o app do seu banco, escolha Pix Copia e Cola e use a chave acima. O QR atual é apenas um placeholder e não pode ser escaneado.</small>
+        </div>
+      </section>
+
       <section class="xlaunch-hero" aria-labelledby="xlaunch-title">
         <div class="xlaunch-hero-copy">
           <span class="xlaunch-br-badge">Projeto 100% Brasileiro</span>
@@ -62,6 +79,33 @@
         </div>
       </section>
 
+        <section class="xlaunch-section xlaunch-architecture" aria-labelledby="architecture-title">
+          <div class="xlaunch-section-heading">
+            <span>ARQUITETURA REPORTADA PELA EQUIPE</span>
+            <h2 id="architecture-title">Uma estratégia própria de <b>compatibilidade.</b></h2>
+          </div>
+          <p class="xlaunch-architecture-intro">Segundo a descrição do projeto, o XLaunchVI busca executar software de Xbox Series X|S (Scarlett) em PCs Windows x86-64 por meio de uma camada de compatibilidade própria.</p>
+          <div class="xlaunch-architecture-grid">
+            <article>
+              <h3>Execução no PC</h3>
+              <p>O código convidado deve rodar diretamente na CPU do computador. Serviços do sistema e interfaces gráficas são reimplementados ou traduzidos para o ambiente Windows.</p>
+            </article>
+            <article>
+              <h3>Gráficos</h3>
+              <p>A equipe descreve um backend próprio de Direct3D 12 em desenvolvimento, além de suporte a Vulkan. A abordagem é apresentada como distinta das soluções de compatibilidade citadas como VIctory e XCL.</p>
+            </article>
+            <article>
+              <h3>Launcher brasileiro e leve</h3>
+              <p>O launcher segue uma estratégia própria de tradução e execução no Windows. O objetivo é ocupar menos espaço em disco no PC; ainda não há benchmark público que quantifique essa redução.</p>
+            </article>
+            <article>
+              <h3>Visão de longo prazo</h3>
+              <p>A ambição inclui jogos de Xbox 360 até Xbox Series S. Neste momento, o foco informado foi redirecionado para GTA VI, com interface personalizável e atualizações contínuas como objetivos do projeto.</p>
+            </article>
+          </div>
+          <p class="xlaunch-facts-note">Os detalhes de arquitetura e desempenho acima refletem informações fornecidas pela equipe e não foram verificados de forma independente por este site.</p>
+        </section>
+
       <section class="xlaunch-section" aria-labelledby="gallery-title">
         <div class="xlaunch-section-heading">
           <span>GALERIA</span>
@@ -83,34 +127,18 @@
         <div class="xlaunch-team" id="xlaunch-team"></div>
       </section>
 
-      <section class="xlaunch-section" aria-labelledby="roadmap-title">
+      <section class="xlaunch-section" aria-labelledby="achievements-title">
         <div class="xlaunch-section-heading">
-          <span>ROADMAP TÉCNICO</span>
-          <h2 id="roadmap-title">Do protótipo ao <b>play.</b></h2>
+          <span>TRILHA DAS CONQUISTAS</span>
+          <h2 id="achievements-title">Marcos reais, metas e <b>horizonte.</b></h2>
         </div>
-        <ol class="xlaunch-roadmap">
-          <li class="done"><span>01</span><div><b>Jogo abre</b><p>Inicialização e reconhecimento do ambiente já relatados pela equipe.</p></div></li>
-          <li class="done"><span>02</span><div><b>Menus a 30 FPS</b><p>Menus rodando de forma cravada, ainda sem texturas completas.</p></div></li>
-          <li><span>03</span><div><b>Memória e shaders</b><p>Foco atual: otimizar memória e o pipeline de shaders sem textura.</p></div></li>
-          <li><span>04</span><div><b>Texturas e quase jogável</b><p>Etapa necessária antes de uma eventual release pública.</p></div></li>
+        <ol class="xlaunch-achievements">
+          <li class="is-reported"><span class="xlaunch-milestone-state">RELATADO</span><b>Jogo abre</b><p>A equipe relata a inicialização do jogo; o resultado não foi reproduzido independentemente.</p></li>
+          <li class="is-current"><span class="xlaunch-milestone-state">STATUS ATUAL · ~55%</span><b>Menus a 30 FPS</b><p>Menus reportados a 30 FPS, ainda sem texturas. O foco técnico atual é otimizar memória e shaders.</p></li>
+          <li class="is-internal-goal"><span class="xlaunch-milestone-state">META INTERNA · PRÓXIMA SEMANA</span><b>Próximo avanço da equipe</b><p>Janela de planejamento interna, não uma promessa: avançar na otimização de memória/shaders e no estágio de renderização.</p></li>
+          <li class="is-projection"><span class="xlaunch-milestone-state">PROJEÇÃO DO TRACKER</span><strong class="xlaunch-projection-days">~60 dias</strong><b>Horizonte: jogo completo</b><p>Estimativa baseada no progresso e no ritmo das notícias do tracker. Não é uma data de lançamento oficial nem uma garantia.</p></li>
         </ol>
-      </section>
-
-      <section class="xlaunch-support" aria-labelledby="support-title">
-        <div>
-          <span>VAQUINHA BR</span>
-          <h2 id="support-title">Ajude o XLaunchVI a ir <b>mais longe.</b></h2>
-          <p>O apoio é voluntário e ajuda a equipe a investir em hardware, testes e infraestrutura. Não há promessa de venda, jogo completo ou release pública garantida.</p>
-          <p>Transparência: contribuições voluntárias destinam-se ao desenvolvimento nacional, equipamentos e infraestrutura da equipe; não há meta ou prestação financeira publicada por este site.</p>
-        </div>
-        <div class="xlaunch-pix-card">
-          <span class="xlaunch-pix-label">PIX COPIA E COLA</span>
-          <code id="xlaunch-pix-key">50450a25-89df-446c-92cc-e56f64a5ab7a</code>
-          <button type="button" data-copy-pix="50450a25-89df-446c-92cc-e56f64a5ab7a">Copiar chave PIX</button>
-          <p class="xlaunch-pix-status" id="xlaunch-pix-status" role="status" aria-live="polite"></p>
-          <img class="xlaunch-pix-qr" src="assets/pix-qr-placeholder.svg" alt="Espaço reservado para inserir o QR Code Pix oficial da equipe">
-          <small>Para pagar, abra o app do seu banco, escolha Pix Copia e Cola e use a chave acima. Substitua o placeholder do QR pela imagem gerada no app da equipe; o gráfico atual não é escaneável.</small>
-        </div>
+        <p class="xlaunch-facts-note">A meta da próxima semana é uma intenção interna informada para esta página. A projeção de 60 dias é aproximada e pode mudar conforme o tracker recebe dados; o contador da home permanece dinâmico e pode mostrar outro valor.</p>
       </section>
     </main>
     <script src="xlaunchvi.js"></script>

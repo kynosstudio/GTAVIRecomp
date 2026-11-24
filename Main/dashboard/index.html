@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4039651654349639" crossorigin="anonymous"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#ffffff">
+  <title>Dashboard · PortWatch VI (private)</title>
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="pinned-editor.css">
+  <script src="../assets/js/theme.js"></script>
+  <script type="module" src="dashboard.js"></script>
+  <script type="module" src="pinned-editor.js"></script>
+</head>
+<body>
+  <header class="nav is-scrolled">
+    <div class="wrap nav-inner">
+      <a class="brand" href="../"><span>PortWatch<b>VI</b></span></a>
+      <span class="db-badge">Private dashboard</span>
+      <span class="nav-updated" id="db-status">Not signed in</span>
+      <button class="toggle" id="db-signout" hidden>Sign out</button>
+    </div>
+  </header>
+
+  <main class="wrap db">
+    <!-- Works without the Supabase sign-in: publishing commits data/pinned.json through GitHub (pinned-editor.js). -->
+    <section class="card db-panel db-pin" aria-labelledby="pin-editor-title">
+      <h3 id="pin-editor-title">Pinned message <span id="pin-state" class="db-pill">…</span></h3>
+      <p class="fine">Everyone sees it on the homepage, under the countdown, signed 4lwayz. Publishing commits it to GitHub and the site shows it about 2 minutes later.</p>
+      <div class="db-pin-grid">
+        <form id="pin-form" class="db-pin-form">
+          <textarea id="pin-input" rows="6" placeholder="Write a message for everyone on the site. Line breaks and https:// links work."></textarea>
+          <div class="db-pin-row">
+            <span class="fine" id="pin-chars">0/500</span>
+            <div class="db-actions">
+              <button type="button" class="no" id="pin-hide">Take it down</button>
+              <button type="submit" class="ok" id="pin-publish">Publish</button>
+            </div>
+          </div>
+          <p class="fine pin-note" id="pin-note" aria-live="polite"></p>
+        </form>
+        <div class="db-pin-preview" id="pin-preview" aria-label="Preview">
+          <p class="db-pin-cap">Preview</p>
+          <aside class="pinned" hidden>
+            <p class="pin-label">
+              <svg class="pin-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 9V4h1a1 1 0 0 0 0-2H7a1 1 0 0 0 0 2h1v5a3 3 0 0 1-3 3v2h5.97v7l1 1 1-1v-7H19v-2a3 3 0 0 1-3-3z"/></svg>
+              <span>Pinned</span>
+            </p>
+            <div class="pin-msg">
+              <span class="pin-avatar"><b aria-hidden="true">4</b></span>
+              <div class="pin-bubble">
+                <p class="pin-head"><b class="pin-name">4lwayz</b><span class="pin-badge">Creator</span><time class="pin-time"></time></p>
+                <p class="pin-text"></p>
+              </div>
+            </div>
+          </aside>
+          <p class="db-pin-empty" id="pin-empty">Start typing to see the card.</p>
+        </div>
+      </div>
+      <details class="db-pin-token" id="pin-token-box">
+        <summary>GitHub token: <span id="pin-token-state">not set</span></summary>
+        <ol class="fine">
+          <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → new fine-grained token</a>.</li>
+          <li>Repository access: <b>Only select repositories</b> → <b>4lwayz/portwatch-vi</b>.</li>
+          <li>Permissions → Repository permissions → <b>Contents: Read and write</b>. Nothing else.</li>
+          <li>Generate it, copy it and paste it here. It's kept in this browser on this PC and sent only to GitHub.</li>
+        </ol>
+        <form id="pin-token-form" class="db-pin-tokenrow">
+          <input type="password" id="pin-token" placeholder="github_pat_…" autocomplete="off" spellcheck="false">
+          <button type="submit" class="gh-link">Save token</button>
+          <button type="button" class="toggle" id="pin-token-forget" hidden>Forget</button>
+        </form>
+      </details>
+    </section>
+
+    <section id="db-login" class="card db-login" hidden>
+      <h1>Sign in</h1>
+      <p>You'll get a one-time sign-in link by email. Only the site's admin account can see anything here.</p>
+      <form id="login-form">
+        <input type="email" name="email" required placeholder="Email address" autocomplete="email">
+        <button class="gh-link" type="submit">Email me a link</button>
+      </form>
+      <p class="fine" id="login-note"></p>
+    </section>
+
+    <section id="db-app" hidden>
+      <div class="db-live card">
+        <div><span class="live-dot"></span><b id="live-count">…</b><span>people on the site right now<small id="live-note">counting…</small></span></div>
+        <ul id="live-pages"></ul>
+      </div>
+
+      <div class="db-tiles" id="tiles"></div>
+
+      <div class="db-grid">
+        <div class="card db-panel"><h3>Views, last 48 hours</h3><div id="chart-hourly" class="db-chart"></div></div>
+        <div class="card db-panel"><h3>Views, last 30 days</h3><div id="chart-daily" class="db-chart"></div></div>
+        <div class="card db-panel"><h3>Top pages · 7 days</h3><ol id="top-pages" class="db-list"></ol></div>
+        <div class="card db-panel"><h3>Where visitors come from · 7 days</h3><ol id="top-refs" class="db-list"></ol></div>
+      </div>
+
+      <div class="card db-panel db-wide">
+        <h3>Waiting for review <span id="pending-count" class="db-pill">0</span></h3>
+        <p class="fine">Posts that contain links are held here. Approve real ones; hide spam, lures and anything with download links.</p>
+        <div id="queue"></div>
+      </div>
+
+      <div class="db-grid">
+        <div class="card db-panel"><h3>Recent posts</h3><div id="recent"></div></div>
+        <div class="card db-panel"><h3>Live activity</h3><ol id="feed" class="db-feed"></ol></div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
