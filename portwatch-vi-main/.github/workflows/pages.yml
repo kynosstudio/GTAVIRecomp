@@ -1,0 +1,117 @@
+name: Deploy site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+  workflow_call: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url || steps.deployment_retry.outputs.page_url || steps.deployment_retry2.outputs.page_url }}
+    steps:
+      # Check out the branch tip, so a deploy called right after the scout's commit includes it.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Collect site files
+        run: |
+          mkdir -p _site
+          cp -r index.html assets data _site/   # dashboard/ is private and never deployed; the board was removed 2026-11-24
+          cp google*.html _site/   # Google Search Console ownership file; keep it, or Google un-verifies the site
+          touch _site/.nojekyll
+
+      - name: Build article pages, news archive, RSS feed and sitemap
+        run: node scripts/build-site.mjs _site
+
+      # Pages lets browsers reuse files for 10 minutes, so after a deploy a browser could pair the new
+      # page with a stylesheet or script it cached from the previous one. Giving every CSS/JS URL and
+      # module import this commit as a version makes each deploy load as one consistent set.
+      - name: Stamp asset versions
+        id: stamp
+        run: |
+          v="${GITHUB_SHA::8}"
+          find _site -name '*.html' -exec sed -i -E "s#(assets/(css|js)/[A-Za-z0-9_-]+\.(css|js))([\"'])#\1?v=$v\4#g" {} +
+          sed -i -E "s#(from '\./[A-Za-z0-9_-]+\.js)'#\1?v=$v'#g" _site/assets/js/*.js
+          echo "Stamped ?v=$v into $(grep -rl "?v=$v" _site | wc -l) files"
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+      # GitHub's artifact service sometimes can't find the just-uploaded site yet ("No artifacts named
+      # github-pages" / "Fetching artifact metadata failed"; it says to re-run). Retry twice before failing.
+      - id: deployment
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+
+      - name: Wait before retrying the deploy
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 30
+
+      - id: deployment_retry
+        if: steps.deployment.outcome == 'failure'
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+
+      - name: Wait before the last deploy attempt
+        if: steps.deployment.outcome == 'failure' && steps.deployment_retry.outcome == 'failure'
+        run: sleep 90
+
+      - id: deployment_retry2
+        if: steps.deployment.outcome == 'failure' && steps.deployment_retry.outcome == 'failure'
+        uses: actions/deploy-pages@v5
+
+      # The main site, https://portwatch-vi.xyz/ (Cloudflare Pages project "portwatch-vi"): the same files as
+      # GitHub Pages. The site's own address in the repo is the domain, so the sed below only catches an old
+      # github.io address that slips back in (for example in a news image link). Runs even
+      # when the GitHub Pages deploy failed, and never fails the workflow. Does nothing until the
+      # CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID repository secrets exist. The scout passes them on
+      # with "secrets: inherit".
+      - name: Deploy the Cloudflare mirror
+        if: ${{ !cancelled() && steps.stamp.outcome == 'success' }}
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "No Cloudflare secrets set, so the mirror isn't updated."
+            exit 0
+          fi
+          rm -rf _cloudflare && cp -r _site _cloudflare
+          grep -rlZ --include='*.html' --include='*.xml' --include='*.json' 'https://4lwayz.github.io/portwatch-vi/' _cloudflare \
+            | xargs -0 -r sed -i 's#https://4lwayz\.github\.io/portwatch-vi/#https://portwatch-vi.xyz/#g'
+          echo "Old address left in the mirror: $(grep -rl 'https://4lwayz.github.io/portwatch-vi/' _cloudflare | wc -l) files"
+          npx --yes wrangler@4 pages deploy _cloudflare --project-name=portwatch-vi --branch=main --commit-dirty=true
+
+      # Tells Bing, Yandex and other IndexNow engines which URLs are new or changed. Never fails the deploy.
+      - name: Ping IndexNow
+        continue-on-error: true
+        run: |
+          if [ -f indexnow.json ]; then
+            curl -sS -m 30 -o /dev/null -w "IndexNow answered HTTP %{http_code}\n" -X POST https://api.indexnow.org/indexnow \
+              -H 'Content-Type: application/json; charset=utf-8' --data @indexnow.json
+          else
+            echo "Nothing new to ping."
+          fi

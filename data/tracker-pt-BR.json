@@ -2,6 +2,12 @@
   "updatedAt": "2026-11-24T04:13:54.192Z",
   "lastSyncedAt": "2026-11-24T05:07:48.307Z",
   "sourceFile": "data/tracker.json",
+  "authorMessage": {
+    "active": false,
+    "date": "2026-11-24",
+    "title": "Nota do autor",
+    "text": "Sem avisos ativos no momento. Novas mensagens podem ser adicionadas aqui."
+  },
   "teams": {
     "xlaunchvi": {
       "pixKey": "galinhafritadubs@gmail.com",
@@ -16,9 +22,9 @@
         "estimatedPercent": 50.0,
         "portwatchPercent": 0.0,
         "title": "XlaunchVI: estimativa editorial de 50% na tela de carregamento",
-        "summary": "Relato atribuído a JPTuba no Discord situa o XlaunchVI na tela de carregamento. A equipe informou uma pausa de cerca de 2–3 horas após esgotar o uso de IA e a retomada depois de recarregar o Claude. O portal registra agora 50% como estimativa editorial informada para esta atualização; não é medição oficial nem marco publicado no GitHub. O escopo informado do XLaunch Dashboard inclui reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. A equipe busca chegar ao carregamento do mundo e alcançar ou ultrapassar XCL e VIctory, com apoio da comunidade brasileira.",
-        "teaser": "O portal registra 50% como estimativa editorial; o marco relatado é a tela de carregamento.",
-        "transparency": "Os 50% foram informados como estimativa editorial para esta atualização, não como medição oficial. O relato da tela de carregamento é atribuído a JPTuba no Discord, mas o convite não aponta para a mensagem original. O snapshot público PortWatch/GitHub registra 0% nos marcos de GTA VI, e os detalhes do Dashboard não foram verificados de forma independente nesse snapshot.",
+        "summary": "Relato atribuído a JPTuba no Discord situa o XlaunchVI na tela de carregamento. Segundo Nesko, a abertura está mais estável. O projeto quer sair do foco exclusivo em GTA VI e já abriu The Matrix Awakens; o escopo inclui outros jogos de Xbox. O portal mantém 50% como estimativa editorial, não como medição oficial. Ainda não há release pública para baixar: a equipe prevê publicar uma quando o jogo estiver pelo menos quase jogável, decisão acompanhada pelo @PACNAT, com informações adicionais de Nat e JPTuba.",
+        "teaser": "50% na tela de carregamento · abertura mais estável · The Matrix Awakens aberto · release pública ainda sem data.",
+        "transparency": "Os 50% são uma estimativa editorial da equipe, não uma medição oficial. Relatos atribuídos a Nesko, @PACNAT, Nat e JPTuba descrevem estabilidade, escopo e a decisão sobre release; o convite de Discord não aponta para mensagens originais e o público não foi verificado de forma independente.",
         "dashboardContext": "Escopo do XLaunch Dashboard informado ao portal: reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. Esses detalhes não estão confirmados de forma independente no snapshot público do GitHub.",
         "dashboardFeatures": [
           "Reconhecimento de jogos e mídia física",
@@ -142,9 +148,9 @@
       "estimatedPercent": 50.0,
       "portwatchPercent": 0.0,
       "title": "XlaunchVI: estimativa editorial de 50% na tela de carregamento",
-      "summary": "Relato atribuído a JPTuba no Discord situa o XlaunchVI na tela de carregamento. A equipe informou uma pausa de cerca de 2–3 horas após esgotar o uso de IA e a retomada depois de recarregar o Claude. O portal registra agora 50% como estimativa editorial informada para esta atualização; não é medição oficial nem marco publicado no GitHub. O escopo informado do XLaunch Dashboard inclui reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. A equipe busca chegar ao carregamento do mundo e alcançar ou ultrapassar XCL e VIctory, com apoio da comunidade brasileira.",
-      "teaser": "O portal registra 50% como estimativa editorial; o marco relatado é a tela de carregamento.",
-      "transparency": "Os 50% foram informados como estimativa editorial para esta atualização, não como medição oficial. O relato da tela de carregamento é atribuído a JPTuba no Discord, mas o convite não aponta para a mensagem original. O snapshot público PortWatch/GitHub registra 0% nos marcos de GTA VI, e os detalhes do Dashboard não foram verificados de forma independente nesse snapshot.",
+      "summary": "Relato atribuído a JPTuba no Discord situa o XlaunchVI na tela de carregamento. Segundo Nesko, a abertura está mais estável. O projeto quer sair do foco exclusivo em GTA VI e já abriu The Matrix Awakens; o escopo inclui outros jogos de Xbox. O portal mantém 50% como estimativa editorial, não como medição oficial. Ainda não há release pública para baixar: a equipe prevê publicar uma quando o jogo estiver pelo menos quase jogável, decisão acompanhada pelo @PACNAT, com informações adicionais de Nat e JPTuba.",
+      "teaser": "50% na tela de carregamento · abertura mais estável · The Matrix Awakens aberto · release pública ainda sem data.",
+      "transparency": "Os 50% são uma estimativa editorial da equipe, não uma medição oficial. Relatos atribuídos a Nesko, @PACNAT, Nat e JPTuba descrevem estabilidade, escopo e a decisão sobre release; o convite de Discord não aponta para mensagens originais e o público não foi verificado de forma independente.",
       "dashboardContext": "Escopo do XLaunch Dashboard informado ao portal: reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. Esses detalhes não estão confirmados de forma independente no snapshot público do GitHub.",
       "dashboardFeatures": [
         "Reconhecimento de jogos e mídia física",
@@ -831,7 +837,7 @@
       "status": "acompanhado",
       "percent": 50.0,
       "stage": "Tela de carregamento (estimativa editorial)",
-      "summary": "A equipe relata a tela de carregamento; o portal registra 50% como estimativa editorial. O contexto do XLaunch Dashboard foi informado ao portal, mas não é confirmado pelo snapshot público.",
+      "summary": "A equipe relata a tela de carregamento e Nesko informa abertura mais estável. O projeto já abriu The Matrix Awakens e quer executar outros jogos de Xbox, não apenas GTA VI. Não há release pública para baixar; a equipe planeja publicar quando estiver pelo menos quase jogável, decisão do @PACNAT com apoio de Nat e JPTuba.",
       "verification": "Estimativa editorial baseada em relato; não é medição oficial nem marco confirmado no GitHub.",
       "stars": 2,
       "forks": 0,
@@ -844,9 +850,9 @@
         "estimatedPercent": 50.0, 
         "portwatchPercent": 0.0,
         "title": "XlaunchVI: estimativa editorial de 50% na tela de carregamento",
-        "summary": "Relato atribuído a JPTuba no Discord situa o XlaunchVI na tela de carregamento. A equipe informou uma pausa de cerca de 2–3 horas após esgotar o uso de IA e a retomada depois de recarregar o Claude. O portal registra agora 50% como estimativa editorial informada para esta atualização; não é medição oficial nem marco publicado no GitHub. O escopo informado do XLaunch Dashboard inclui reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. A equipe busca chegar ao carregamento do mundo e alcançar ou ultrapassar XCL e VIctory, com apoio da comunidade brasileira.",
-        "teaser": "O portal registra 50% como estimativa editorial; o marco relatado é a tela de carregamento.",
-        "transparency": "Os 50% foram informados como estimativa editorial para esta atualização, não como medição oficial. O relato da tela de carregamento é atribuído a JPTuba no Discord, mas o convite não aponta para a mensagem original. O snapshot público PortWatch/GitHub registra 0% nos marcos de GTA VI, e os detalhes do Dashboard não foram verificados de forma independente nesse snapshot.",
+        "summary": "Relato atribuído a JPTuba no Discord situa o XlaunchVI na tela de carregamento. Segundo Nesko, a abertura está mais estável. O projeto quer sair do foco exclusivo em GTA VI e já abriu The Matrix Awakens; o escopo inclui outros jogos de Xbox. O portal mantém 50% como estimativa editorial, não como medição oficial. Ainda não há release pública para baixar: a equipe prevê publicar uma quando o jogo estiver pelo menos quase jogável, decisão acompanhada pelo @PACNAT, com informações adicionais de Nat e JPTuba.",
+        "teaser": "50% na tela de carregamento · abertura mais estável · The Matrix Awakens aberto · release pública ainda sem data.",
+        "transparency": "Os 50% são uma estimativa editorial da equipe, não uma medição oficial. Relatos atribuídos a Nesko, @PACNAT, Nat e JPTuba descrevem estabilidade, escopo e a decisão sobre release; o convite de Discord não aponta para mensagens originais e o público não foi verificado de forma independente.",
         "dashboardContext": "Escopo do XLaunch Dashboard informado ao portal: reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. Esses detalhes não estão confirmados de forma independente no snapshot público do GitHub.",
         "dashboardFeatures": [
           "Reconhecimento de jogos e mídia física",
@@ -904,14 +910,14 @@
         "approach": "Camada de compatibilidade",
         "target": "Qualquer jogo de Xbox Series",
         "highlights": [
-          "O projeto relata 12 de 12 shaders de computação compilados pela AMD com resultados idênticos aos de referência de CPU, em testes próprios.",
-          "O tradutor recusa instruções sem suporte em vez de simular resultados.",
-          "As tabelas do decodificador foram conferidas com a especificação oficial RDNA2 da AMD."
+          "Nesko relata abertura mais estável em relação ao estado anterior.",
+          "O projeto já abriu The Matrix Awakens e pretende executar outros jogos de Xbox, além de GTA VI.",
+          "O XLaunch Dashboard continua com reconhecimento de jogos e mídia física, detecção de build, controles, perfis e biblioteca."
         ],
         "blockers": [
-          "O snapshot público consultado não comprova a execução de um jogo de Xbox; a inicialização de Matrix Awakens ainda está em diagnóstico.",
-          "A maior parte dos recursos está em pull requests abertos; a branch principal contém principalmente documentação.",
-          "Os testes foram feitos com shaders próprios, não os de GTA VI; ainda não há tiling de texturas de console."
+          "Não há release pública disponível para baixar no momento.",
+          "A previsão de release depende de o jogo ficar pelo menos quase jogável, com decisão do @PACNAT e acompanhamento de Nat e JPTuba.",
+          "Ainda não há confirmação independente do uso público do projeto em GTA VI ou em um port distribuído."
         ],
         "groundwork": [
           {

@@ -328,6 +328,7 @@ function applyLanguage() {
     renderNews(trackerData);
     renderTrackerDetails(trackerData);
     renderXlaunchPage(trackerData);
+    renderAuthorMessage(trackerData);
     if (quickProjects.length) updateQuickProjectStatus();
     if (byId('quick-safety-query') && byId('quick-safety-query').value.trim()) updateFakeRadar(trackerData);
     if (notificationPreferences) renderNotificationCenter(trackerData);
@@ -494,8 +495,15 @@ function mergeTrackerPayloads(portwatch, localized, fallback) {
     return {
       ...rawItem,
       ...local,
-      percent: remotePercent ? Number(rawItem.percent) : (local.percent ?? rawItem.percent),
-      stage: rawItem.stage || local.stage,
+      percent: rawItem.id === 'xlaunchvi'
+        ? 50
+        : (remotePercent ? Number(rawItem.percent) : (local.percent != null ? Number(local.percent) : undefined)),
+      stage: rawItem.id === 'xlaunchvi'
+        ? 'Tela de carregamento'
+        : (rawItem.stage || local.stage),
+      status: rawItem.id === 'xlaunchvi'
+        ? 'acompanhado'
+        : (rawItem.nuked || rawItem.missing || rawItem.status === 'offline' ? 'offline' : rawItem.status),
       gta: rawItem.gta || local.gta,
       groundwork: rawItem.groundwork || local.groundwork,
       stats: rawItem.stats || local.stats,
@@ -1936,6 +1944,57 @@ function progressPercent(value) {
   return Number.isFinite(percent) ? Math.max(0, Math.min(100, percent)) : 0;
 }
 
+function portwatchEffortScore(project) {
+  if (project && project.id === 'xlaunchvi') return 50;
+  const gta = project && project.gta && typeof project.gta === 'object' ? project.gta : {};
+  const groundwork = project && project.groundwork && typeof project.groundwork === 'object'
+    ? project.groundwork
+    : {};
+  const clamp01 = (value) => {
+    const number = Number(value);
+    return Number.isFinite(number) ? Math.max(0, Math.min(1, number)) : 0;
+  };
+  const ladderValue = (value) => {
+    if (value === true) return 1;
+    if (value === false || value == null) return 0;
+    return clamp01(value);
+  };
+  const groundworkFraction =
+    clamp01(groundwork.loader) * 0.2 +
+    clamp01(groundwork.shaders) * 0.28 +
+    clamp01(groundwork.graphics) * 0.32 +
+    clamp01(groundwork.proven) * 0.2;
+  const ladder = [
+    ['loads', 25],
+    ['boots', 40],
+    ['menu', 55],
+    ['ingame', 70]
+  ];
+  let score = 25 * groundworkFraction;
+  let previous = score;
+  let reached = 'groundwork';
+  for (const [key, tick] of ladder) {
+    const value = ladderValue(gta[key]);
+    if (value >= 1) {
+      score = tick;
+      previous = tick;
+      reached = key;
+      continue;
+    }
+    if (value > 0) {
+      score = Math.max(score, previous + value * (tick - previous));
+    }
+    break;
+  }
+  if (reached === 'ingame') {
+    const fps = clamp01(Number(gta.fps || 0) / 30);
+    const stabilityValues = { unknown: 0, constant: 0, often: 0.25, sometimes: 0.55, rarely: 0.8, stable: 1 };
+    const stability = stabilityValues[String(gta.stability || 'unknown')] ?? 0;
+    score = 70 + fps * 15 + stability * 15;
+  }
+  return Math.round(score * 10) / 10;
+}
+
 function portwatchMilestone(project, milestones) {
   const projectProgress = Number(project && project.percent);
   if (Number.isFinite(projectProgress)) {
@@ -1954,19 +2013,12 @@ function portwatchMilestone(project, milestones) {
     .sort((left, right) => progressPercent(right.percent) - progressPercent(left.percent))[0]
     || milestones.find((milestone) => progressPercent(milestone.percent) === 0)
     || { percent: 0, label: 'Preparação' };
-  if (Number(gta.ingame) >= 1 && Number(gta.fps) > 0) {
-    return { percent: 77, label: 'Dentro do jogo · FPS reportado', description: 'O projeto entrou no mundo com FPS reportado.' };
-  }
-  if (Number(gta.ingame) >= 1) {
-    return { percent: 70, label: 'Dentro do jogo', description: 'É possível entrar no jogo.' };
-  }
   return matched;
 }
 
 function portwatchProjectProgress(project, milestones) {
-  return progressPercent(project && project.percent != null
-    ? project.percent
-    : portwatchMilestone(project, milestones).percent);
+  if (!project) return 0;
+  return progressPercent(portwatchEffortScore(project));
 }
 
 function isInactiveProject(project) {
@@ -2056,6 +2108,17 @@ function countdownParts(timestamp) {
   return { days, hours, minutes, seconds };
 }
 
+function elapsedParts(timestamp) {
+  let totalSeconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
+  const days = Math.floor(totalSeconds / 86400);
+  totalSeconds %= 86400;
+  const hours = Math.floor(totalSeconds / 3600);
+  totalSeconds %= 3600;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return { days, hours, minutes, seconds };
+}
+
 function renderHeroRaceClock(snapshot, leader, milestones, progress) {
   const panel = byId('hero-race-clock');
   if (!panel) return;
@@ -2063,57 +2126,85 @@ function renderHeroRaceClock(snapshot, leader, milestones, progress) {
     clearInterval(heroCountdownTimer);
     heroCountdownTimer = null;
   }
-
-  const projection = getRaceMilestoneProjections(snapshot, leader, milestones, progress);
-  const target = projection.projections[0];
-  const nextMilestone = target ? target.milestone : projection.nextMilestone;
-  const hasProjection = Boolean(target);
-  const remaining = hasProjection ? countdownParts(target.timestamp) : null;
+  const exe = snapshot && snapshot.exe && typeof snapshot.exe === 'object' ? snapshot.exe : {};
+  const releasedTimestamp = exe.status === 'released'
+    ? Date.parse(exe.releasedAt || '')
+    : NaN;
+  const expectedTimestamp = Date.parse(exe.expectedAt || (exe.expected ? `${exe.expected}T00:00:00Z` : ''));
+  const factualReference = Number.isFinite(releasedTimestamp)
+    ? releasedTimestamp
+    : Number.isFinite(expectedTimestamp) ? expectedTimestamp : NaN;
+  const isReleased = Number.isFinite(releasedTimestamp);
+  const isPastExpected = !isReleased && Number.isFinite(expectedTimestamp) && expectedTimestamp <= Date.now();
+  const isFutureExpected = !isReleased && Number.isFinite(expectedTimestamp) && expectedTimestamp > Date.now();
+  const remaining = isFutureExpected
+    ? countdownParts(expectedTimestamp)
+    : Number.isFinite(factualReference)
+      ? elapsedParts(factualReference)
+      : null;
+  const hasProjection = Boolean(remaining);
   const units = [
     { key: 'days', label: 'dias' },
     { key: 'hours', label: 'horas' },
     { key: 'minutes', label: 'minutos' },
     { key: 'seconds', label: 'segundos' }
   ];
-  const targetDate = hasProjection ? new Date(target.timestamp).toISOString() : '';
-  const status = !leader
-    ? t('Ainda não há projeto ativo no snapshot.')
-    : !nextMilestone
-      ? t('O projeto líder já alcançou os marcos acompanhados.')
-      : !hasProjection
-        ? t('Faltam amostras datadas recentes do mesmo projeto para calcular a contagem.')
-        : target.timestamp <= Date.now()
-          ? t('A previsão passou, mas o tracker ainda não confirmou este marco.')
-          : t('Contagem calculada a partir do ritmo recente registrado no tracker.');
+  const targetDate = isReleased
+    ? exe.releasedAt
+    : isFutureExpected
+      ? (exe.expectedAt || `${exe.expected}T00:00:00Z`)
+      : isPastExpected
+        ? (exe.expectedAt || `${exe.expected}T00:00:00Z`)
+        : '';
+  const status = isReleased
+    ? `${t('Executável divulgado')}${exe.by ? ` ${t('por')} ${exe.by}` : ''}. ${t('Contagem factual desde a referência registrada no tracker.')}`
+    : isFutureExpected
+      ? t('Prazo factual informado pelo tracker; ainda não consta como executável lançado.')
+      : isPastExpected
+        ? t('O prazo factual informado pelo tracker passou; o status ainda não confirma o lançamento.')
+        : t('O tracker não informa data de release nem prazo factual para esta referência.');
+  const title = isReleased
+    ? t('Tempo desde o release do executável')
+    : isFutureExpected
+      ? t('Tempo até o prazo informado')
+      : t('Referência factual do executável');
 
-  panel.dataset.state = hasProjection ? (target.timestamp > Date.now() ? 'active' : 'elapsed') : 'unavailable';
-  panel.innerHTML = `<span class="section-kicker">${escapeHtml(t('PROJEÇÃO DA COMUNIDADE'))}</span>
-    <h2>${escapeHtml(t('Tempo estimado até o próximo marco'))}</h2>
-    <p class="hero-clock-target">${nextMilestone ? `${escapeHtml(t('Próximo alvo:'))} <b>${escapeHtml(t(nextMilestone.label))}</b>` : escapeHtml(t('Todos os marcos da trilha foram alcançados.'))}</p>
+  panel.dataset.state = isReleased ? 'released' : isFutureExpected ? 'active' : isPastExpected ? 'elapsed' : 'unavailable';
+  panel.innerHTML = `<span class="section-kicker">${escapeHtml(t('REFERÊNCIA FÁTICA DO TRACKER'))}</span>
+    <h2>${escapeHtml(title)}</h2>
+    <p class="hero-clock-target">${isReleased ? escapeHtml(t('Release registrado no tracker')) : isFutureExpected ? escapeHtml(t('Prazo registrado no tracker')) : escapeHtml(t('Sem prazo ou release confirmado'))}</p>
     <div class="hero-clock-units" aria-label="${escapeHtml(t('Contagem regressiva em dias, horas, minutos e segundos'))}" aria-live="off">
       ${units.map((unit) => `<span class="hero-clock-unit"><strong data-clock-unit="${unit.key}">${hasProjection ? counterMarkup(remaining[unit.key]) : '—'}</strong><small>${escapeHtml(t(unit.label))}</small></span>`).join('')}
     </div>
-    ${hasProjection ? `<time class="hero-clock-date" datetime="${escapeHtml(targetDate)}">${escapeHtml(t('Previsão:'))} ${escapeHtml(formatNewsDate(targetDate))}</time>` : ''}
+    ${targetDate ? `<time class="hero-clock-date" datetime="${escapeHtml(targetDate)}">${escapeHtml(isReleased ? t('Divulgado em:') : t('Referência factual:'))} ${escapeHtml(formatNewsDate(targetDate))}</time>` : ''}
     <p class="hero-clock-status" role="status">${escapeHtml(status)}</p>
-    <small class="hero-clock-disclaimer">${escapeHtml(t('Não há data oficial para PC. Esta contagem especulativa extrapola o ritmo recente da comunidade; bloqueios, bugs e derrubadas podem alterar o prazo.'))}</small>`;
+    <small class="hero-clock-disclaimer">${escapeHtml(t('Esta referência usa somente datas presentes no tracker; não é uma previsão oficial de lançamento para PC.'))}</small>`;
   window.KynosI18n.translateDom(panel, state.language);
   if (!hasProjection) return;
 
   animateCounters(panel);
-  if (target.timestamp > Date.now()) {
+  if (isFutureExpected) {
     heroCountdownTimer = setInterval(() => {
-      const parts = countdownParts(target.timestamp);
+      const parts = countdownParts(expectedTimestamp);
       units.forEach((unit) => {
         const number = panel.querySelector(`[data-clock-unit="${unit.key}"] .count-up`);
         if (number) number.textContent = formatCounter(parts[unit.key], 'integer');
       });
-      if (target.timestamp <= Date.now()) {
+      if (expectedTimestamp <= Date.now()) {
         const statusElement = panel.querySelector('.hero-clock-status');
-        if (statusElement) statusElement.textContent = t('A previsão passou, mas o tracker ainda não confirmou este marco.');
+        if (statusElement) statusElement.textContent = t('O prazo factual informado pelo tracker passou; o status ainda não confirma o lançamento.');
         panel.dataset.state = 'elapsed';
         clearInterval(heroCountdownTimer);
         heroCountdownTimer = null;
       }
+    }, 1000);
+  } else if (isReleased || isPastExpected) {
+    heroCountdownTimer = setInterval(() => {
+      const parts = elapsedParts(factualReference);
+      units.forEach((unit) => {
+        const number = panel.querySelector(`[data-clock-unit="${unit.key}"] .count-up`);
+        if (number) number.textContent = formatCounter(parts[unit.key], 'integer');
+      });
     }, 1000);
   }
 }
@@ -2927,10 +3018,22 @@ function selectFeaturedStory(data) {
   const candidates = [];
   const addCandidate = (item, sourceType) => {
     if (!item) return;
+    const exclusionText = normalizeHardwareSearch([
+      item.title, item.name, item.description, item.summary, item.dek, item.text
+    ].join(' '));
+    if (
+      /leonida/.test(exclusionText)
+      || (sourceType !== 'candidate'
+        && /nuked|derrubad|fora do ar|offline|takedown/.test(exclusionText))
+    ) return;
     const dateValue = item.date || item.updatedAt || item.loggedAt || item.foundAt || item.assessedAt || '';
     const timestamp = Date.parse(dateValue);
     const ageHours = Number.isFinite(timestamp) ? Math.max(0, (Date.now() - timestamp) / 3600000) : 24 * 365;
-    const recency = Number.isFinite(timestamp) ? Math.max(0, 100 - Math.min(100, ageHours * 2)) : 0;
+    const recency = Number.isFinite(timestamp)
+      ? (sourceType === 'candidate'
+        ? Math.max(0, 35 - Math.min(35, ageHours * 0.7))
+        : Math.max(0, 100 - Math.min(100, ageHours * 2)))
+      : 0;
     const text = normalizeHardwareSearch([
       item.title, item.name, item.description, item.summary, item.dek, item.text,
       ...(item.signals || [])
@@ -2941,7 +3044,7 @@ function selectFeaturedStory(data) {
     if (/menu|menus|first frame|primeiro quadro|in-game|fps/.test(text)) impact += 34;
     if (/exe|execut[aá]vel/.test(text)) impact += 28;
     if (/new project|novo projeto|nova equipe|candidate|candidato/.test(text)) impact += 30;
-    if (sourceType === 'candidate') impact += Math.max(0, Math.min(50, Number(item.substance) || 0)) * 0.55;
+    if (sourceType === 'candidate') impact += Math.max(0, Math.min(35, Number(item.substance) || 0)) * 0.25;
     if (item.status === 'new' || item.kind === 'effort') impact += 20;
     const score = recency * 0.65 + impact;
     candidates.push({ item, score, sourceType });
@@ -2987,7 +3090,7 @@ function renderStoryFeature(story, target) {
       ${articleBody}
       <div class="news-source-links">${(story.sources || []).map((source) => `<a class="text-link" href="${escapeHtml(safeUrl(source.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(t(source.title))}">${escapeHtml(t(source.outlet))} ↗</a>`).join('')}</div>
     </div>
-    <div class="news-feature-stamp" aria-hidden="true"><span>KYNOSRECOMPVI</span><strong>LEONIDA</strong><small>${escapeHtml(formatNewsDate(story.date))}</small></div>`;
+    <div class="news-feature-stamp" aria-hidden="true"><span>KYNOSRECOMPVI</span><strong>${escapeHtml(t(story.category || 'Notícia'))}</strong><small>${escapeHtml(formatNewsDate(story.date))}</small></div>`;
   window.KynosI18n.translateDom(target, state.language);
 }
 
@@ -3110,7 +3213,12 @@ function renderPortalHome(data) {
   renderHeaderFreshness(data);
   const lead = selectFeaturedStory(data);
   if (lead) renderStoryFeature(lead, byId('home-feature'));
-  const projects = data.efforts.filter((project) => project.status !== 'offline')
+  const projects = data.efforts.filter((project) => !isInactiveProject(project))
+    .map((project) => ({
+      ...project,
+      percent: portwatchEffortScore(project),
+      stage: portwatchMilestone(project, PORTWATCH_FALLBACK.milestones).label
+    }))
     .slice().sort((left, right) => right.percent - left.percent || left.name.localeCompare(right.name));
   const assignedStories = new Set(lead ? [lead] : []);
   const teamReportStory = data.news.find((story) => story.id === 'xlaunchvi-loading-screen-team-report');
@@ -3346,6 +3454,7 @@ function renderXlaunchPage(data) {
 function renderTrackerProjectCard(project, rank, leaderId) {
   const inactive = project.status === 'offline';
   const featured = !inactive && project.id === leaderId;
+  const projectPercent = portwatchEffortScore(project);
   const details = project.technicalDetails && typeof project.technicalDetails === 'object' ? project.technicalDetails : {};
   const highlights = Array.isArray(details.highlights) ? details.highlights.filter((item) => typeof item === 'string' && item.trim()) : [];
   const blockers = Array.isArray(details.blockers) ? details.blockers.filter((item) => typeof item === 'string' && item.trim()) : [];
@@ -3354,7 +3463,7 @@ function renderTrackerProjectCard(project, rank, leaderId) {
     ${highlights.length ? `<div><b>${escapeHtml(t('Avanços reportados'))}</b><ul>${highlights.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>` : ''}
     ${blockers.length ? `<div><b>${escapeHtml(t('Bloqueios conhecidos'))}</b><ul>${blockers.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>` : ''}
   </details>` : '';
-  const badge = inactive ? t('Fora do ar') : `${counterMarkup(project.percent, 'percent')}% · ${t(project.stage)}`;
+  const badge = inactive ? t('Fora do ar') : `${counterMarkup(projectPercent, 'percent')}% · ${t(project.stage)}`;
   const stats = [
     project.stars != null ? `${counterMarkup(project.stars)} ${escapeHtml(t('estrelas'))}` : '',
     project.forks != null ? `${counterMarkup(project.forks)} ${escapeHtml(t('forks'))}` : ''
@@ -3371,17 +3480,23 @@ function renderTrackerProjectCard(project, rank, leaderId) {
       <div class="repo-links">${project.url ? `<a class="button primary-link" href="${escapeHtml(safeUrl(project.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Repositório original'))} ↗</a>` : ''}</div>
     </div>
     <div class="repo-progress">
-    <div class="progress-label"><span>${escapeHtml(t(inactive ? 'Último marco' : 'Marco atual'))} · ${escapeHtml(t(project.stage))}</span><b>${counterMarkup(project.percent, 'percent')}%</b></div>
-    <div class="progress-track" role="progressbar" aria-label="${escapeHtml(`${project.name}: ${formatPercent(project.percent)}%`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${project.percent}"><span data-progress-value="${Number(project.percent) || 0}"></span></div>
+    <div class="progress-label"><span>${escapeHtml(t(inactive ? 'Último marco' : 'Marco atual'))} · ${escapeHtml(t(project.stage))}</span><b>${counterMarkup(projectPercent, 'percent')}%</b></div>
+    <div class="progress-track" role="progressbar" aria-label="${escapeHtml(`${project.name}: ${formatPercent(projectPercent)}%`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${projectPercent}"><span data-progress-value="${projectPercent}"></span></div>
       <small>${escapeHtml(project.verification)} · ${escapeHtml(t('Leitura do snapshot:'))} ${escapeHtml(formatNewsDate(trackerData && trackerData.updatedAt))}</small>
     </div>
   </article>`;
 }
 
 function renderTrackerProjects(data) {
-  const projects = data.efforts.slice().sort((left, right) => right.percent - left.percent || left.name.localeCompare(right.name));
-  const active = projects.filter((project) => project.status !== 'offline');
-  const inactive = projects.filter((project) => project.status === 'offline');
+  const projects = data.efforts.map((project) => ({
+    ...project,
+    percent: portwatchEffortScore(project),
+    stage: project.id === 'xlaunchvi'
+      ? 'Tela de carregamento'
+      : portwatchMilestone(project, PORTWATCH_FALLBACK.milestones).label
+  })).sort((left, right) => right.percent - left.percent || left.name.localeCompare(right.name));
+  const active = projects.filter((project) => !isInactiveProject(project));
+  const inactive = projects.filter((project) => isInactiveProject(project));
   const top = active.slice(0, 5);
   const leader = active[0];
   const runnerUp = active[1];
@@ -3907,6 +4022,59 @@ function bindAnalyticsControls() {
   });
 }
 
+function renderAuthorMessage(data) {
+  const container = byId('kynos-author-message');
+  if (!container) return;
+  const message = data && data.authorMessage && typeof data.authorMessage === 'object'
+    ? data.authorMessage
+    : { active: false, title: 'Nota do autor', text: 'Sem avisos ativos no momento.' };
+  if (!message.active) {
+    container.hidden = false;
+    container.innerHTML = `<span class="section-kicker">${escapeHtml(t('MENSAGEM DO KYNOS'))}</span>
+      <h3>${escapeHtml(t(message.title || 'Nota do autor'))}</h3>
+      <p>${escapeHtml(t(message.text || 'Sem avisos ativos no momento.'))}</p>`;
+    window.KynosI18n.translateDom(container, state.language);
+    return;
+  }
+  container.hidden = false;
+  container.innerHTML = `<span class="section-kicker">${escapeHtml(t('MENSAGEM DO KYNOS'))}</span>
+    ${message.date ? publicationTimeMarkup(message.date) : ''}
+    <h3>${escapeHtml(localizedValue(message, 'title') || message.title || t('Aviso do autor'))}</h3>
+    <p>${escapeHtml(localizedValue(message, 'text') || message.text || '')}</p>`;
+  window.KynosI18n.translateDom(container, state.language);
+}
+
+function watchLiveViewers() {
+  const pill = byId('watching-now');
+  if (!pill || window.location.protocol === 'file:') {
+    if (pill) pill.hidden = true;
+    return;
+  }
+  const refresh = async () => {
+    if (document.hidden) return;
+    try {
+      const response = await fetch('/api/live', { cache: 'no-store' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const payload = await response.json();
+      const count = Number(payload && payload.n);
+      if (!Number.isInteger(count) || count < 1) {
+        pill.hidden = true;
+        return;
+      }
+      const locale = { pt: 'pt-BR', en: 'en-US', es: 'es-ES', zh: 'zh-CN' }[state.language] || 'pt-BR';
+      pill.textContent = `${count.toLocaleString(locale)} ${t('assistindo agora')}`;
+      pill.hidden = false;
+    } catch (error) {
+      pill.hidden = true;
+    }
+  };
+  refresh();
+  window.setInterval(refresh, 5 * 60_000);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refresh();
+  });
+}
+
 function setupLogoFallback() {
   const logo = document.querySelector('.brand-logo');
   const fallbackLogo = () => {
@@ -3970,6 +4138,8 @@ async function init() {
     renderNews(trackerData);
     renderTrackerDetails(trackerData);
     renderXlaunchPage(trackerData);
+    renderAuthorMessage(trackerData);
+    watchLiveViewers();
     setupNotificationCenter(trackerData);
     setupXclFeed();
     renderDiscords(data.discords);
