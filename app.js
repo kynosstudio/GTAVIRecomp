@@ -4,6 +4,7 @@ const LANGUAGE_KEY = 'kynos-gta-vi-language';
 const ANALYTICS_ROUTE = 'kynos-analytics';
 const MAX_ANALYTICS_EVENTS = 3000;
 const PRESETS_KEY = 'kynos-gta-vi-presets-v1';
+const NOTIFICATION_KEY = 'kynos-gta-vi-notifications-v1';
 const XCL_FEED_CACHE_KEY = 'kynos-xcl-feed-v1';
 const XCL_FEED_CACHE_TTL = 15 * 60 * 1000;
 const XCL_FEED_FALLBACK = {
@@ -146,6 +147,10 @@ let portwatchData = null;
 let repositoryData = [];
 let newsData = null;
 let trackerData = null;
+let notificationPreferences = null;
+let notificationItems = [];
+let quickProjects = [];
+let heroCountdownTimer = null;
 
 const pageNames = {
   home: 'Início',
@@ -319,6 +324,9 @@ function applyLanguage() {
     renderTrackerProjects(trackerData);
     renderNews(trackerData);
     renderTrackerDetails(trackerData);
+    if (quickProjects.length) updateQuickProjectStatus();
+    if (byId('quick-safety-query') && byId('quick-safety-query').value.trim()) updateFakeRadar(trackerData);
+    if (notificationPreferences) renderNotificationCenter(trackerData);
   }
   if (xclFeedLoaded && byId('xcl-news-list')) renderXclFeed(xclFeedItems, xclFeedStatusRaw);
 }
@@ -332,7 +340,8 @@ function setLanguage(language) {
     console.error('Não foi possível salvar o idioma preferido:', error);
   }
   if (state.activeScenario) updateScenarioBadge();
-  applyLanguage();
+  if (hardware) calculate({ trackSimulation: false });
+  else applyLanguage();
   trackEvent('language_change', language.toUpperCase(), { language });
   if (state.page === 'analytics') renderAnalytics();
   if (byId('presets-dialog').open) renderPresetList();
@@ -697,7 +706,9 @@ function calculate(options = {}) {
   if (!hardware) return;
   const setup = options.setup || readSetup();
   const reference = options.reference || null;
-  const target = hardware.targets[Number(setup.target)];
+  const scenario = options.scenario === undefined ? state.activeScenario : options.scenario;
+  const target = { ...hardware.targets[Number(setup.target)] };
+  if (scenario === 'chaos-vram') target.vramGb *= 2;
   const gpu = reference
     ? { id: `console-gpu-${reference.name}`, name: `${reference.name} · GPU equivalente`, score: reference.gpuScore, vram: reference.vramGb }
     : hardware.gpus.find((item) => item.id === setup.gpuId);
@@ -798,6 +809,7 @@ function calculate(options = {}) {
   };
   if (options.render === false) return evaluation;
 
+  updateQuickReadiness();
   byId('score-value').innerHTML = counterMarkup(score);
   byId('score-ring').style.setProperty('--score', `${Math.min(score, 100)}%`);
   byId('status-label').textContent = t(status);
@@ -818,7 +830,7 @@ function calculate(options = {}) {
   byId('memory-detail').textContent = reference ? `${ramCapacity} GB ${ramGeneration.name} · ${Math.round(bandwidth)} GB/s · console` : `${ramCapacity} GB ${ramGeneration.name} · ${frequency.mhz.toLocaleString('pt-BR')} MHz · ${channel === 'dual' ? 'canal duplo' : 'canal único'}`;
   byId('factor-list').innerHTML = factors.map((factor) => {
     const percent = Math.max(0, Math.round(factor.score * 100));
-    return `<div class="factor-row"><span class="factor-label">${escapeHtml(factor.label)}</span><div class="factor-track"><div class="factor-fill" style="width:${Math.min(percent, 100)}%"></div></div><span class="factor-value">${percent}%</span></div>`;
+    return `<div class="factor-row"><span class="factor-label">${escapeHtml(factor.label)}</span><div class="factor-track"><div class="factor-fill" style="width:${Math.min(percent, 100)}%"></div></div><span class="factor-value">${counterMarkup(percent, 'percent')}%</span></div>`;
   }).join('');
   byId('bottleneck-title').textContent = !storage.compatible
     ? 'Armazenamento: HDD incompatível'
@@ -838,6 +850,10 @@ function calculate(options = {}) {
         : bottleneckLabel
           ? `${bottleneck.label}: ${Math.round(bottleneck.score * 100)}% da referência escolhida para a meta.`
           : 'Nenhum componente está significativamente abaixo da referência escolhida.';
+  updateMemoryPressure(evaluation);
+  updateBottleneckHumor(evaluation);
+  updateSetupCardPreview(evaluation);
+  renderUpgradeEconomics(setup);
   renderRecommendations({ gpu, cpu, ramCapacity, ramGeneration, frequency, referenceMhz, memoryCompatible, storage, storageRatio, freeSpace, target, targetStorage, factors, bottleneckLabel, isCompatible, channel, backgroundId: setup.backgroundId });
   window.KynosI18n.translateDom(byId('result-panel'), state.language);
   animateCounters(byId('result-panel'));
@@ -858,6 +874,101 @@ function calculate(options = {}) {
   }
   applyLanguage();
   return evaluation;
+}
+
+function updateMemoryPressure(evaluation) {
+  const section = byId('memory-pressure');
+  if (!section) return;
+  const ramCoverage = Math.round(evaluation.ramCapacity / evaluation.target.ramGb * 100);
+  const ramWidth = Math.max(0, Math.min(100, ramCoverage));
+  const graphicsMemory = evaluation.gpu.integrated
+    ? `<div class="memory-pressure-row"><div><span>${escapeHtml(t('VRAM dedicada'))}</span><strong>${escapeHtml(t('Gráfico integrado · usa RAM compartilhada'))}</strong></div><div class="memory-pressure-track"><span class="memory-pressure-shared"></span></div><small>${escapeHtml(t('O modelo não mede a memória compartilhada em separado.'))}</small></div>`
+    : (() => {
+      const vramCoverage = Math.round(evaluation.gpu.vram / evaluation.target.vramGb * 100);
+      return `<div class="memory-pressure-row"><div><span>${escapeHtml(t('VRAM dedicada'))}</span><strong>${counterMarkup(vramCoverage)}% · ${evaluation.gpu.vram} / ${evaluation.target.vramGb} GB</strong></div><div class="memory-pressure-track" role="progressbar" aria-label="${escapeHtml(t('Cobertura da referência de VRAM'))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.min(100, vramCoverage)}"><span data-progress-value="${Math.max(0, Math.min(100, vramCoverage))}"></span></div><small>${escapeHtml(t(memoryCoverageLabel(vramCoverage)))}</small></div>`;
+    })();
+  section.innerHTML = `<span class="section-kicker">${escapeHtml(t('TERMÔMETRO DE RAM E VRAM'))}</span>
+    <h4 id="memory-pressure-title">${escapeHtml(t('Memória perto do limite?'))}</h4>
+    <div class="memory-pressure-row"><div><span>${escapeHtml(t('RAM do sistema · referência'))}</span><strong>${counterMarkup(ramCoverage)}% · ${evaluation.ramCapacity} / ${evaluation.target.ramGb} GB</strong></div><div class="memory-pressure-track" role="progressbar" aria-label="${escapeHtml(t('Cobertura da referência de RAM'))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${ramWidth}"><span data-progress-value="${ramWidth}"></span></div><small>${escapeHtml(t(memoryCoverageLabel(ramCoverage)))}</small></div>
+    ${graphicsMemory}
+    <p>${escapeHtml(t('Indicadores relativos às referências do simulador; não são leitura do uso real do sistema.'))}</p>`;
+  window.KynosI18n.translateDom(section, state.language);
+  animateCounters(section);
+  animateProgress(section);
+}
+
+function memoryCoverageLabel(coverage) {
+  if (coverage < 80) return 'Abaixo da referência estimada';
+  if (coverage < 100) return 'Perto da referência estimada';
+  return 'Referência estimada coberta; sem medição de folga real';
+}
+
+function updateBottleneckHumor(evaluation) {
+  const output = byId('bottleneck-humor');
+  if (!output) return;
+  const rankedFactors = evaluation.factors.slice().sort((left, right) => left.score - right.score);
+  const primary = rankedFactors[0];
+  const next = rankedFactors[1];
+  const jokes = {
+    gpu: 'A GPU está puxando o freio de mão; baixar a resolução costuma aliviar o trânsito.',
+    vram: 'A VRAM já pediu reforço; texturas menores ajudam antes do cartão corporativo.',
+    cpu: 'O processador virou gerente de fila: todo mundo espera ele terminar a reunião.',
+    ram: 'A RAM está fazendo malabarismo com poucos pratos; canal duplo dá mais pista, não mais GB.',
+    bandwidth: 'A memória está numa pista simples; o canal duplo pode abrir a segunda faixa.',
+    storage: 'O SSD não faz milagre de FPS, mas espaço insuficiente transforma o loading num retiro.',
+    overhead: 'Tem tanta coisa no fundo que o jogo vai pedir silêncio no condomínio.'
+  };
+  const joke = primary.score >= 0.9
+    ? t('Nenhum gargalo gritante; até o ventilador pode tirar um minuto de reunião.')
+    : t(jokes[primary.key] || 'O gargalo está fazendo hora extra; priorize o componente mais abaixo da referência.');
+  output.innerHTML = `<span class="section-kicker">${escapeHtml(t('TERMÔMETRO DO GARGALO'))}</span>
+    <p>${escapeHtml(joke)}</p>
+    <small>${escapeHtml(t('Próximo limitante provável:'))} <b>${escapeHtml(t(next.label))}</b> · ${counterMarkup(Math.max(0, next.score * 100), 'percent')}%</small>`;
+  window.KynosI18n.translateDom(output, state.language);
+  animateCounters(output);
+}
+
+function updateSetupCardPreview(evaluation) {
+  const preview = byId('setup-card-preview');
+  if (!preview) return;
+  preview.innerHTML = `<div class="setup-card-art">
+    <div class="setup-card-brand"><span>KYNOSRECOMPVI</span><span>${escapeHtml(t('CARTEIRINHA DE SETUP'))}</span></div>
+    <div class="setup-card-main"><div><strong>${counterMarkup(evaluation.fpsValues[1])}</strong><span>FPS · ${escapeHtml(t(evaluation.target.name))}</span></div><span class="setup-card-score">${counterMarkup(evaluation.score)}%</span></div>
+    <div class="setup-card-parts"><span><small>CPU</small><b>${escapeHtml(evaluation.cpu.name)}</b></span><span><small>GPU</small><b>${escapeHtml(evaluation.gpu.name)}</b></span><span><small>RAM</small><b>${evaluation.ramCapacity} GB ${escapeHtml(evaluation.ramGeneration.name)}</b></span></div>
+  </div>`;
+  window.KynosI18n.translateDom(preview, state.language);
+  animateCounters(preview);
+}
+
+function renderUpgradeEconomics(setup) {
+  const output = byId('upgrade-economics');
+  if (!output || !hardware) return;
+  const baseline = calculate({ setup, render: false, trackSimulation: false, scenario: '' });
+  const candidates = [
+    { scenario: 'upgrade-ram16', label: '+16 GB de RAM' },
+    { scenario: 'upgrade-nvme', label: 'Migrar para SSD NVMe' },
+    { scenario: 'upgrade-gpu-mid', label: 'GPU intermediária' },
+    { scenario: 'target-900p', label: 'Ajustar para 900p' },
+    { scenario: 'target-720p', label: 'Ajustar para 720p' }
+  ];
+  output.innerHTML = candidates.map((candidate) => {
+    try {
+      const variant = scenarioSetup(candidate.scenario, setup);
+      const result = calculate({ setup: variant, render: false, trackSimulation: false, scenario: '' });
+      const delta = result.fpsValues[1] - baseline.fpsValues[1];
+      const sign = delta > 0 ? '+' : delta < 0 ? '−' : '±';
+      return `<article class="upgrade-economics-row">
+        <span>${escapeHtml(t(candidate.label))}</span>
+        <strong>${counterMarkup(result.fpsValues[1])} FPS</strong>
+        <small>${escapeHtml(t('Variação estimada:'))} ${sign}${counterMarkup(Math.abs(delta))} FPS</small>
+        <button class="tool-button" type="button" data-scenario="${escapeHtml(candidate.scenario)}">${escapeHtml(t('Testar no resumão'))}</button>
+      </article>`;
+    } catch (error) {
+      return `<article class="upgrade-economics-row is-unavailable"><span>${escapeHtml(t(candidate.label))}</span><small>${escapeHtml(error.message)}</small></article>`;
+    }
+  }).join('');
+  window.KynosI18n.translateDom(output, state.language);
+  animateCounters(output);
 }
 
 function renderRecommendations(context) {
@@ -987,7 +1098,10 @@ function setToolStatus(message) {
 }
 
 function downloadJsonFile(fileName, data) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  downloadBlobFile(fileName, new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+}
+
+function downloadBlobFile(fileName, blob) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -1259,6 +1373,34 @@ function buildShareSummary() {
   ].join('\n');
 }
 
+function downloadSetupCard() {
+  const setup = readSetup();
+  const result = calculate({ setup, render: false, trackSimulation: false });
+  const gpu = hardware.gpus.find((item) => item.id === setup.gpuId);
+  const cpu = hardware.cpus.find((item) => item.id === setup.cpuId);
+  const parts = [
+    `${t('CPU')}: ${cpu.name}`,
+    `${t('GPU')}: ${gpu.name}`,
+    `${t('RAM')}: ${setup.ramGb} GB ${setup.ramGeneration.toUpperCase()}`
+  ];
+  const xml = (value) => escapeHtml(value);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">${xml(t('Carteirinha de setup KynosRecompVI'))}</title>
+  <desc id="description">${xml(t(result.target.name))} · ${result.fpsValues[1]} FPS · ${xml(parts.join(' · '))}</desc>
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#11101d"/><stop offset="1" stop-color="#29152d"/></linearGradient><linearGradient id="neon"><stop stop-color="#ff704e"/><stop offset="1" stop-color="#ffd866"/></linearGradient></defs>
+  <rect width="1200" height="630" rx="36" fill="url(#bg)"/><rect x="30" y="30" width="1140" height="570" rx="26" fill="none" stroke="#674b72" stroke-width="2"/>
+  <text x="78" y="100" fill="#ffd866" font-family="Arial,sans-serif" font-size="26" font-weight="700" letter-spacing="4">KYNOSRECOMPVI</text>
+  <text x="78" y="151" fill="#c6b6cf" font-family="Arial,sans-serif" font-size="22">${xml(t(result.target.name))}</text>
+  <text x="72" y="350" fill="url(#neon)" font-family="Arial,sans-serif" font-size="174" font-weight="800">${result.fpsValues[1]}</text>
+  <text x="570" y="340" fill="#fff" font-family="Arial,sans-serif" font-size="48" font-weight="700">FPS</text>
+  <text x="78" y="430" fill="#e9d9f0" font-family="Arial,sans-serif" font-size="25">${xml(parts[0])}</text>
+  <text x="78" y="475" fill="#e9d9f0" font-family="Arial,sans-serif" font-size="25">${xml(parts[1])}</text>
+  <text x="78" y="520" fill="#e9d9f0" font-family="Arial,sans-serif" font-size="25">${xml(parts[2])}</text>
+  <text x="940" y="540" fill="#aaa0b5" font-family="Arial,sans-serif" font-size="18">${xml(t('Estimativa comunitária · não oficial'))}</text>
+</svg>`;
+  downloadBlobFile('kynosrecompvi-carteirinha.svg', new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
+}
+
 function shareCurrentSetup() {
   const url = new URL(window.location.href);
   url.hash = 'home';
@@ -1268,9 +1410,78 @@ function shareCurrentSetup() {
 
 function scenarioSetup(scenario, original) {
   const setup = { ...original };
-  if (scenario === 'dual') setup.channel = 'dual';
+  if (scenario === 'target-900p' || scenario === 'target-720p') {
+    const resolution = scenario === 'target-900p' ? '900p' : '720p';
+    const targetIndex = hardware.targets.findIndex((target) => target.name.startsWith(resolution));
+    if (targetIndex < 0) throw new Error(t('Esta resolução não está disponível neste catálogo.'));
+    setup.target = targetIndex;
+  } else if (scenario === 'dual') setup.channel = 'dual';
   else if (scenario === 'nvme4') setup.storageId = 'nvme4';
-  else if (scenario === 'optimized') {
+  else if (scenario === 'upgrade-ram16') {
+    const capacity = hardware.ramCapacities.slice().sort((left, right) => left - right)
+      .find((item) => item >= setup.ramGb + 16);
+    if (!capacity) throw new Error(t('A RAM já está no maior valor disponível.'));
+    setup.ramGb = capacity;
+  } else if (scenario === 'upgrade-nvme') {
+    const currentStorage = hardware.storage.find((item) => item.id === setup.storageId);
+    const storage = hardware.storage.filter((item) => item.compatible)
+      .sort((left, right) => right.score - left.score)
+      .find((item) => item.score > currentStorage.score);
+    if (!storage) throw new Error(t('Seu SSD já está no melhor nível disponível.'));
+    setup.storageId = storage.id;
+  } else if (scenario === 'upgrade-gpu-mid') {
+    const currentGpu = hardware.gpus.find((item) => item.id === setup.gpuId);
+    const gpu = hardware.gpus.filter((item) => !item.integrated && item.score > currentGpu.score)
+      .sort((left, right) => left.score - right.score)[0];
+    if (!gpu) throw new Error(t('Não há uma GPU acima da selecionada no catálogo.'));
+    setup.gpuId = gpu.id;
+  } else if (scenario === 'chaos-720p') {
+    const targetIndex = hardware.targets.findIndex((target) => target.name.startsWith('720p'));
+    if (targetIndex < 0) throw new Error(t('Esta resolução não está disponível neste catálogo.'));
+    setup.target = targetIndex;
+    setup.backgroundId = 'heavy';
+  } else if (scenario === 'nasa') {
+    const cpu = hardware.cpus.filter((item) => item.memoryGenerations.includes('ddr5'))
+      .sort((left, right) => right.score - left.score)[0];
+    const gpu = hardware.gpus.filter((item) => !item.integrated).sort((left, right) => right.score - left.score)[0];
+    const targetIndex = hardware.targets.findIndex((target) => target.name.startsWith('Ultra'));
+    const storage = hardware.storage.filter((item) => item.compatible).sort((left, right) => right.score - left.score)[0];
+    if (!cpu || !gpu || !storage || targetIndex < 0) throw new Error(t('Este preset não está disponível neste catálogo.'));
+    setup.cpuId = cpu.id;
+    setup.gpuId = gpu.id;
+    setup.target = targetIndex;
+    setup.ramGb = Math.max(...hardware.ramCapacities);
+    setup.ramGeneration = 'ddr5';
+    setup.ramMhz = Math.max(...hardware.ramGenerations.ddr5.frequencies.map((item) => item.mhz));
+    setup.channel = 'dual';
+    setup.storageId = storage.id;
+    setup.freeSpaceGb = Math.max(...hardware.freeSpaceOptions);
+    setup.osId = 'optimized';
+    setup.backgroundId = 'clean';
+  } else if (scenario === 'potato' || scenario === 'office-laptop') {
+    const integratedGpus = hardware.gpus.filter((item) => item.integrated)
+      .sort((left, right) => scenario === 'potato' ? left.score - right.score : right.score - left.score);
+    const cpuOptions = hardware.cpus.filter((item) => item.memoryGenerations.includes('ddr4'))
+      .sort((left, right) => scenario === 'potato' ? left.score - right.score : right.score - left.score);
+    const targetIndex = hardware.targets.findIndex((target) => target.name.startsWith('720p'));
+    const storage = hardware.storage.filter((item) => item.compatible).sort((left, right) => left.score - right.score)[0];
+    if (!integratedGpus.length || !cpuOptions.length || !storage || targetIndex < 0) throw new Error(t('Este preset não está disponível neste catálogo.'));
+    setup.gpuId = integratedGpus[0].id;
+    setup.cpuId = cpuOptions[0].id;
+    setup.target = targetIndex;
+    setup.ramGb = scenario === 'potato' ? Math.min(...hardware.ramCapacities) : Math.min(16, Math.max(...hardware.ramCapacities));
+    setup.ramGeneration = 'ddr4';
+    setup.ramMhz = Math.min(...hardware.ramGenerations.ddr4.frequencies.map((item) => item.mhz));
+    setup.channel = scenario === 'potato' ? 'single' : 'dual';
+    setup.storageId = storage.id;
+    setup.freeSpaceGb = scenario === 'potato'
+      ? Math.min(...hardware.freeSpaceOptions)
+      : Math.max(...hardware.freeSpaceOptions.filter((space) => space >= hardware.requiredFreeSpace));
+    setup.osId = scenario === 'potato' ? 'windows-11' : 'optimized';
+    setup.backgroundId = scenario === 'potato' ? 'heavy' : 'clean';
+  } else if (scenario === 'chaos-vram') {
+    return setup;
+  } else if (scenario === 'optimized') {
     setup.osId = 'optimized';
     setup.backgroundId = 'clean';
   } else if (scenario === 'ram-up' || scenario === 'ram-down') {
@@ -1289,11 +1500,21 @@ function scenarioSetup(scenario, original) {
 function updateScenarioBadge() {
   const badge = byId('scenario-badge');
   const labels = {
+    'target-900p': 'E se mudar para 900p?',
+    'target-720p': 'E se mudar para 720p?',
     dual: 'E se ativar canal duplo?',
     nvme4: 'E se usar SSD NVMe Gen 4?',
     optimized: 'E se fechar apps e otimizar o SO?',
     'ram-up': 'E se aumentar a RAM?',
-    'ram-down': 'E se reduzir a RAM?'
+    'ram-down': 'E se reduzir a RAM?',
+    'upgrade-ram16': 'E se subir um degrau na RAM?',
+    'upgrade-nvme': 'E se migrar para SSD NVMe?',
+    'upgrade-gpu-mid': 'E se trocar por uma GPU acima?',
+    'chaos-720p': 'Modo Caos: 720p, 100 abas e chamada',
+    'chaos-vram': 'Modo Caos: dobro da exigência de VRAM',
+    nasa: 'Preset extremo: PC da NASA',
+    potato: 'Preset extremo: PC batata',
+    'office-laptop': 'Notebook guerreiro: iGPU e tudo fechado'
   };
   badge.hidden = !state.activeScenario;
   if (state.activeScenario) byId('scenario-label').textContent = t(labels[state.activeScenario]);
@@ -1434,20 +1655,38 @@ function initAdvancedTools() {
       setToolStatus(error.message);
     }
   });
+  byId('download-setup-card').addEventListener('click', () => {
+    try {
+      downloadSetupCard();
+      setToolStatus(t('Carteirinha baixada em SVG.'));
+      trackEvent('share_setup_card', 'Baixar carteirinha de setup');
+    } catch (error) {
+      console.error('Não foi possível gerar a carteirinha de setup:', error);
+      setToolStatus(error.message);
+    }
+  });
   byId('theme-toggle').addEventListener('click', () => updateTheme(state.theme === 'dark' ? 'light' : 'dark'));
   byId('scenario-restore').addEventListener('click', restoreScenario);
-  document.querySelector('.what-if-options').addEventListener('click', (event) => {
+  const applyScenarioFromButton = (event) => {
     const button = event.target.closest('[data-scenario]');
     if (!button) return;
     try {
       runWhatIf(button.dataset.scenario);
       setToolStatus(t('Simulação temporária aplicada.'));
-      button.closest('details').open = false;
+      if (button.closest('#quick-upgrade-actions')) {
+        setPage('utility');
+        byId('result-panel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      const menu = button.closest('details');
+      if (menu) menu.open = false;
     } catch (error) {
       console.error('Não foi possível aplicar o cenário:', error);
       setToolStatus(error.message);
     }
-  });
+  };
+  byId('simulator').addEventListener('click', applyScenarioFromButton);
+  byId('quick-upgrade-actions').addEventListener('click', applyScenarioFromButton);
+  byId('upgrade-economics').addEventListener('click', applyScenarioFromButton);
 }
 
 function progressPercent(value) {
@@ -1487,6 +1726,257 @@ function isInactiveProject(project) {
     || Boolean(project && (project.nuked || project.removed || project.takedown));
 }
 
+function getProjectHistoryPoints(snapshot, project) {
+  const history = snapshot && Array.isArray(snapshot.history) ? snapshot.history : [];
+  return history.reduce((points, entry) => {
+    const timestamp = entry && (entry.timestamp || entry.updatedAt || entry.at || entry.date);
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/i.test(String(timestamp || ''))) return points;
+    const nestedProjects = Array.isArray(entry.efforts) ? entry.efforts : Array.isArray(entry.projects) ? entry.projects : [];
+    const sample = nestedProjects.find((item) => item.id === project.id || item.projectId === project.id || item.repo === project.repo)
+      || (entry.projectId === project.id || entry.id === project.id || entry.repo === project.repo ? entry : null);
+    const percent = Number(sample && (sample.percent != null ? sample.percent : sample.progress));
+    const time = Date.parse(timestamp);
+    if (Number.isFinite(percent) && percent >= 0 && percent <= 100 && Number.isFinite(time)) {
+      points.push({ time, timestamp, percent });
+    }
+    return points;
+  }, []).sort((left, right) => left.time - right.time);
+}
+
+function recentProgressTrend(snapshot, project) {
+  const points = getProjectHistoryPoints(snapshot, project);
+  if (points.length < 2) return { points, rate: null, delta: null, latestTime: null };
+  const latest = points[points.length - 1];
+  const cutoff = latest.time - 30 * 24 * 60 * 60 * 1000;
+  const recent = points.filter((point) => point.time >= cutoff);
+  const first = recent[0];
+  const elapsedDays = first ? (latest.time - first.time) / (24 * 60 * 60 * 1000) : 0;
+  const previous = points[points.length - 2];
+  const delta = latest.percent - previous.percent;
+  const snapshotTime = Date.parse(snapshot.updatedAt || '');
+  const stale = Number.isFinite(snapshotTime) && snapshotTime - latest.time > 30 * 24 * 60 * 60 * 1000;
+  const rate = first && elapsedDays > 0 && !stale && latest.percent > first.percent
+    ? (latest.percent - first.percent) / elapsedDays
+    : null;
+  return {
+    points,
+    rate: Number.isFinite(rate) && rate > 0 ? rate : null,
+    delta: !stale && Number.isFinite(delta) ? delta : null,
+    latestTime: latest.time
+  };
+}
+
+function getRaceMilestoneProjections(snapshot, leader, milestones, progress) {
+  const safeSnapshot = snapshot || {};
+  const trend = leader ? recentProgressTrend(safeSnapshot, leader) : { rate: null };
+  const futureMilestones = milestones
+    .filter((milestone) => progressPercent(milestone.percent) > progress)
+    .filter((milestone) => [70, 85, 100].includes(progressPercent(milestone.percent)))
+    .sort((left, right) => progressPercent(left.percent) - progressPercent(right.percent));
+  const nextMilestone = milestones.find((milestone) => progressPercent(milestone.percent) > progress);
+  const snapshotTime = Date.parse(safeSnapshot.updatedAt || '');
+  const projectionBaseTime = Math.max(
+    Number.isFinite(snapshotTime) ? snapshotTime : 0,
+    trend.latestTime || 0
+  ) || null;
+  const projections = trend.rate && projectionBaseTime
+    ? futureMilestones.map((milestone) => {
+      const days = Math.ceil((progressPercent(milestone.percent) - progress) / trend.rate);
+      return {
+        milestone,
+        timestamp: projectionBaseTime + days * 24 * 60 * 60 * 1000
+      };
+    })
+    : [];
+  return {
+    trend,
+    nextMilestone,
+    distance: nextMilestone ? Math.max(0, progressPercent(nextMilestone.percent) - progress) : 0,
+    projections
+  };
+}
+
+function countdownParts(timestamp) {
+  let totalSeconds = Math.max(0, Math.floor((timestamp - Date.now()) / 1000));
+  const days = Math.floor(totalSeconds / 86400);
+  totalSeconds %= 86400;
+  const hours = Math.floor(totalSeconds / 3600);
+  totalSeconds %= 3600;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return { days, hours, minutes, seconds };
+}
+
+function renderHeroRaceClock(snapshot, leader, milestones, progress) {
+  const panel = byId('hero-race-clock');
+  if (!panel) return;
+  if (heroCountdownTimer) {
+    clearInterval(heroCountdownTimer);
+    heroCountdownTimer = null;
+  }
+
+  const projection = getRaceMilestoneProjections(snapshot, leader, milestones, progress);
+  const target = projection.projections[0];
+  const nextMilestone = target ? target.milestone : projection.nextMilestone;
+  const hasProjection = Boolean(target);
+  const remaining = hasProjection ? countdownParts(target.timestamp) : null;
+  const units = [
+    { key: 'days', label: 'dias' },
+    { key: 'hours', label: 'horas' },
+    { key: 'minutes', label: 'minutos' },
+    { key: 'seconds', label: 'segundos' }
+  ];
+  const targetDate = hasProjection ? new Date(target.timestamp).toISOString() : '';
+  const status = !leader
+    ? t('Ainda não há projeto ativo no snapshot.')
+    : !nextMilestone
+      ? t('O projeto líder já alcançou os marcos acompanhados.')
+      : !hasProjection
+        ? t('Faltam amostras datadas recentes do mesmo projeto para calcular a contagem.')
+        : target.timestamp <= Date.now()
+          ? t('A previsão passou, mas o tracker ainda não confirmou este marco.')
+          : t('Contagem calculada a partir do ritmo recente registrado no tracker.');
+
+  panel.dataset.state = hasProjection ? (target.timestamp > Date.now() ? 'active' : 'elapsed') : 'unavailable';
+  panel.innerHTML = `<span class="section-kicker">${escapeHtml(t('PROJEÇÃO DA COMUNIDADE'))}</span>
+    <h2>${escapeHtml(t('Tempo estimado até o próximo marco'))}</h2>
+    <p class="hero-clock-target">${nextMilestone ? `${escapeHtml(t('Próximo alvo:'))} <b>${escapeHtml(t(nextMilestone.label))}</b>` : escapeHtml(t('Todos os marcos da trilha foram alcançados.'))}</p>
+    <div class="hero-clock-units" aria-label="${escapeHtml(t('Contagem regressiva em dias, horas, minutos e segundos'))}" aria-live="off">
+      ${units.map((unit) => `<span class="hero-clock-unit"><strong data-clock-unit="${unit.key}">${hasProjection ? counterMarkup(remaining[unit.key]) : '—'}</strong><small>${escapeHtml(t(unit.label))}</small></span>`).join('')}
+    </div>
+    ${hasProjection ? `<time class="hero-clock-date" datetime="${escapeHtml(targetDate)}">${escapeHtml(t('Previsão:'))} ${escapeHtml(formatNewsDate(targetDate))}</time>` : ''}
+    <p class="hero-clock-status" role="status">${escapeHtml(status)}</p>
+    <small class="hero-clock-disclaimer">${escapeHtml(t('Não há data oficial para PC. Esta contagem especulativa extrapola o ritmo recente da comunidade; bloqueios, bugs e derrubadas podem alterar o prazo.'))}</small>`;
+  window.KynosI18n.translateDom(panel, state.language);
+  if (!hasProjection) return;
+
+  animateCounters(panel);
+  if (target.timestamp > Date.now()) {
+    heroCountdownTimer = setInterval(() => {
+      const parts = countdownParts(target.timestamp);
+      units.forEach((unit) => {
+        const number = panel.querySelector(`[data-clock-unit="${unit.key}"] .count-up`);
+        if (number) number.textContent = formatCounter(parts[unit.key], 'integer');
+      });
+      if (target.timestamp <= Date.now()) {
+        const statusElement = panel.querySelector('.hero-clock-status');
+        if (statusElement) statusElement.textContent = t('A previsão passou, mas o tracker ainda não confirmou este marco.');
+        panel.dataset.state = 'elapsed';
+        clearInterval(heroCountdownTimer);
+        heroCountdownTimer = null;
+      }
+    }, 1000);
+  }
+}
+
+function renderRaceProjection(snapshot, leader, milestones, progress) {
+  const estimate = getRaceMilestoneProjections(snapshot, leader, milestones, progress);
+  const dates = estimate.trend.rate
+    ? estimate.projections.map((projection) => {
+      const projectedAt = new Date(projection.timestamp).toISOString();
+      const distance = Math.max(0, progressPercent(projection.milestone.percent) - progress);
+      return `<li><span>${escapeHtml(t(projection.milestone.label))} · ${counterMarkup(distance, 'percent')} p.p.</span><strong>${escapeHtml(formatNewsDate(projectedAt))}</strong></li>`;
+    }).join('')
+    : `<li class="projection-unavailable">${escapeHtml(t('Prazo não calculável: faltam duas amostras datadas de progresso do mesmo projeto.'))}</li>`;
+  const pace = estimate.trend.rate
+    ? `${escapeHtml(t('Ritmo observado:'))} ${counterMarkup(estimate.trend.rate, 'percent')} ${escapeHtml(t('p.p. por dia'))}`
+    : escapeHtml(t('Ritmo recente indisponível no snapshot atual.'));
+  return `<section class="race-intel-card panel pc-projection" aria-labelledby="pc-projection-title">
+    <span class="section-kicker">${escapeHtml(t('PROJEÇÃO ESTIMADA PARA PC'))}</span>
+    <h3 id="pc-projection-title">${escapeHtml(t('Contagem estimada da corrida'))}</h3>
+    <p class="projection-leader">${leader ? `${escapeHtml(t('Líder atual:'))} <b>${escapeHtml(leader.name)}</b> · ${counterMarkup(progress, 'percent')}%` : escapeHtml(t('Ainda não há projeto ativo no snapshot.'))}</p>
+    <p>${estimate.nextMilestone ? `${escapeHtml(t('Próximo degrau:'))} <b>${escapeHtml(t(estimate.nextMilestone.label))}</b> · ${counterMarkup(estimate.distance, 'percent')} ${escapeHtml(t('pontos percentuais'))} ${escapeHtml(t('restantes'))}` : escapeHtml(t('Todos os marcos da trilha foram alcançados.'))}</p>
+    <p class="projection-pace">${pace}</p>
+    <ul class="projection-targets">${dates}</ul>
+    <p class="projection-warning"><b>${escapeHtml(t('Estimativa especulativa, não uma data oficial.'))}</b> ${escapeHtml(t('Não representa promessa da Rockstar/Take-Two nem data de lançamento para PC; bugs, bloqueios técnicos, limites de hardware e derrubadas podem mudar tudo.'))}</p>
+    <p class="projection-method">${escapeHtml(t('A projeção de prazo só aparece com histórico temporal verificável; sem ele, mostramos a distância até os marcos, não uma data inventada.'))}</p>
+  </section>`;
+}
+
+function renderRaceTimeline(milestones, progress, leader) {
+  const currentMilestone = milestones.filter((milestone) => progressPercent(milestone.percent) <= progress)
+    .sort((left, right) => progressPercent(right.percent) - progressPercent(left.percent))[0];
+  const nextMilestone = milestones.find((milestone) => progressPercent(milestone.percent) > progress);
+  const steps = milestones.map((milestone) => {
+    const percent = progressPercent(milestone.percent);
+    const reached = percent <= progress;
+    const current = currentMilestone && percent === progressPercent(currentMilestone.percent);
+    return `<li class="race-xray-step ${reached ? 'is-reached' : ''} ${current ? 'is-current' : ''}">
+      <span class="race-xray-percent">${counterMarkup(percent, 'percent')}%</span>
+      <strong>${escapeHtml(t(milestone.label))}</strong>
+      <small>${escapeHtml(t(milestone.description || ''))}</small>
+      ${current ? `<em>${escapeHtml(t('Onde está o líder'))}</em>` : ''}
+    </li>`;
+  }).join('');
+  return `<section class="race-intel-card panel race-xray" aria-labelledby="race-xray-title">
+    <span class="section-kicker">${escapeHtml(t('RAIO-X DOS MARCOS'))}</span>
+    <h3 id="race-xray-title">${escapeHtml(t('Da preparação à estabilidade'))}</h3>
+    <p>${leader ? `${escapeHtml(leader.name)} · ${counterMarkup(progress, 'percent')}% · ${escapeHtml(t('Marco atual:'))} ${escapeHtml(t(currentMilestone && currentMilestone.label || 'Preparação'))}` : escapeHtml(t('Sem líder ativo no momento.'))}</p>
+    <ol class="race-xray-list">${steps}</ol>
+    <p class="race-xray-next">${nextMilestone ? `${escapeHtml(t('Falta para o próximo degrau:'))} ${counterMarkup(Math.max(0, progressPercent(nextMilestone.percent) - progress), 'percent')} ${escapeHtml(t('pontos percentuais'))} · ${escapeHtml(t(nextMilestone.label))}` : escapeHtml(t('O líder já alcançou a estabilidade.'))}</p>
+  </section>`;
+}
+
+function renderRaceReversals(snapshot, efforts, leader) {
+  const offline = efforts.filter(isInactiveProject);
+  const jumps = efforts.map((project) => ({ project, trend: recentProgressTrend(snapshot, project) }))
+    .filter((item) => item.trend.delta > 0)
+    .sort((left, right) => right.trend.delta - left.trend.delta);
+  const biggestJump = jumps[0];
+  const leadSummary = leader
+    ? `${escapeHtml(leader.name)} · ${counterMarkup(leader.percent, 'percent')}%`
+    : escapeHtml(t('Sem líder ativo'));
+  const jumpSummary = biggestJump
+    ? `${escapeHtml(biggestJump.project.name)} · +${counterMarkup(biggestJump.trend.delta, 'percent')} p.p.`
+    : escapeHtml(t('Sem série histórica para calcular o maior salto percentual.'));
+  const fallSummary = offline.length
+    ? offline.map((project) => escapeHtml(project.name)).join(' · ')
+    : escapeHtml(t('Nenhum projeto fora do ar foi registrado.'));
+  return `<section class="race-intel-card panel race-reversals" aria-labelledby="race-reversals-title">
+    <span class="section-kicker">${escapeHtml(t('PLACAR DE REVIRAVOLTAS'))}</span>
+    <h3 id="race-reversals-title">${escapeHtml(t('Quem lidera, quem caiu'))}</h3>
+    <dl><div><dt>${escapeHtml(t('Liderança atual'))}</dt><dd>${leadSummary}</dd></div>
+    <div><dt>${escapeHtml(t('Maior salto recente'))}</dt><dd>${jumpSummary}</dd></div>
+    <div><dt>${escapeHtml(t('Fora do ar / derrubados'))}</dt><dd>${fallSummary}</dd></div></dl>
+    <small>${escapeHtml(t('Ultrapassagens e saltos só são calculados quando há snapshots históricos comparáveis.'))}</small>
+  </section>`;
+}
+
+function renderRaceControlLog(snapshot, leader, efforts) {
+  const events = [];
+  if (leader) {
+    const trend = recentProgressTrend(snapshot, leader);
+    events.push({
+      kind: 'leader',
+      date: snapshot.updatedAt || '',
+      title: t('Leitura do placar'),
+      project: leader,
+      delta: trend.delta
+    });
+  }
+  (Array.isArray(snapshot.changes) ? snapshot.changes : []).slice(0, 5).forEach((change) => {
+    events.push({ date: change.date, title: t(change.kind || 'Atualização'), body: localizedChangeSummary(change.summary) });
+  });
+  (Array.isArray(snapshot.news) ? snapshot.news : []).slice(0, 2).forEach((story) => {
+    events.push({ date: story.date, title: t(story.category || 'Notícia'), body: localizedValue(story, 'title') || story.title });
+  });
+  events.sort((left, right) => (Date.parse(right.date) || 0) - (Date.parse(left.date) || 0));
+  const entries = events.slice(0, 7).map((event) => `<article class="race-log-entry">
+    ${publicationTimeMarkup(event.date)}
+    <div><b>${escapeHtml(event.title)}</b><p>${event.kind === 'leader'
+    ? `${escapeHtml(event.project.name)} · ${counterMarkup(event.project.percent, 'percent')}% · ${escapeHtml(t(event.project.stage))}${event.delta != null ? ` · ${escapeHtml(t('variação'))} ${event.delta > 0 ? '+' : ''}${counterMarkup(Math.abs(event.delta), 'percent')} p.p.` : ` · ${escapeHtml(t('variação percentual não disponível'))}`}`
+    : escapeHtml(event.body)}</p></div>
+  </article>`).join('');
+  const inactive = efforts.filter(isInactiveProject);
+  return `<section class="race-intel-card panel race-control-log" aria-labelledby="race-control-title">
+    <span class="section-kicker">${escapeHtml(t('BASTIDORES & COMMITS'))}</span>
+    <h3 id="race-control-title">${escapeHtml(t('Central de controle da corrida'))}</h3>
+    <p class="race-log-note">${escapeHtml(t('A liderança abaixo é a leitura atual do snapshot; sem histórico, não afirmamos quem ultrapassou quem.'))}</p>
+    <div class="race-log-list">${entries || `<p>${escapeHtml(t('Nenhuma atualização registrada.'))}</p>`}</div>
+    ${inactive.length ? `<p class="race-log-offline">${escapeHtml(t('Fora do ar:'))} ${inactive.map((project) => escapeHtml(project.name)).join(' · ')}</p>` : ''}
+  </section>`;
+}
+
 function renderPortwatchProgress(data, snapshot = trackerData) {
   const section = byId('portwatch-progress');
   const milestones = Array.isArray(data.milestones) ? data.milestones : [];
@@ -1515,6 +2005,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
   const leaderMilestone = leaderProject ? portwatchMilestone(leaderProject, milestones) : null;
   const progress = leaderProject ? portwatchProjectProgress(leaderProject, milestones) : 0;
   const leader = leaderProject ? { ...leaderProject, milestone: leaderMilestone.label } : null;
+  renderHeroRaceClock(snapshot, leader, milestones, progress);
   const topThree = rankedProjects.slice(0, 3);
   const topThreeAverage = topThree.length
     ? Math.round((topThree.reduce((total, project) => total + portwatchProjectProgress(project, milestones), 0) / topThree.length) * 10) / 10
@@ -1563,7 +2054,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
       const inactive = isInactiveProject(project);
       const stageText = inactive
         ? `${t('Fora do ranking ativo')} · ${t('Último marco')}: ${t(stage)}`
-        : `${projectProgress}% · ${t(stage)}`;
+        : t(stage);
       const avatarMarkup = project.avatarUrl
         ? `<img class="pw-avatar-image" width="28" height="28" src="${escapeHtml(safeUrl(project.avatarUrl))}" alt="" loading="lazy" decoding="async" /><span class="pw-avatar-fallback" hidden>${escapeHtml(avatar)}</span>`
         : escapeHtml(avatar);
@@ -1580,7 +2071,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
     const label = String(milestone.label || '');
     const tooltip = `${label}: ${milestone.description || ''}`;
     return `<button class="pw-milestone ${isReached ? 'reached' : ''} ${isCurrent ? 'current' : ''}" type="button" style="--milestone-x:${milestoneProgress}%" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(`${milestoneProgress}% ${label}. ${milestone.description || ''}`)}" ${isCurrent ? 'aria-current="step"' : ''}>
-      <b>${milestoneProgress}%</b><span>${escapeHtml(label)}</span>
+      <b>${counterMarkup(milestoneProgress, 'percent')}%</b><span>${escapeHtml(t(label))}</span>
     </button>`;
   }).join('');
 
@@ -1590,11 +2081,20 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
       <div class="pw-changes-heading"><span class="section-kicker">${escapeHtml(t('O que mudou'))}</span><h3 id="pw-changes-title">${escapeHtml(t('Atualizações recentes do tracker'))}</h3></div>
       <div class="pw-change-track">${changes.map((change) => `
         <article class="pw-change-item">
-          <div><span class="pw-change-kind">${escapeHtml(t(change.kind))}</span><time datetime="${escapeHtml(change.date || '')}">${escapeHtml(formatNewsDate(change.date))}</time></div>
+          <div><span class="pw-change-kind">${escapeHtml(t(change.kind))}</span>${publicationTimeMarkup(change.date)}</div>
           <p>${escapeHtml(localizedChangeSummary(change.summary))}</p>
         </article>`).join('')}
       </div>
     </section>` : '';
+  const readingTime = snapshot && snapshot.updatedAt
+    ? `<p class="pw-reading-time">${escapeHtml(t('Leitura do progresso:'))} ${publicationTimeMarkup(snapshot.updatedAt)}</p>`
+    : '';
+  const raceIntel = snapshot ? `<div class="race-intelligence-grid">
+    ${renderRaceTimeline(milestones, progress, leader)}
+    ${renderRaceProjection(snapshot, leader, milestones, progress)}
+    ${renderRaceReversals(snapshot, projects, leader)}
+    ${renderRaceControlLog(snapshot, leader, projects)}
+  </div>` : '';
 
   section.setAttribute('aria-busy', 'false');
   section.innerHTML = `
@@ -1603,6 +2103,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
         <div class="pw-overview-main">
           <span class="section-kicker">PROGRESSO GERAL · PROJETO MAIS PERTO DE SER JOGÁVEL</span>
           <h2 id="portwatch-title">Acompanhamento da <span>portabilidade.</span></h2>
+          ${readingTime}
           <div class="pw-headline">
             <strong class="pw-overall-value">${counterMarkup(progress, 'percent')}<span>%</span></strong>
             <p><b>${escapeHtml(t('Líder:'))}</b> ${leader ? `${escapeHtml(leader.name)}${leader.author ? ` <span>${escapeHtml(t('de'))}</span> ${escapeHtml(leader.author)}` : ''}<span>.</span> <span>${escapeHtml(t('Chegou a'))}</span> “${escapeHtml(t(leader.milestone || latestMilestoneLabel))}”<span>.</span>` : escapeHtml(t('Ainda sem projetos'))}</p>
@@ -1627,7 +2128,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
         <summary><span>${escapeHtml(t('Progresso por projeto'))}</span><span class="pw-project-list-action">${escapeHtml(t('Ver progresso de todos os projetos'))} (${projects.length})</span></summary>
         <ul class="pw-project-progress-grid">${projectList}</ul>
       </details>
-    </div>${changeStrip}`;
+    </div>${raceIntel}${changeStrip}`;
   section.querySelectorAll('.pw-avatar-image').forEach((image) => {
     image.addEventListener('error', () => {
       image.hidden = true;
@@ -1654,6 +2155,337 @@ function localizedChangeSummary(summary) {
     zh: `Scout 在 ${repository} 发现了一个可能的项目。`
   };
   return translations[state.language] || String(summary);
+}
+
+function loadNotificationPreferences() {
+  try {
+    const raw = localStorage.getItem(NOTIFICATION_KEY);
+    if (!raw) return { readIds: [], lastViewedAt: '' };
+    const stored = JSON.parse(raw);
+    if (stored.version !== 1 || !Array.isArray(stored.readIds)
+      || stored.readIds.some((id) => typeof id !== 'string')
+      || (stored.lastViewedAt && typeof stored.lastViewedAt !== 'string')) {
+      throw new Error('As preferências da central de avisos estão inválidas.');
+    }
+    return {
+      readIds: [...new Set(stored.readIds)],
+      lastViewedAt: stored.lastViewedAt || ''
+    };
+  } catch (error) {
+    console.error('Não foi possível ler as preferências da central de avisos:', error);
+    return { readIds: [], lastViewedAt: '' };
+  }
+}
+
+function saveNotificationPreferences() {
+  try {
+    localStorage.setItem(NOTIFICATION_KEY, JSON.stringify({
+      version: 1,
+      readIds: notificationPreferences.readIds,
+      lastViewedAt: notificationPreferences.lastViewedAt
+    }));
+  } catch (error) {
+    console.error('Não foi possível salvar as preferências da central de avisos:', error);
+  }
+}
+
+function buildPortalNotifications(snapshot) {
+  const notifications = [];
+  const efforts = snapshot && Array.isArray(snapshot.efforts) ? snapshot.efforts : [];
+  const offlineProjects = efforts.filter(isInactiveProject).slice(0, 2);
+  offlineProjects.forEach((project) => {
+    notifications.push({
+      id: `offline:${project.repo || project.id || project.name}`,
+      title: `${t('Projeto fora do ar')}: ${project.name}`,
+      body: t('O tracker registra este projeto como fora do ar; o motivo da remoção pode não estar confirmado.'),
+      page: 'repositories',
+      kind: 'warning',
+      date: snapshot.updatedAt || ''
+    });
+  });
+
+  if (snapshot && snapshot.exe && snapshot.exe.safety) {
+    notifications.push({
+      id: 'security:fake-download-warning:v1',
+      title: t('Alerta de segurança'),
+      body: t('Não baixe nem execute arquivos divulgados por desconhecidos; podem conter malware ou roubar senhas.'),
+      page: 'tracker',
+      kind: 'warning',
+      date: snapshot.updatedAt || ''
+    });
+  }
+
+  const activeProjects = efforts.filter((project) => !isInactiveProject(project)).slice()
+    .sort((left, right) => portwatchProjectProgress(right, PORTWATCH_FALLBACK.milestones)
+      - portwatchProjectProgress(left, PORTWATCH_FALLBACK.milestones));
+  const leader = activeProjects[0];
+  if (leader) {
+    const progress = portwatchProjectProgress(leader, PORTWATCH_FALLBACK.milestones);
+    const milestone = portwatchMilestone(leader, PORTWATCH_FALLBACK.milestones);
+    notifications.push({
+      id: `leader:${leader.repo || leader.id || leader.name}:${progress}:${milestone.label}`,
+      title: t('Liderança da corrida'),
+      body: `${leader.name} · ${formatPercent(progress)}% · ${t(milestone.label)}`,
+      page: 'home',
+      kind: 'progress',
+      date: snapshot.updatedAt || ''
+    });
+  }
+
+  (snapshot && Array.isArray(snapshot.news) ? snapshot.news : []).slice(0, 2).forEach((story) => {
+    notifications.push({
+      id: `news:${story.id || story.title}`,
+      title: t('Notícia recente'),
+      body: t(story.title || story.category || ''),
+      page: 'news',
+      kind: 'news',
+      date: story.date || ''
+    });
+  });
+  (snapshot && Array.isArray(snapshot.changes) ? snapshot.changes : []).slice(0, 2).forEach((change, index) => {
+    notifications.push({
+      id: `change:${change.date || ''}:${change.kind || ''}:${index}:${change.summary || ''}`,
+      title: t('Novidade no tracker'),
+      body: localizedChangeSummary(change.summary),
+      page: 'home',
+      kind: 'update',
+      date: change.date || ''
+    });
+  });
+  return notifications;
+}
+
+function renderNotificationCenter(snapshot) {
+  const center = byId('notification-center');
+  if (!center || !notificationPreferences) return;
+  notificationItems = buildPortalNotifications(snapshot);
+  const validIds = new Set(notificationItems.map((item) => item.id));
+  const currentReadIds = notificationPreferences.readIds.filter((id) => validIds.has(id));
+  if (currentReadIds.length !== notificationPreferences.readIds.length) {
+    notificationPreferences.readIds = currentReadIds;
+    saveNotificationPreferences();
+  }
+  const unreadCount = notificationItems.filter((item) => !notificationPreferences.readIds.includes(item.id)).length;
+  const count = byId('notification-count');
+  count.hidden = unreadCount === 0;
+  count.innerHTML = unreadCount ? counterMarkup(unreadCount) : '';
+  byId('notification-toggle').setAttribute('aria-label', `${t('Abrir notificações')} · ${unreadCount} ${t('não lidas')}`);
+  byId('notification-mark-all').disabled = unreadCount === 0;
+  byId('notification-list').innerHTML = notificationItems.length
+    ? notificationItems.map((item) => {
+      const unread = !notificationPreferences.readIds.includes(item.id);
+      return `<article class="notification-item ${unread ? 'is-unread' : ''} notification-${escapeHtml(item.kind)}">
+        <span class="notification-dot" aria-hidden="true"></span>
+        <div class="notification-copy"><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.body)}</p>${item.date ? publicationTimeMarkup(item.date) : ''}</div>
+        <a class="notification-link" href="#${escapeHtml(item.page)}" data-page-link="${escapeHtml(item.page)}" data-notification-id="${escapeHtml(item.id)}" aria-label="${escapeHtml(t('Abrir conteúdo relacionado'))}">↗</a>
+      </article>`;
+    }).join('')
+    : `<p class="notification-empty">${escapeHtml(t('Sem avisos novos por enquanto.'))}</p>`;
+  animateCounters(center);
+}
+
+function closeNotificationPanel(restoreFocus = false) {
+  const panel = byId('notification-panel');
+  if (!panel) return;
+  panel.hidden = true;
+  byId('notification-toggle').setAttribute('aria-expanded', 'false');
+  if (restoreFocus) byId('notification-toggle').focus();
+}
+
+function setupNotificationCenter(snapshot) {
+  const center = byId('notification-center');
+  const toggle = byId('notification-toggle');
+  const panel = byId('notification-panel');
+  notificationPreferences = loadNotificationPreferences();
+
+  toggle.addEventListener('click', () => {
+    if (panel.hidden) {
+      notificationPreferences.lastViewedAt = new Date().toISOString();
+      saveNotificationPreferences();
+      renderNotificationCenter(snapshot);
+      panel.hidden = false;
+      toggle.setAttribute('aria-expanded', 'true');
+    } else {
+      closeNotificationPanel();
+    }
+  });
+  byId('notification-close').addEventListener('click', () => closeNotificationPanel(true));
+  byId('notification-mark-all').addEventListener('click', () => {
+    notificationPreferences.readIds = notificationItems.map((item) => item.id);
+    saveNotificationPreferences();
+    renderNotificationCenter(snapshot);
+  });
+  panel.addEventListener('click', (event) => {
+    const link = event.target.closest('[data-notification-id]');
+    if (!link) return;
+    const id = link.dataset.notificationId;
+    if (!notificationPreferences.readIds.includes(id)) {
+      notificationPreferences.readIds.push(id);
+      saveNotificationPreferences();
+    }
+    renderNotificationCenter(snapshot);
+    closeNotificationPanel();
+  });
+  document.addEventListener('click', (event) => {
+    if (!center.contains(event.target)) closeNotificationPanel();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !panel.hidden) closeNotificationPanel(true);
+  });
+  renderNotificationCenter(snapshot);
+}
+
+function updateQuickReadiness() {
+  if (!hardware) return;
+  const freeSpaceInput = byId('quick-free-space');
+  const ramInput = byId('quick-ram');
+  const output = byId('quick-check-status');
+  if (!freeSpaceInput || !ramInput || !output) return;
+  const freeSpace = Number(freeSpaceInput.value);
+  const ram = Number(ramInput.value);
+  if (!freeSpaceInput.value.trim() || !ramInput.value.trim()
+    || !Number.isFinite(freeSpace) || freeSpace < 0
+    || !Number.isFinite(ram) || ram < 0) {
+    output.className = 'quick-check-status is-warning';
+    output.innerHTML = `<strong>${escapeHtml(t('Informe valores numéricos válidos, iguais ou maiores que zero.'))}</strong>`;
+    return;
+  }
+  const target = hardware.targets[state.target];
+  const requiredSpace = Number(hardware.requiredFreeSpace);
+  const requiredRam = Number(target.ramGb);
+  const enoughSpace = freeSpace >= requiredSpace;
+  const enoughRam = ram >= requiredRam;
+  output.className = `quick-check-status ${enoughSpace && enoughRam ? 'is-ok' : 'is-warning'}`;
+  output.innerHTML = `<strong>${escapeHtml(t(enoughSpace && enoughRam ? 'Margem estimada adequada para esta meta.' : 'Espaço e/ou RAM abaixo da referência da meta.'))}</strong>
+    <ul>
+      <li>${escapeHtml(t('Espaço:'))} ${counterMarkup(freeSpace)} / ${counterMarkup(requiredSpace)} GB</li>
+      <li>${escapeHtml(t('RAM:'))} ${counterMarkup(ram)} / ${counterMarkup(requiredRam)} GB</li>
+    </ul>`;
+  window.KynosI18n.translateDom(output, state.language);
+  animateCounters(output);
+}
+
+function updateQuickProjectStatus() {
+  const select = byId('quick-project-select');
+  const output = byId('quick-project-status');
+  if (!select || !output) return;
+  const project = quickProjects[Number(select.value)];
+  if (!project) {
+    output.textContent = t('Selecione um projeto acompanhado.');
+    return;
+  }
+  const inactive = isInactiveProject(project);
+  const progress = portwatchProjectProgress(project, PORTWATCH_FALLBACK.milestones);
+  const milestone = portwatchMilestone(project, PORTWATCH_FALLBACK.milestones);
+  const status = inactive
+    ? t('Projeto fora do ar / encerrado')
+    : progress > 0
+      ? t('Em progresso (relato do tracker)')
+      : t('Acompanhado, sem marco de progresso reportado');
+  const details = inactive
+    ? `${t('Último marco:')} ${t(milestone.label)} · ${formatPercent(progress)}%`
+    : progress > 0
+      ? `${formatPercent(progress)}% · ${t(milestone.label)}`
+      : t('Nenhum marco de progresso foi informado no tracker.');
+  const repositoryLink = project.url
+    ? `<a href="${escapeHtml(safeUrl(project.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Abrir repositório ↗'))}</a>`
+    : '';
+  output.innerHTML = `<div class="quick-project-result ${inactive ? 'is-warning' : progress > 0 ? 'is-progress' : ''}"><strong>${escapeHtml(status)}</strong><span>${escapeHtml(details)}</span></div>${repositoryLink}`;
+  window.KynosI18n.translateDom(output, state.language);
+}
+
+function updateFakeRadar(snapshot) {
+  const field = byId('quick-safety-query');
+  const output = byId('quick-safety-result');
+  const meter = byId('fake-radar-meter');
+  if (!field || !output || !meter) return;
+  const query = field.value.trim();
+  if (!query) {
+    meter.dataset.risk = 'low';
+    output.className = 'quick-safety-result is-neutral';
+    output.textContent = t('Digite um nome de projeto ou link para consultar o snapshot.');
+    return;
+  }
+  const credentialLike = /\b(?:gh[pousr]_[a-z0-9_]{20,}|github_pat_[a-z0-9_]{20,})\b|(?:token|access_token|api_key)=([a-z0-9%_-]{16,})/i.test(query);
+  if (credentialLike) {
+    meter.dataset.risk = 'high';
+    output.className = 'quick-safety-result is-danger';
+    output.innerHTML = `<strong>${escapeHtml(t('Possível credencial detectada.'))}</strong><p>${escapeHtml(t('Não compartilhe tokens ou senhas. Apague o conteúdo do campo; a consulta acontece apenas localmente e não salva nem envia o texto.'))}</p>`;
+    return;
+  }
+  const githubMatch = query.match(/github\.com\/([^/?#]+\/[^/?#]+)/i);
+  const normalizedQuery = normalizeHardwareSearch(githubMatch ? githubMatch[1] : query);
+  const projects = snapshot && Array.isArray(snapshot.efforts) ? snapshot.efforts : [];
+  const project = projects.find((item) => {
+    const repo = normalizeHardwareSearch(item.repo || '');
+    const name = normalizeHardwareSearch(item.name || '');
+    return normalizedQuery === repo || normalizedQuery === name;
+  });
+  const flaggedItems = snapshot && Array.isArray(snapshot.flagged) ? snapshot.flagged : [];
+  const flaggedEntry = flaggedItems.find((item) => {
+    const content = normalizeHardwareSearch(JSON.stringify(item));
+    return normalizedQuery.length >= 4 && content.includes(normalizedQuery);
+  });
+  const looksLikeDownload = /\.(?:exe|msi|bat|cmd|scr)(?:$|[?#])|\/(?:download|installer|setup)(?:\/|$|[?#])|(?:free|gta.?vi).{0,20}(?:installer|download|launcher)/i.test(query);
+  if ((flaggedEntry || looksLikeDownload) && !project) {
+    meter.dataset.risk = 'high';
+    output.className = 'quick-safety-result is-danger';
+    output.innerHTML = `<strong>${escapeHtml(t('Alerta alto: sinalizado pelo tracker ou link de download executável.'))}</strong><p>${escapeHtml(flaggedEntry ? `${flaggedEntry.title}: ${flaggedEntry.summary}` : t('Nenhum instalador ou executável é distribuído pelo KynosRecompVI.'))}</p><small>${escapeHtml(t('Não baixe, não execute e não informe credenciais.'))}</small>`;
+    return;
+  }
+  if (project) {
+    const inactive = isInactiveProject(project);
+    const highRisk = inactive || Boolean(flaggedEntry) || looksLikeDownload;
+    meter.dataset.risk = highRisk ? 'high' : 'low';
+    output.className = `quick-safety-result ${highRisk ? 'is-danger' : 'is-ok'}`;
+    const progress = portwatchProjectProgress(project, PORTWATCH_FALLBACK.milestones);
+    const projectStatus = inactive
+      ? 'Projeto fora do ar / encerrado'
+      : progress > 0
+        ? 'Em progresso (relato do tracker)'
+        : 'Acompanhado';
+    const securityNotice = flaggedEntry
+      ? `<p>${escapeHtml(t('Alerta alto: sinalizado pelo tracker ou link de download executável.'))} ${escapeHtml(flaggedEntry.title)}: ${escapeHtml(flaggedEntry.summary)}</p>`
+      : looksLikeDownload
+        ? `<p>${escapeHtml(t('Nenhum instalador ou executável é distribuído pelo KynosRecompVI.'))}</p>`
+        : '';
+    output.innerHTML = `<strong>${escapeHtml(t(projectStatus))}: ${escapeHtml(project.name)}</strong><p>${escapeHtml(project.repo || '')} · ${counterMarkup(progress, 'percent')}%</p>${securityNotice}${project.url ? `<a href="${escapeHtml(safeUrl(project.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Abrir repositório original ↗'))}</a>` : ''}<small>${escapeHtml(t('Encontrado no snapshot não é garantia de segurança; verifique o proprietário e o código antes de confiar.'))} ${escapeHtml(t('Não baixe, não execute e não informe credenciais.'))}</small>`;
+    window.KynosI18n.translateDom(output, state.language);
+    animateCounters(output);
+    return;
+  }
+  meter.dataset.risk = 'medium';
+  output.className = 'quick-safety-result is-warning';
+  output.innerHTML = `<strong>${escapeHtml(t('Não encontrado como projeto confirmado no snapshot.'))}</strong><p>${escapeHtml(t('Isso não confirma que seja golpe nem que seja seguro. Nenhuma verificação ao vivo foi feita.'))}</p>`;
+  window.KynosI18n.translateDom(output, state.language);
+}
+
+function setupQuickUtilities(snapshot) {
+  const setup = readSetup();
+  const freeSpaceInput = byId('quick-free-space');
+  const ramInput = byId('quick-ram');
+  freeSpaceInput.value = String(setup.freeSpaceGb);
+  ramInput.value = String(setup.ramGb);
+  freeSpaceInput.addEventListener('input', updateQuickReadiness);
+  ramInput.addEventListener('input', updateQuickReadiness);
+  const efforts = snapshot && Array.isArray(snapshot.efforts) ? snapshot.efforts : [];
+  quickProjects = efforts.filter((project) => project && project.name);
+  const select = byId('quick-project-select');
+  select.innerHTML = `<option value="">${escapeHtml(t('Selecione um projeto acompanhado'))}</option>${quickProjects.map((project, index) =>
+    `<option value="${index}">${escapeHtml(project.name)}${project.repo ? ` · ${escapeHtml(project.repo)}` : ''}</option>`).join('')}`;
+  const offlineIndex = quickProjects.findIndex((project) => isInactiveProject(project));
+  select.value = String(offlineIndex >= 0 ? offlineIndex : 0);
+  select.addEventListener('change', updateQuickProjectStatus);
+  byId('quick-safety-check').addEventListener('click', () => updateFakeRadar(snapshot));
+  byId('quick-safety-query').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      updateFakeRadar(snapshot);
+    }
+  });
+  updateQuickReadiness();
+  updateQuickProjectStatus();
+  updateFakeRadar(snapshot);
 }
 
 function renderPortwatchError(error) {
@@ -1707,7 +2539,7 @@ function renderRepositoryCard(repo, project, milestones, rank, inactive) {
   }).join('')}</div>
       </div>
       <div class="repo-progress">
-        <div class="progress-label"><span>${escapeHtml(label)}</span><b>${progress}%</b></div>
+        <div class="progress-label"><span>${escapeHtml(label)}</span><b>${counterMarkup(progress, 'percent')}%</b></div>
         <div class="progress-track"><span style="width:${progress}%"></span></div>
         <div class="milestone-tags">${milestoneTags.map((milestone) => {
     const reachedMilestone = typeof milestone.done === 'boolean'
@@ -1769,10 +2601,35 @@ function renderRepositories(items, progressData = portwatchData || PORTWATCH_FAL
 }
 
 function formatNewsDate(value) {
-  const date = new Date(/^\d{4}-\d{2}-\d{2}$/.test(String(value)) ? `${value}T12:00:00` : value);
-  if (Number.isNaN(date.getTime())) return String(value || '');
+  const source = String(value || '').trim();
   const locale = { pt: 'pt-BR', en: 'en', es: 'es', zh: 'zh-CN' }[state.language];
-  return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(source)) {
+    const date = new Date(`${source}T12:00:00Z`);
+    return `${new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).format(date)} · ${t('horário não informado')}`;
+  }
+  const date = new Date(source);
+  if (Number.isNaN(date.getTime())) return source || t('Data não informada');
+  const formatted = new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short'
+  }).format(date);
+  return `${formatted} · ${t('horário local')}`;
+}
+
+function publicationTimeMarkup(value, className = '') {
+  const source = String(value || '').trim();
+  const hasTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/i.test(source);
+  const date = new Date(source);
+  const isValid = !Number.isNaN(date.getTime());
+  const datetime = isValid ? (hasTime ? date.toISOString() : source) : '';
+  const title = hasTime && isValid
+    ? `UTC: ${date.toISOString()}`
+    : t('A fonte não informou o horário de publicação.');
+  return `<time${className ? ` class="${escapeHtml(className)}"` : ''}${datetime ? ` datetime="${escapeHtml(datetime)}"` : ''} title="${escapeHtml(title)}">${escapeHtml(formatNewsDate(source))}</time>`;
 }
 
 function formatPercent(value) {
@@ -1783,7 +2640,7 @@ function formatPercent(value) {
 function renderStoryFeature(story, target) {
   target.innerHTML = `
     <div class="news-feature-content">
-      <div class="news-feature-meta"><span class="news-feature-kicker">${escapeHtml(t('Manchete em destaque'))}</span><span class="news-category">${escapeHtml(t(story.category))}</span><time>${escapeHtml(formatNewsDate(story.date))}</time></div>
+      <div class="news-feature-meta"><span class="news-feature-kicker">${escapeHtml(t('Manchete em destaque'))}</span><span class="news-category">${escapeHtml(t(story.category))}</span>${publicationTimeMarkup(story.date)}</div>
       <h3>${escapeHtml(story.title)}</h3>
       <p>${escapeHtml(story.summary)}</p>
       <div class="news-source-links">${(story.sources || []).map((source) => `<a class="text-link" href="${escapeHtml(safeUrl(source.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(source.title)}">${escapeHtml(source.outlet)} ↗</a>`).join('')}</div>
@@ -1794,7 +2651,7 @@ function renderStoryFeature(story, target) {
 
 function renderStoryCard(story, featured = false) {
   return `<article class="news-card ${featured ? 'news-card--featured' : ''}">
-    <div class="news-card-top"><span class="news-category">${escapeHtml(t(story.category))}</span><time>${escapeHtml(formatNewsDate(story.date))}</time></div>
+    <div class="news-card-top"><span class="news-category">${escapeHtml(t(story.category))}</span>${publicationTimeMarkup(story.date)}</div>
     <h3>${escapeHtml(localizedValue(story, 'title') || story.title)}</h3>
     <p>${escapeHtml(localizedValue(story, 'summary') || story.summary)}</p>
     <div class="news-source-links">${(story.sources || []).map((source) => `<a class="text-link" href="${escapeHtml(safeUrl(source.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(source.title)}">${escapeHtml(source.outlet)} ↗</a>`).join('')}</div>
@@ -1894,7 +2751,7 @@ function renderPortalHome(data) {
 function renderTrackerProjectCard(project, rank, leaderId) {
   const inactive = project.status === 'offline';
   const featured = !inactive && project.id === leaderId;
-  const badge = inactive ? t('Fora do ar') : `${formatPercent(project.percent)}% · ${t(project.stage)}`;
+  const badge = inactive ? t('Fora do ar') : `${counterMarkup(project.percent, 'percent')}% · ${t(project.stage)}`;
   const stats = [
     project.stars != null ? `${counterMarkup(project.stars)} ${escapeHtml(t('estrelas'))}` : '',
     project.forks != null ? `${counterMarkup(project.forks)} ${escapeHtml(t('forks'))}` : ''
@@ -1903,7 +2760,7 @@ function renderTrackerProjectCard(project, rank, leaderId) {
     <div class="rank-badge ${inactive ? 'inactive-badge' : ''}">${inactive ? t('FORA') : `#${rank}`}</div>
     <div class="repo-main">
       <div class="repo-title-row"><div><h3>${escapeHtml(project.name)}</h3><span class="repo-slug">${escapeHtml(project.repo)}</span></div></div>
-      <div class="badge-row"><span class="status-badge ${featured || inactive ? 'warning' : 'accent'}">${escapeHtml(featured ? t('Projeto mais avançado') : badge)}</span><span class="status-badge">${escapeHtml(t(project.tier === 'tracked' ? 'Projeto acompanhado' : 'Em observação'))}</span><span class="status-badge">${escapeHtml(t('Relato não verificado independentemente'))}</span></div>
+      <div class="badge-row"><span class="status-badge ${featured || inactive ? 'warning' : 'accent'}">${featured ? escapeHtml(t('Projeto mais avançado')) : badge}</span><span class="status-badge">${escapeHtml(t(project.tier === 'tracked' ? 'Projeto acompanhado' : 'Em observação'))}</span><span class="status-badge">${escapeHtml(t('Relato não verificado independentemente'))}</span></div>
       <p class="repo-description">${escapeHtml(project.summary)}</p>
       ${inactive ? `<p class="repo-inactive-note">${escapeHtml(t('Registro histórico: fora do ar e excluído do ranking ativo.'))}</p>` : ''}
       ${stats ? `<p class="repo-author">${escapeHtml(stats)} · ${escapeHtml(t('snapshot, não ao vivo'))}</p>` : ''}
@@ -1912,7 +2769,7 @@ function renderTrackerProjectCard(project, rank, leaderId) {
     <div class="repo-progress">
     <div class="progress-label"><span>${escapeHtml(t(inactive ? 'Último marco' : 'Marco atual'))} · ${escapeHtml(t(project.stage))}</span><b>${counterMarkup(project.percent, 'percent')}%</b></div>
     <div class="progress-track" role="progressbar" aria-label="${escapeHtml(`${project.name}: ${formatPercent(project.percent)}%`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${project.percent}"><span data-progress-value="${Number(project.percent) || 0}"></span></div>
-      <small>${escapeHtml(project.verification)}</small>
+      <small>${escapeHtml(project.verification)} · ${escapeHtml(t('Leitura do snapshot:'))} ${escapeHtml(formatNewsDate(trackerData && trackerData.updatedAt))}</small>
     </div>
   </article>`;
 }
@@ -1962,6 +2819,7 @@ function renderTrackerDetails(data) {
   byId('tracker-exe').innerHTML = `
     <span class="section-kicker">${escapeHtml(t('STATUS DO EXECUTÁVEL'))}</span>
     <h2>${escapeHtml(t(exe.status))}</h2>
+    <small>${escapeHtml(t('Relato registrado em:'))} ${publicationTimeMarkup(exe.releasedAt)}</small>
     <p>${escapeHtml(exe.summary)}</p>
     <p class="tracker-safety-warning"><b>${escapeHtml(t('Alerta de segurança'))}</b> ${escapeHtml(exe.safety)}</p>
     <a class="text-link" href="${escapeHtml(safeUrl(exe.source))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Ler fonte citada'))} ↗</a>`;
@@ -1970,18 +2828,19 @@ function renderTrackerDetails(data) {
     <h2>${escapeHtml(t('Scout e triagem'))}</h2>
     <p>${escapeHtml(exe ? data.scout.summary : '')}</p>
     <div class="tracker-tags">${data.scout.sources.map((source) => `<span>${escapeHtml(source)}</span>`).join('')}</div>
-    <small>${escapeHtml(t('Última varredura'))}: ${escapeHtml(formatNewsDate(data.scout.lastRun))} · ${data.candidates} ${escapeHtml(t('novos candidatos aguardam confirmação'))}</small>`;
+    <small>${escapeHtml(t('Última varredura'))}: ${publicationTimeMarkup(data.scout.lastRun)} · ${data.candidates} ${escapeHtml(t('novos candidatos aguardam confirmação'))}</small>`;
   byId('tracker-changes').innerHTML = data.changes.slice().reverse().map((change) => `
-    <article class="tracker-change panel"><span class="tracker-change-kind">${escapeHtml(t(change.kind))}</span><time>${escapeHtml(formatNewsDate(change.date))}</time><p>${escapeHtml(change.summary)}</p></article>`).join('');
+    <article class="tracker-change panel"><span class="tracker-change-kind">${escapeHtml(t(change.kind))}</span>${publicationTimeMarkup(change.date)}<p>${escapeHtml(change.summary)}</p></article>`).join('');
   byId('tracker-tools').innerHTML = data.tools.map((tool) => `
     <article class="tracker-tool panel"><span class="section-kicker">${escapeHtml(t(tool.kind))}</span><h3>${escapeHtml(tool.name)}</h3><p>${escapeHtml(tool.description)}</p><a class="text-link" href="${escapeHtml(safeUrl(tool.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(tool.repo)} ↗</a></article>`).join('');
   byId('tracker-flagged').innerHTML = data.flagged.map((item) => `
     <article class="tracker-alert panel"><span class="status-badge warning">${item.count ? `${item.count} ${escapeHtml(t('itens sinalizados'))}` : escapeHtml(t('Alerta'))}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.summary)}</p>${item.examples.length ? `<small>${escapeHtml(t('Exemplos'))}: ${item.examples.map(escapeHtml).join(' · ')}</small>` : ''}</article>`).join('');
   byId('tracker-ignored').innerHTML = `<span class="section-kicker">${escapeHtml(t('TRIAGEM'))}</span><strong>${data.ignored.count} ${escapeHtml(t('itens ignorados ou não confirmados'))}</strong><p>${escapeHtml(data.ignored.summary)}</p>`;
   byId('tracker-dmca').innerHTML = data.dmca.map((item) => `
-    <article class="tracker-dmca panel"><span class="section-kicker">${escapeHtml(formatNewsDate(item.date))}</span><strong>${item.repositories} ${escapeHtml(t('repositórios de GTA VI associados'))}</strong><p>${escapeHtml(item.summary)}</p><a class="text-link" href="${escapeHtml(safeUrl(item.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Abrir registro público'))} ↗</a></article>`).join('');
+    <article class="tracker-dmca panel">${publicationTimeMarkup(item.date, 'section-kicker')}<strong>${item.repositories} ${escapeHtml(t('repositórios de GTA VI associados'))}</strong><p>${escapeHtml(item.summary)}</p><a class="text-link" href="${escapeHtml(safeUrl(item.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Abrir registro público'))} ↗</a></article>`).join('');
   byId('tracker-headlines').innerHTML = data.headlines.slice(0, 12).map((headline) => `
-    <article class="tracker-headline panel"><span>${escapeHtml(headline.outlet)} · ${escapeHtml(formatNewsDate(headline.date))}</span><h3>${escapeHtml(headline.title)}</h3><a class="text-link" href="${escapeHtml(safeUrl(headline.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Fonte original'))} ↗</a></article>`).join('');
+    <article class="tracker-headline panel"><span>${escapeHtml(headline.outlet)}</span>${publicationTimeMarkup(headline.date)}<h3>${escapeHtml(headline.title)}</h3><a class="text-link" href="${escapeHtml(safeUrl(headline.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Fonte original'))} ↗</a></article>`).join('');
+  byId('tracker-updated').setAttribute('datetime', data.updatedAt || '');
   byId('tracker-updated').textContent = formatNewsDate(data.updatedAt);
   document.querySelectorAll('#tracker .tracker-content > *, #tracker .tracker-content article').forEach((element) => {
     window.KynosI18n.translateDom(element, state.language);
@@ -1994,7 +2853,7 @@ function renderXclFeed(items, statusMessage) {
   const list = byId('xcl-news-list');
   list.innerHTML = xclFeedItems.length ? xclFeedItems.map((item, index) => `
     <article class="news-card xcl-feed-card">
-      <div class="news-card-top"><span class="news-category">${escapeHtml(t(item.category))}</span><time>${escapeHtml(formatFeedDate(item.date))}</time></div>
+      <div class="news-card-top"><span class="news-category">${escapeHtml(t(item.category))}</span>${publicationTimeMarkup(item.date)}</div>
       <h3>${escapeHtml(t(item.title))}</h3><p>${escapeHtml(t(item.summary))}</p>
       <div class="xcl-feed-card-actions">
         <a class="text-link" href="${escapeHtml(safeUrl(item.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Ver no GitHub'))} ↗</a>
@@ -2007,14 +2866,12 @@ function renderXclFeed(items, statusMessage) {
 }
 
 function formatFeedDate(value) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value || '');
-  return new Intl.DateTimeFormat(document.documentElement.lang || 'pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(date);
+  return formatNewsDate(value);
 }
 
 function xclItemToNews(item) {
   return {
-    date: formatFeedDate(item.date),
+    date: item.date,
     category: t(item.category),
     title: t(item.title),
     summary: t(item.summary),
@@ -2455,10 +3312,12 @@ async function init() {
     renderTrackerProjects(trackerData);
     renderNews(trackerData);
     renderTrackerDetails(trackerData);
+    setupNotificationCenter(trackerData);
     setupXclFeed();
     renderDiscords(data.discords);
     initAdvancedTools();
     loadSharedSetup();
+    setupQuickUtilities(trackerData);
     const initialPage = window.location.hash.slice(1);
     setPage(initialPage || 'home', false);
   } catch (error) {

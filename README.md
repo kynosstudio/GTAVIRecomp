@@ -22,7 +22,11 @@ O gerador valida se todas as notícias e manchetes têm uma tradução revisada 
 - `data/tracker-pt-BR.json`: conteúdo enxuto para o site, com resumos em PT-BR, dados de projetos, ferramentas, alertas, mudanças, scout, DMCA e manchetes. Os links originais são preservados.
 - `data/file-fallback.js`: pacote local de fallback para `file://`, com os dados do simulador e da comunidade junto ao tracker traduzido. Em HTTP, o portal carrega os JSONs normalmente e não baixa esse pacote.
 
-As traduções editoriais ficam no dicionário `scripts/build_tracker_ptbr.py`. Se o tracker trouxer IDs de notícias ou títulos de manchetes novos, o gerador interrompe com erro até que a tradução seja adicionada. O histórico bruto `history` não é convertido em gráfico; só exiba uma série temporal se ela for verificada e tiver dados suficientes.
+As traduções editoriais ficam no dicionário `scripts/build_tracker_ptbr.py`. Se o tracker trouxer IDs de notícias ou títulos de manchetes novos, o gerador interrompe com erro até que a tradução seja adicionada. Datas sem hora são exibidas como “horário não informado”; timestamps completos aparecem no fuso local do navegador, com o fuso indicado e o valor UTC disponível no detalhe.
+
+A projeção de prazo da corrida só é calculada se `history` contiver ao menos duas amostras do mesmo projeto, com timestamps ISO 8601 completos e percentuais comparáveis nos últimos 30 dias. Formatos aceitos incluem `{ "projectId": "xcl", "timestamp": "2026-11-24T01:00:00Z", "percent": 62.5 }` e snapshots `{ "timestamp": "...Z", "efforts": [{ "id": "xcl", "percent": 62.5 }] }`. Sem essa série, a interface mostra a distância até os marcos e informa que não há prazo calculável; não cria datas nem ritmo artificial. A previsão é especulativa e não representa uma data oficial de lançamento para PC.
+
+O relógio no hero usa essa mesma projeção para contar até o próximo marco acompanhado de jogabilidade (70%, 30 FPS ou estabilidade). Ele só inicia com histórico verificável, atualiza a cada segundo e, sem amostras suficientes, mantém traços em vez de inventar um prazo. Se a previsão passar sem confirmação do tracker, o relógio chega a zero e informa que o marco ainda não foi confirmado.
 
 O snapshot deste workspace aponta VIctory em 67%, XCL em 62,5% e TuxBox em 40%. O projeto ativo com maior percentual é destacado automaticamente na home e no ranking; projetos fora do ar ficam no registro histórico e não entram na liderança ativa.
 
@@ -36,6 +40,8 @@ Os arquivos JSON em `data/` concentram o conteúdo e os perfis editáveis do sit
 - `hardware.json`: edite as metas de desempenho, os perfis de console, o catálogo de placas de vídeo e processadores, as capacidades e frequências de memória, o armazenamento e os pesos da estimativa. Há metas próprias para 720p, 900p e resoluções maiores; cada meta define alvos de GPU, CPU, VRAM, RAM, largura de banda e classe de SSD.
 
 As métricas dos projetos são o snapshot do tracker, não contagens ao vivo. O feed separado do XCL é o único trecho que consulta a API pública do GitHub para atividade recente.
+
+Na seção **Meu PC Roda GTAVI**, a carteirinha pode ser copiada como texto para Discord/X/WhatsApp ou baixada como SVG. Os cenários Caos e presets extremos reaproveitam as pontuações locais do simulador; FSR/DLSS não recebem bônus estimado, e a ferramenta de custo-benefício não inventa preços. O radar de segurança consulta apenas o snapshot local: não visita links, não verifica disponibilidade ao vivo e não deve receber senhas ou tokens.
 
 Os seletores de GPU e CPU organizam os modelos por fabricante, série e disponibilidade de gráfico integrado. A busca ignora diferenças de maiúsculas, acentos, espaços e hifens, informa a quantidade encontrada e mantém uma seleção válida. O catálogo de CPUs inclui Ryzen de várias gerações, Intel Core da 6ª à 14ª geração e Core Ultra; os Intel de 11ª geração e variantes F/KF aparecem no grupo de vídeo correspondente. As pontuações e os FPS são projeções comparativas, não medições nem requisitos oficiais da Rockstar Games. GPUs Radeon RX 8000 indicadas como perfis estimados são projeções.
 
