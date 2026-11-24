@@ -1,0 +1,16 @@
+{
+  "repository": "ivall/xcl",
+  "updatedAt": "2026-11-23T20:57:00-03:00",
+  "source": "PortWatch VI · atualização manual",
+  "items": [
+    {
+      "kind": "manual_snapshot",
+      "date": "2026-11-23T20:57:00-03:00",
+      "actor": "PortWatch VI",
+      "title": "XCL alcança o menu principal de GTA VI",
+      "summary": "Resumo manual: o tracker reporta menus iniciais a 30 FPS e resposta de controle em testes autodeclarados; gameplay ainda não foi alcançado.",
+      "url": "https://github.com/ivall/xcl",
+      "category": "Snapshot manual · PortWatch VI"
+    }
+  ]
+}

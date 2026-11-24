@@ -1,0 +1,18 @@
+{
+  "official": {
+    "name": "Comunidade Kynos GTA VI Recomp",
+    "badge": "PROJETO OFICIAL · PARTICIPE",
+    "description": "Entre no servidor oficial para acompanhar o site, sugerir melhorias, compartilhar notícias ou ajudar a equipe com conteúdo e desenvolvimento.",
+    "url": "https://discord.gg/TnPaeUAPKX",
+    "initials": "K"
+  },
+  "affiliates": [
+    {
+      "name": "Leonida",
+      "description": "Participe da comunidade em torno do projeto de recompilação estática de código aberto e acompanhe o desenvolvimento.",
+      "url": "https://discord.gg/rexed",
+      "initials": "L",
+      "tags": ["RECOMPILAÇÃO", "CÓDIGO ABERTO"]
+    }
+  ]
+}

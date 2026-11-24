@@ -1,0 +1,239 @@
+[
+  {
+    "rank": 1,
+    "trackerId": "xcl",
+    "status": "active",
+    "name": "XCL",
+    "repo": "ivall/xcl",
+    "url": "https://github.com/ivall/xcl",
+    "avatar": "https://github.com/ivall.png?size=88",
+    "initials": "XC",
+    "statuses": [
+      { "label": "CAMADA DE COMPATIBILIDADE", "style": "accent" },
+      { "label": "JOGOS DE XBOX SERIES", "style": "green" },
+      { "label": "AUTODECLARADO", "style": "" },
+      { "label": "MINECRAFT PREVIEW E UNICORN OVERLORD JOGÁVEIS", "style": "green" }
+    ],
+    "author": "ivall",
+    "description": "Camada de compatibilidade estilo Wine para Windows que executa código nativo de jogos de Xbox Series, reimplementa bibliotecas do sistema do console e recompila shaders RDNA2 para DXIL. Em testes autodeclarados, exibe as telas de conta e menus iniciais a 30 FPS com suporte a controle; gameplay ainda não foi alcançado. Projeto independente e comunitário, sem afiliação oficial com Microsoft, Xbox, Rockstar Games, Take-Two ou AMD.",
+    "progress": { "label": "MARCO ATUAL · MENU PRINCIPAL", "percent": 55 },
+    "milestones": [
+      { "label": "Preparação", "done": true },
+      { "label": "Exe rodando", "done": true },
+      { "label": "Primeiro frame", "done": true },
+      { "label": "Menu principal · atual", "done": true },
+      { "label": "Dentro do jogo · 70%", "done": false },
+      { "label": "30 FPS · 85%", "done": false },
+      { "label": "Estável · 100%", "done": false }
+    ],
+    "details": {
+      "groundwork": [
+        { "label": "Loader e bibliotecas do sistema", "value": 90 },
+        { "label": "Tradução de shaders", "value": 90 },
+        { "label": "Camada gráfica", "value": 85 },
+        { "label": "Comprovado em outro jogo", "value": 90, "note": "Minecraft Preview e Unicorn Overlord jogáveis" }
+      ],
+      "highlights": [
+        "O executável exibe a tela de conta e menus de configurações a 30 FPS com resposta de controle.",
+        "Execução separada de um colaborador com RTX 5090 alcançou os mesmos menus; partes foram integradas pelo mantenedor.",
+        "Todos os 26.698 programas RDNA2 do pacote de shaders são convertidos para HLSL; amostras compilam para DXIL."
+      ],
+      "blockers": [
+        "Gameplay ainda não alcançado; os pipelines de malha do minimapa ainda são recusados.",
+        "Cerca de 15 GB de memória comprometida apenas nos menus, testado em um PC com 32 GB de RAM.",
+        "Resultados autodeclarados apenas em texto, ainda não reproduzidos externamente."
+      ],
+      "metrics": [
+        { "label": "Estrelas", "value": "1,1k ★" },
+        { "label": "Forks", "value": "116" },
+        { "label": "Watchers", "value": "62" },
+        { "label": "Commits / 7 dias", "value": "100+" }
+      ],
+      "evaluatedAt": "23/11/2026",
+      "metricsNote": "Snapshot de referência do tracker PortWatch VI; não são contagens ao vivo."
+    },
+    "links": [
+      { "label": "Abrir repositório XCL", "url": "https://github.com/ivall/xcl", "primary": true }
+    ]
+  },
+  {
+    "rank": 2,
+    "trackerId": "marvis",
+    "status": "active",
+    "name": "VIctory",
+    "repo": "Marvisak/VIctory",
+    "avatar": "https://github.com/Marvisak.png?size=88",
+    "initials": "VI",
+    "statuses": [
+      { "label": "GTA VI · 55%", "style": "accent" },
+      { "label": "MENU PRINCIPAL", "style": "green" },
+      { "label": "AUTODECLARADO", "style": "" }
+    ],
+    "author": "Marvisak",
+    "description": "Camada em Rust que executa nativamente o código de GTA VI. Uma transmissão mostrou o menu por volta de 15 FPS; o README relata telas de inicialização a 30 FPS e carregamento até o mundo aberto, ainda com imagem preta. Resultado autodeclarado em uma única máquina, sem reprodução independente.",
+    "links": [
+      { "label": "Ver repositório", "url": "https://github.com/Marvisak/VIctory", "primary": true }
+    ],
+    "translations": {
+      "en": {
+        "description": "A Rust layer that runs GTA VI code natively. A livestream showed the menu at about 15 FPS; the README reports boot screens at 30 FPS and loading into the open world, still with a black image. Self-reported on one machine and not independently reproduced.",
+        "statusLabels": ["GTA VI · 55%", "MAIN MENU", "SELF-REPORTED"],
+        "linkLabels": ["View repository"]
+      },
+      "es": {
+        "description": "Una capa en Rust que ejecuta de forma nativa el código de GTA VI. Una transmisión mostró el menú a unos 15 FPS; el README informa pantallas de inicio a 30 FPS y carga hasta el mundo abierto, todavía con imagen negra. Resultado autodeclarado en una sola máquina y sin reproducción independiente.",
+        "statusLabels": ["GTA VI · 55%", "MENÚ PRINCIPAL", "AUTODECLARADO"],
+        "linkLabels": ["Ver repositorio"]
+      },
+      "zh": {
+        "description": "一个以 Rust 编写、可原生运行 GTA VI 代码的兼容层。直播画面显示菜单约为 15 FPS；项目 README 声称启动界面可达 30 FPS，并能加载到开放世界，但画面仍为黑屏。该结果为单台设备上的自述，尚未得到独立复现。",
+        "statusLabels": ["GTA VI · 55%", "主菜单", "自述结果"],
+        "linkLabels": ["查看仓库"]
+      }
+    }
+  },
+  {
+    "rank": 3,
+    "trackerId": "tuxbox",
+    "status": "active",
+    "name": "TuxBox",
+    "repo": "brcly/TuxBox",
+    "avatar": "https://github.com/brcly.png?size=88",
+    "initials": "TB",
+    "statuses": [
+      { "label": "GTA VI · 25%", "style": "accent" },
+      { "label": "LINUX / PROTON", "style": "" },
+      { "label": "TELA AINDA PRETA", "style": "" }
+    ],
+    "author": "brcly",
+    "description": "Camada nativa para jogos Xbox Series, testada principalmente no Linux com Proton. O executável de GTA VI abre uma janela em 4K e inicializa áudio e arquivos do jogo, mas ainda não exibe logo ou menu. Relato autodeclarado.",
+    "links": [
+      { "label": "Ver repositório", "url": "https://github.com/brcly/TuxBox", "primary": true }
+    ],
+    "translations": {
+      "en": {
+        "description": "A native-first layer for Xbox Series games, tested mostly on Linux through Proton. GTA VI's executable opens a 4K window and initializes audio and game archives, but no logo or menu is visible yet. Self-reported.",
+        "statusLabels": ["GTA VI · 25%", "LINUX / PROTON", "SCREEN STILL BLACK"],
+        "linkLabels": ["View repository"]
+      },
+      "es": {
+        "description": "Una capa nativa para juegos de Xbox Series, probada principalmente en Linux mediante Proton. El ejecutable de GTA VI abre una ventana 4K e inicializa el audio y los archivos del juego, pero aún no muestra el logotipo ni el menú. Autodeclarado.",
+        "statusLabels": ["GTA VI · 25%", "LINUX / PROTON", "PANTALLA AÚN NEGRA"],
+        "linkLabels": ["Ver repositorio"]
+      },
+      "zh": {
+        "description": "面向 Xbox Series 游戏的原生兼容层，主要在 Linux/Proton 环境下测试。GTA VI 可执行文件可打开 4K 窗口并初始化音频与游戏文件，但尚未显示标志或菜单。该结果为自述。",
+        "statusLabels": ["GTA VI · 25%", "LINUX / PROTON", "画面仍为黑屏"],
+        "linkLabels": ["查看仓库"]
+      }
+    }
+  },
+  {
+    "rank": 4,
+    "trackerId": "xbox-emulator",
+    "status": "active",
+    "name": "xbox-emulator",
+    "repo": "omonkeyz/xbox-emulator",
+    "avatar": "https://github.com/omonkeyz.png?size=88",
+    "initials": "XE",
+    "statuses": [
+      { "label": "RUNTIME DE COMPATIBILIDADE", "style": "accent" },
+      { "label": "GTA VI AINDA NÃO EXECUTADO", "style": "" },
+      { "label": "OUTROS JOGOS TESTADOS", "style": "green" }
+    ],
+    "author": "omonkeyz",
+    "description": "Runtime em Rust para executar builds de Xbox Series como processos do Windows. Relata testes com Trackmania, Terraria e Fortnite; já analisou parte dos shaders de GTA VI, mas ainda não executou o jogo.",
+    "links": [
+      { "label": "Ver repositório", "url": "https://github.com/omonkeyz/xbox-emulator", "primary": true }
+    ],
+    "translations": {
+      "en": {
+        "description": "A Rust runtime for running Xbox Series builds as Windows processes. It reports tests with Trackmania, Terraria, and Fortnite and has analyzed part of GTA VI's shader pack, but has not run the game.",
+        "statusLabels": ["COMPATIBILITY RUNTIME", "GTA VI NOT RUN", "OTHER GAMES TESTED"],
+        "linkLabels": ["View repository"]
+      },
+      "es": {
+        "description": "Un runtime en Rust para ejecutar builds de Xbox Series como procesos de Windows. Informa pruebas con Trackmania, Terraria y Fortnite y ya analizó parte de los shaders de GTA VI, pero todavía no ejecutó el juego.",
+        "statusLabels": ["RUNTIME DE COMPATIBILIDAD", "GTA VI AÚN NO EJECUTADO", "OTROS JUEGOS PROBADOS"],
+        "linkLabels": ["Ver repositorio"]
+      },
+      "zh": {
+        "description": "一个以 Rust 编写的运行时，可将 Xbox Series 游戏版本作为 Windows 进程运行。项目报告了 Trackmania、Terraria 和 Fortnite 的测试，并分析了部分 GTA VI 着色器，但尚未运行 GTA VI。",
+        "statusLabels": ["兼容运行时", "尚未运行 GTA VI", "已测试其他游戏"],
+        "linkLabels": ["查看仓库"]
+      }
+    }
+  },
+  {
+    "rank": 5,
+    "trackerId": "scarlettx",
+    "status": "active",
+    "name": "ScarlettX",
+    "repo": "Freminet/ScarlettX",
+    "avatar": "https://github.com/Freminet.png?size=88",
+    "initials": "SX",
+    "statuses": [
+      { "label": "EMULADOR HLE", "style": "accent" },
+      { "label": "OUTROS TÍTULOS JOGÁVEIS", "style": "green" },
+      { "label": "GTA VI AINDA NÃO INICIADO", "style": "" }
+    ],
+    "author": "Freminet",
+    "description": "Emulador HLE clean-room do Scarlett OS e do runtime GDK. O projeto relata Concept Destruction e Unicorn Overlord jogáveis em Windows; ainda não iniciou GTA VI e não começou a tradução de shaders RDNA2.",
+    "links": [
+      { "label": "Ver repositório", "url": "https://github.com/Freminet/ScarlettX", "primary": true }
+    ],
+    "translations": {
+      "en": {
+        "description": "A clean-room HLE emulator for Scarlett OS and the GDK runtime. The project reports Concept Destruction and Unicorn Overlord playable on Windows; it has not started GTA VI and has not begun RDNA2 shader translation.",
+        "statusLabels": ["HLE EMULATOR", "OTHER TITLES PLAYABLE", "GTA VI NOT STARTED"],
+        "linkLabels": ["View repository"]
+      },
+      "es": {
+        "description": "Un emulador HLE clean-room de Scarlett OS y del runtime GDK. El proyecto informa que Concept Destruction y Unicorn Overlord son jugables en Windows; aún no inició GTA VI ni la traducción de shaders RDNA2.",
+        "statusLabels": ["EMULADOR HLE", "OTROS TÍTULOS JUGABLES", "GTA VI AÚN NO INICIADO"],
+        "linkLabels": ["Ver repositorio"]
+      },
+      "zh": {
+        "description": "针对 Scarlett OS 和 GDK 运行时的 clean-room HLE 模拟器。项目报告称 Concept Destruction 与 Unicorn Overlord 可在 Windows 上游玩；尚未启动 GTA VI，也未开始 RDNA2 着色器转换。",
+        "statusLabels": ["HLE 模拟器", "其他游戏可玩", "尚未启动 GTA VI"],
+        "linkLabels": ["查看仓库"]
+      }
+    }
+  },
+  {
+    "status": "nuked",
+    "trackerId": "leonida",
+    "name": "Leonida",
+    "repo": "ItsNotRexed/Leonida",
+    "initials": "Le",
+    "statuses": [
+      { "label": "REPOSITÓRIO E DISCORD FORA DO AR", "style": "warning" }
+    ],
+    "author": "ItsNotRexed",
+    "description": "Projeto de recompilação estática dedicado a GTA VI. O último estado acompanhado alcançou a execução do executável, mas sem imagem visível.",
+    "statusNote": "Repositório e Discord indisponíveis; o criador publicou que está se afastando. Forks de colaboradores preservam parte do código. Fora do ranking ativo.",
+    "links": [
+      { "label": "Ver fork preservado", "url": "https://github.com/ASTROWwwW/Leonida", "primary": true }
+    ],
+    "translations": {
+      "en": {
+        "description": "A static recompilation project dedicated to GTA VI. Its last tracked state reached executable startup, but no image was visible.",
+        "statusLabels": ["REPOSITORY AND DISCORD OFFLINE"],
+        "statusNote": "The repository and Discord are unavailable; the creator posted that he is stepping away. Contributor forks preserve some of the code. Excluded from the active ranking.",
+        "linkLabels": ["View preserved fork"]
+      },
+      "es": {
+        "description": "Proyecto de recompilación estática dedicado a GTA VI. Su último estado registrado llegó a iniciar el ejecutable, pero sin imagen visible.",
+        "statusLabels": ["REPOSITORIO Y DISCORD FUERA DE LÍNEA"],
+        "statusNote": "El repositorio y Discord no están disponibles; el creador publicó que se aparta. Los forks de colaboradores conservan parte del código. Fuera del ranking activo.",
+        "linkLabels": ["Ver fork conservado"]
+      },
+      "zh": {
+        "description": "一个专为 GTA VI 开发的静态重编译项目。最后记录的状态已启动游戏可执行文件，但没有显示画面。",
+        "statusLabels": ["仓库与 DISCORD 已下线"],
+        "statusNote": "仓库和 Discord 均无法访问；创建者发文称将退出。贡献者的 fork 保存了部分代码。已移出活跃排名。",
+        "linkLabels": ["查看保留的 fork"]
+      }
+    }
+  }
+]

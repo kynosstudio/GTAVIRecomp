@@ -1,0 +1,121 @@
+{
+  "updatedAt": "2026-11-23",
+  "sourceUrl": "https://portwatch-vi.xyz/#top",
+  "sourceNote": "Conteúdo e posições atualizados manualmente com base no tracker PortWatch VI.",
+  "translations": {
+    "en": {
+      "sourceNote": "Stories and rankings are updated manually from the PortWatch VI tracker."
+    },
+    "es": {
+      "sourceNote": "Las noticias y posiciones se actualizan manualmente con base en el tracker PortWatch VI."
+    },
+    "zh": {
+      "sourceNote": "新闻与排名依据 PortWatch VI 跟踪器手动更新。"
+    }
+  },
+  "headline": {
+    "date": "2026-11-23",
+    "category": "PROJETO FORA DO AR",
+    "title": "Leonida perde o repositório e o Discord; criador anuncia afastamento",
+    "summary": "Em 23/11, o repositório deixou de existir no GitHub e o convite do Discord parou de resolver. O criador publicou que estava saindo do projeto. O tracker não encontrou aviso público de DMCA e não confirma o motivo da remoção. Forks de colaboradores ainda preservam o código; Leonida permanece no registro histórico, mas não conta no ranking ativo.",
+    "url": "https://portwatch-vi.xyz/#top",
+    "linkLabel": "Acompanhar no PortWatch VI",
+    "translations": {
+      "en": {
+        "category": "PROJECT OFFLINE",
+        "title": "Leonida loses its GitHub repository and Discord as its creator steps away",
+        "summary": "On Nov 23, the GitHub repository disappeared and the Discord invite stopped resolving. The creator posted that he was leaving the project. The tracker found no public DMCA notice and cannot confirm why the repository was removed. Contributor forks still preserve the code; Leonida remains in the historical record but is excluded from the active ranking.",
+        "linkLabel": "Follow PortWatch VI"
+      },
+      "es": {
+        "category": "PROYECTO FUERA DE LÍNEA",
+        "title": "Leonida pierde su repositorio de GitHub y Discord; su creador anuncia que se aparta",
+        "summary": "El 23/11, el repositorio dejó de estar disponible en GitHub y la invitación de Discord dejó de funcionar. El creador publicó que abandonaba el proyecto. El tracker no encontró un aviso público de DMCA y no confirma el motivo de la eliminación. Los forks de colaboradores aún conservan el código; Leonida permanece en el registro histórico, pero queda fuera del ranking activo.",
+        "linkLabel": "Seguir en PortWatch VI"
+      },
+      "zh": {
+        "category": "项目已下线",
+        "title": "Leonida 的 GitHub 仓库与 Discord 消失，创建者宣布退出",
+        "summary": "11 月 23 日，GitHub 仓库消失，Discord 邀请链接也无法使用。创建者发文称将离开项目。跟踪器未发现公开的 DMCA 通知，因此无法确认仓库移除的原因。贡献者的 fork 仍保存着代码；Leonida 保留在历史记录中，但不再计入活跃排名。",
+        "linkLabel": "查看 PortWatch VI"
+      }
+    }
+  },
+  "topThree": [
+    {
+      "date": "2026-11-23",
+      "category": "XCL · 55%",
+      "title": "XCL chega ao menu principal e divide a liderança dos marcos",
+      "summary": "O tracker atribui 55% e o estágio Menu principal ao XCL. Registra tela de conta e menus de configurações a 30 FPS com controle em um teste autodeclarado; gameplay ainda não foi alcançado.",
+      "url": "https://github.com/ivall/xcl",
+      "linkLabel": "Ver repositório",
+      "translations": {
+        "en": {
+          "category": "XCL · 55%",
+          "title": "XCL reaches the main menu and shares the milestone lead",
+          "summary": "The tracker rates XCL at 55%, the Main menu stage. It records an account screen and settings menus at 30 FPS with controller input in a self-reported test; gameplay has not been reached."
+        },
+        "es": {
+          "category": "XCL · 55%",
+          "title": "XCL llega al menú principal y comparte el liderazgo por hitos",
+          "summary": "El tracker sitúa a XCL en 55%, en la etapa Menú principal. Registra una pantalla de cuenta y menús de ajustes a 30 FPS con mando en una prueba autodeclarada; aún no se ha alcanzado el juego."
+        },
+        "zh": {
+          "category": "XCL · 55%",
+          "title": "XCL 到达主菜单阶段，与另一项目并列领先",
+          "summary": "跟踪器将 XCL 评为 55%，处于主菜单阶段。记录显示，一项自述测试中的账户界面和设置菜单可在手柄操作下达到 30 FPS；尚未进入实际游戏。"
+        }
+      }
+    },
+    {
+      "date": "2026-11-23",
+      "category": "VICTORY · 55%",
+      "title": "VIctory também chega ao menu; resultado ainda aguarda reprodução independente",
+      "summary": "O tracker coloca o VIctory em 55%, no estágio Menu principal. Uma transmissão mostrou o menu perto de 15 FPS; o README relata telas iniciais a 30 FPS e carregamento até um mundo com imagem preta. Os testes seguem autodeclarados em um único PC.",
+      "url": "https://github.com/Marvisak/VIctory",
+      "linkLabel": "Ver repositório",
+      "translations": {
+        "en": {
+          "category": "VICTORY · 55%",
+          "title": "VIctory also reaches the menu, but independent reproduction is still pending",
+          "summary": "The tracker places VIctory at 55%, the Main menu stage. A livestream showed the menu at about 15 FPS; its README reports boot screens at 30 FPS and loading into a world with a black image. Tests remain self-reported on a single PC."
+        },
+        "es": {
+          "category": "VICTORY · 55%",
+          "title": "VIctory también llega al menú, pero aún espera una reproducción independiente",
+          "summary": "El tracker sitúa a VIctory en 55%, en la etapa Menú principal. Una transmisión mostró el menú a unos 15 FPS; su README informa pantallas iniciales a 30 FPS y carga hasta un mundo con imagen negra. Las pruebas siguen siendo autodeclaradas y se hicieron en un solo PC."
+        },
+        "zh": {
+          "category": "VICTORY · 55%",
+          "title": "VIctory 也已到达菜单阶段，仍待独立复现",
+          "summary": "跟踪器将 VIctory 列为 55%，处于主菜单阶段。直播画面显示菜单约为 15 FPS；项目 README 声称启动界面可达 30 FPS，并能加载到画面为黑色的游戏世界。测试目前仍是单台电脑上的自述结果。"
+        }
+      }
+    },
+    {
+      "date": "2026-11-23",
+      "category": "TUXBOX · 25%",
+      "title": "TuxBox abre o executável de GTA VI, mas ainda exibe uma tela preta",
+      "summary": "O estágio atual é Exe rodando, com 25%. Segundo o tracker, o executável abre uma janela em 4K e inicializa áudio e arquivos do jogo no Proton; ainda não há logo nem menu visível. Resultado autodeclarado.",
+      "url": "https://github.com/brcly/TuxBox",
+      "linkLabel": "Ver repositório",
+      "translations": {
+        "en": {
+          "category": "TUXBOX · 25%",
+          "title": "TuxBox opens GTA VI's executable, but the screen is still black",
+          "summary": "Its current stage is Executable running, at 25%. According to the tracker, the executable opens a 4K window and initializes audio and game archives through Proton; no logo or menu is visible yet. Self-reported result."
+        },
+        "es": {
+          "category": "TUXBOX · 25%",
+          "title": "TuxBox abre el ejecutable de GTA VI, pero la pantalla sigue negra",
+          "summary": "Su etapa actual es Ejecutable en marcha, con 25%. Según el tracker, el ejecutable abre una ventana 4K e inicia el audio y los archivos del juego en Proton; todavía no se ve el logotipo ni el menú. Resultado autodeclarado."
+        },
+        "zh": {
+          "category": "TUXBOX · 25%",
+          "title": "TuxBox 已启动 GTA VI 可执行文件，但画面仍为黑屏",
+          "summary": "当前阶段为可执行文件运行，进度 25%。据跟踪器称，可执行文件会在 Proton 中打开 4K 窗口并初始化音频与游戏文件；目前尚未显示标志或菜单。该结果为自述。"
+        }
+      }
+    }
+  ]
+}
