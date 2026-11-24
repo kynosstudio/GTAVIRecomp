@@ -23,7 +23,7 @@
 .xlaunch-nav { gap: 18px; }
 .xlaunch-nav a { color: #c8c0d2; text-decoration: none; font-size: 13px; font-weight: 700; transition: color .18s, transform .18s; }
 .xlaunch-nav a:hover { color: var(--x-yellow); transform: translateY(-1px); }
-.xlaunch-page { max-width: 1180px; margin: auto; padding: 44px 18px 80px; }
+.xlaunch-page { max-width: 1180px; margin: auto; padding: 24px 18px 80px; }
 .xlaunch-hero {
   min-height: 520px;
   display: grid;
@@ -65,13 +65,30 @@
 .xlaunch-member:hover { transform:translateY(-3px); border-color:rgba(0,156,59,.35); box-shadow:0 10px 24px rgba(0,0,0,.18); }
 .xlaunch-member strong { display:block; margin-bottom:5px; }
 .xlaunch-member small { color:var(--x-muted); line-height:1.45; }
-.xlaunch-roadmap { margin:0; padding:0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; list-style:none; }
-.xlaunch-roadmap li { min-height:150px; padding:16px; border:1px solid rgba(255,255,255,.08); border-radius:12px; background:var(--x-panel); }
-.xlaunch-roadmap li.done { border-color:rgba(0,156,59,.38); }
-.xlaunch-roadmap li > span { color:var(--x-yellow); font:800 12px monospace; }
-.xlaunch-roadmap li b { display:block; margin:10px 0 6px; }
-.xlaunch-roadmap li p { margin:0; color:var(--x-muted); font-size:12px; line-height:1.5; }
+.xlaunch-achievements { margin:0; padding:0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; list-style:none; }
+.xlaunch-achievements li { min-height:190px; padding:17px; display:flex; flex-direction:column; border:1px solid rgba(255,255,255,.08); border-radius:12px; background:var(--x-panel); }
+.xlaunch-achievements li.is-reported { border-color:rgba(0,156,59,.38); }
+.xlaunch-achievements li.is-current { border-color:rgba(255,223,0,.4); background:linear-gradient(155deg,rgba(255,223,0,.07),var(--x-panel) 55%); }
+.xlaunch-achievements li.is-internal-goal { border-style:dashed; border-color:rgba(131,217,158,.42); }
+.xlaunch-achievements li.is-projection { border-color:rgba(0,39,118,.65); background:linear-gradient(155deg,rgba(0,39,118,.24),var(--x-panel) 65%); }
+.xlaunch-milestone-state { margin-bottom:12px; color:var(--x-yellow); font:800 10px/1.45 monospace; letter-spacing:.4px; }
+.xlaunch-achievements li.is-internal-goal .xlaunch-milestone-state { color:#83d99e; }
+.xlaunch-achievements li.is-projection .xlaunch-milestone-state { color:#93b7ff; }
+.xlaunch-achievements li b { display:block; margin:0 0 7px; }
+.xlaunch-achievements li p { margin:0; color:var(--x-muted); font-size:12px; line-height:1.5; }
+.xlaunch-projection-days { margin:-5px 0 3px; color:var(--x-yellow); font:800 clamp(28px,3vw,40px)/1 var(--display); }
 .xlaunch-support { margin-top:46px; display:grid; grid-template-columns:minmax(0,1fr) 350px; align-items:center; gap:24px; padding:28px; border:1px solid rgba(255,223,0,.18); border-radius:16px; background:linear-gradient(135deg,rgba(0,156,59,.10),rgba(0,39,118,.12),rgba(255,223,0,.05)); }
+.xlaunch-support--featured { margin:0 0 34px; grid-template-columns:minmax(0,1.15fr) minmax(270px,.85fr); align-items:start; padding:22px; border-color:rgba(255,223,0,.34); box-shadow:0 16px 42px rgba(0,0,0,.2); }
+.xlaunch-support-copy > span { color:var(--x-yellow); font:800 10px/1.4 monospace; letter-spacing:.8px; }
+.xlaunch-support-copy h2 { max-width:620px; font-size:clamp(24px,3vw,36px); line-height:1.12; }
+.xlaunch-support-copy p { margin:10px 0 0; color:#e4dbe8; line-height:1.55; }
+.xlaunch-support-copy .xlaunch-transparency { color:var(--x-muted); font-size:12px; }
+.xlaunch-architecture-intro { max-width:780px; color:#d4ccdd; font-size:15px; line-height:1.65; }
+.xlaunch-architecture-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.xlaunch-architecture-grid article { min-width:0; padding:18px; border:1px solid rgba(255,255,255,.08); border-radius:12px; background:var(--x-panel); }
+.xlaunch-architecture-grid h3 { margin:0 0 8px; color:#f7f4fb; font-size:15px; }
+.xlaunch-architecture-grid p { margin:0; color:var(--x-muted); font-size:13px; line-height:1.6; }
+.xlaunch-facts-note { margin:12px 0 0; color:#a99fb4; font-size:11px; line-height:1.55; }
 .xlaunch-support h2 { margin:7px 0 8px; }
 .xlaunch-support h2 b { color:var(--x-yellow); }
 .xlaunch-support p { color:var(--x-muted); line-height:1.55; }
@@ -85,16 +102,19 @@
   .xlaunch-nav { flex-wrap:wrap; justify-content:flex-end; }
   .xlaunch-hero { grid-template-columns:1fr; }
   .xlaunch-team { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .xlaunch-achievements { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 @media (max-width:680px) {
   .xlaunch-header { flex-direction:column; }
   .xlaunch-nav { width:100%; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
-  .xlaunch-page { padding:24px 10px 48px; }
+  .xlaunch-page { padding:14px 10px 48px; }
   .xlaunch-hero { min-height:0; padding:22px 14px; }
   .xlaunch-hero h1 { font-size:38px; }
   .xlaunch-actions,.xlaunch-support { grid-template-columns:1fr; }
   .xlaunch-actions { flex-direction:column; }
-  .xlaunch-gallery,.xlaunch-team,.xlaunch-roadmap,.xlaunch-support { grid-template-columns:1fr; }
+  .xlaunch-gallery,.xlaunch-team,.xlaunch-achievements,.xlaunch-architecture-grid,.xlaunch-support { grid-template-columns:1fr; }
+  .xlaunch-support--featured { padding:17px; }
+  .xlaunch-achievements li { min-height:0; }
   .xlaunch-hero-art { min-height:260px; }
 }
 .xlaunch-tracker-summary { margin: 8px 0 0; color: var(--x-muted); font-size: 12px; line-height: 1.55; }
@@ -109,6 +129,11 @@
 .xlaunch-member a:hover { color: var(--x-yellow); }
 .xlaunch-pix-status { min-height: 17px; margin: 0; color: #8fe1b4; font-size: 12px; }
 .xlaunch-pix-qr { width: 138px; height: 138px; justify-self: center; border: 1px solid rgba(255,223,0,.2); border-radius: 8px; background: #fff; }
+.xlaunch-support--featured .xlaunch-pix-card { align-self:stretch; }
+.xlaunch-pix-label { color:var(--x-yellow); font:800 10px/1.4 monospace; letter-spacing:.6px; }
+.xlaunch-pix-card code { display:block; padding:9px; border:1px solid rgba(255,223,0,.12); border-radius:7px; background:rgba(255,255,255,.03); }
+.xlaunch-pix-card small { font-size:11px; }
+.xlaunch-projection-days { display:block; }
 @media (max-width: 980px) {
   .xlaunch-team { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

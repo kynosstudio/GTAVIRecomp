@@ -325,8 +325,12 @@ function recalculateProgressConnectors(root) {
     const distance = Math.max(24, endY - startY);
     const controlY1 = startY + distance * 0.42;
     const controlY2 = endY - distance * 0.18;
-    return `<path d="M ${startX.toFixed(2)} ${startY.toFixed(2)} C ${startX.toFixed(2)} ${controlY1.toFixed(2)}, ${endX.toFixed(2)} ${controlY2.toFixed(2)}, ${endX.toFixed(2)} ${endY.toFixed(2)}" fill="none" class="pw-curve-path"/>
-      <circle cx="${endX.toFixed(2)}" cy="${endY.toFixed(2)}" r="3.5" class="pw-curve-dot"/>`;
+    const restrictedClass = marker.classList.contains('is-private') || marker.classList.contains('is-blocked')
+      ? ' pw-curve-path--restricted'
+      : '';
+    const dotRestrictedClass = restrictedClass ? ' pw-curve-dot--restricted' : '';
+    return `<path d="M ${startX.toFixed(2)} ${startY.toFixed(2)} C ${startX.toFixed(2)} ${controlY1.toFixed(2)}, ${endX.toFixed(2)} ${controlY2.toFixed(2)}, ${endX.toFixed(2)} ${endY.toFixed(2)}" fill="none" class="pw-curve-path${restrictedClass}"/>
+      <circle cx="${endX.toFixed(2)}" cy="${endY.toFixed(2)}" r="3.5" class="pw-curve-dot${dotRestrictedClass}"/>`;
   }).join('');
 }
 
@@ -2518,9 +2522,6 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
     const avatar = String(project.avatar || project.name.slice(0, 2)).slice(0, 3);
     const stage = portwatchMilestone(project, milestones).label;
     const progressLabel = formatPercent(projectProgress);
-    const avatarMarkup = project.avatarUrl
-      ? `<span class="pw-avatar" aria-hidden="true"><img class="pw-avatar-image" width="34" height="34" src="${escapeHtml(safeUrl(project.avatarUrl))}" alt="" loading="lazy" decoding="async" /><span class="pw-avatar-fallback" hidden>${escapeHtml(avatar)}</span></span>`
-      : `<span class="pw-avatar" aria-hidden="true">${escapeHtml(avatar)}</span>`;
     const reportStage = project.teamReport && localizedValue(project.teamReport, 'stage');
     const snapshotPercent = Number.isFinite(Number(project.portwatchPercent))
       ? formatPercent(project.portwatchPercent)
@@ -2531,10 +2532,30 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
     const tooltip = `${project.name}: ${progressLabel}% · ${stage}${estimateLabel}`;
     const repositoryUrl = project.repo ? `https://github.com/${encodeURIComponent(String(project.repo).split('/')[0])}/${encodeURIComponent(String(project.repo).split('/')[1] || '')}` : '';
     const publicUrl = project.id !== 'cgbj' && safeUrl(repositoryUrl) !== '#' ? repositoryUrl : '';
+    const isLeader = Boolean(leaderProject && project.id === leaderProject.id);
+    const isPrivate = project.private === true || project.id === 'cgbj' || !publicUrl;
+    const status = String(project.status || '').toLowerCase();
+    const isBlocked = isInactiveProject(project) || project.blocked === true
+      || ['blocked', 'private', 'privado', 'bloqueado'].includes(status);
+    const markerClasses = [
+      'pw-project-marker',
+      project.teamReport ? 'pw-project-marker--xlaunch' : '',
+      projectProgress <= progress ? 'is-reached' : '',
+      isLeader ? 'is-leader' : '',
+      isPrivate ? 'is-private' : '',
+      isBlocked ? 'is-blocked' : '',
+      isLeader ? 'is-tooltip-open' : ''
+    ].filter(Boolean).join(' ');
+    const lockMarkup = isLeader || isPrivate || isBlocked
+      ? '<span class="pw-avatar-lock" aria-hidden="true">🔒</span>'
+      : '';
+    const avatarMarkup = project.avatarUrl
+      ? `<span class="pw-avatar" aria-hidden="true"><img class="pw-avatar-image" width="34" height="34" src="${escapeHtml(safeUrl(project.avatarUrl))}" alt="" loading="lazy" decoding="async" /><span class="pw-avatar-fallback" hidden>${escapeHtml(avatar)}</span>${lockMarkup}</span>`
+      : `<span class="pw-avatar" aria-hidden="true">${escapeHtml(avatar)}${lockMarkup}</span>`;
     const markerLabel = publicUrl
       ? `Abrir repositório público de ${project.name}`
       : project.id === 'cgbj' ? 'CGBJ · repositório privado' : `Sem repositório público: ${project.name}`;
-    return `<button class="pw-project-marker ${project.teamReport ? 'pw-project-marker--xlaunch' : ''} ${projectProgress <= progress ? 'is-reached' : ''}" type="button" style="--marker-x:${projectProgress}%" data-marker-progress="${projectProgress}" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(publicUrl ? `${markerLabel}: ${tooltip}` : `${markerLabel}. ${tooltip}`)}" ${publicUrl ? `data-repository-url="${escapeHtml(publicUrl)}"` : 'data-private-repository="true"'}>
+    return `<button class="${markerClasses}" type="button" style="--marker-x:${projectProgress}%" data-marker-progress="${projectProgress}" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(publicUrl ? `${markerLabel}: ${tooltip}` : `${markerLabel}. ${tooltip}`)}" ${publicUrl ? `data-repository-url="${escapeHtml(publicUrl)}"` : 'data-private-repository="true"'}>
       ${avatarMarkup}
     </button>`;
   }).join('');
@@ -3203,6 +3224,49 @@ function formatPercent(value) {
 
 function selectFeaturedStory(data) {
   const candidates = [];
+  const progressWords = (value) => String(value || '')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .match(/[a-z0-9]+/g) || [];
+  const containsWordSequence = (textWords, sequence) => {
+    if (!sequence.length || sequence.length > textWords.length) return false;
+    return textWords.some((_, index) => sequence.every((word, offset) => textWords[index + offset] === word));
+  };
+  const sourceEfforts = data.portwatchSource && Array.isArray(data.portwatchSource.efforts)
+    ? data.portwatchSource.efforts
+    : Array.isArray(data.efforts) ? data.efforts : [];
+  const topProjects = window.PortWatchScoring.overall(
+    sourceEfforts.filter((project) => !isInactiveProject(project)).map(normalizePortwatchEffort)
+  ).ranked.slice(0, 5).map(({ effort }, rank) => {
+    const repoName = String(effort.repo || '').split('/').pop();
+    const projectId = normalizeHardwareSearch(effort.id || '');
+    const ignoredAliases = new Set(['game', 'gta', 'gta6', 'gtavi', 'xbox', 'scarlett', 'project', 'recomp', 'emulator', 'windows']);
+    const aliases = [effort.id, effort.name, repoName].flatMap((value) => {
+      const words = progressWords(value);
+      if (!words.length) return [];
+      const phrases = words.length > 1 ? [words] : [];
+      words.forEach((word) => {
+        const isProjectId = word === projectId && word.length >= 3;
+        if (!ignoredAliases.has(word) && (word.length >= 4 || isProjectId)) phrases.push([word]);
+      });
+      return phrases;
+    });
+    return { rank, aliases };
+  });
+  const getProgressRank = (item) => {
+    const sourceWords = progressWords([
+      item.title, item.name, item.description, item.summary, item.dek, item.text,
+      ...(Array.isArray(item.body) ? item.body : []),
+      ...(Array.isArray(item.signals) ? item.signals : []),
+      ...(Array.isArray(item.sources) ? item.sources.flatMap((source) => [source.outlet, source.title, source.url]) : [])
+    ].join(' '));
+    const match = topProjects.find((project) =>
+      project.aliases.some((alias) => containsWordSequence(sourceWords, alias))
+    );
+    return match ? match.rank : -1;
+  };
   const addCandidate = (item, sourceType) => {
     if (!item) return;
     const exclusionText = normalizeHardwareSearch([
@@ -3234,7 +3298,7 @@ function selectFeaturedStory(data) {
     if (sourceType === 'candidate') impact += Math.max(0, Math.min(35, Number(item.substance) || 0)) * 0.25;
     if (item.status === 'new' || item.kind === 'effort') impact += 20;
     const score = recency * 0.65 + impact;
-    candidates.push({ item, score, sourceType });
+    candidates.push({ item, score, sourceType, progressRank: getProgressRank(item) });
   };
 
   (Array.isArray(data.news) ? data.news : []).forEach((item) => addCandidate(item, 'news'));
@@ -3260,6 +3324,9 @@ function selectFeaturedStory(data) {
     right.score - left.score
     || Date.parse(right.item.date || right.item.updatedAt || right.item.foundAt || 0)
     - Date.parse(left.item.date || left.item.updatedAt || left.item.foundAt || 0));
+  const progressRelated = candidates.filter((candidate) => candidate.progressRank >= 0)
+    .sort((left, right) => left.progressRank - right.progressRank || right.score - left.score);
+  if (progressRelated.length) return progressRelated[0].item;
   return candidates[0] ? candidates[0].item : (data.news && data.news[0]) || null;
 }
 
