@@ -1303,12 +1303,7 @@ function calculate(options = {}) {
   const referenceMhz = reference ? 0 : setup.ramGeneration === target.ramGeneration ? target.frequencyMhz : setup.ramGeneration === 'ddr4' ? 3200 : 5600;
   const bandwidth = reference ? reference.bandwidthGbps : Number(setup.ramMhz) * 8 * (channel === 'dual' ? 2 : 1) / 1000;
   const spaceFactor = freeSpace < hardware.requiredFreeSpace ? hardware.penalties.insufficientSpace : 1;
-
-  // RAM mínimas por geração (requisito do simulador)
-  const minRamByGen = { ddr4: 32, ddr5: 24 };
-  const minRamRequired = minRamByGen[setup.ramGeneration] || target.ramGb;
-  const ramCapacityFactor = Math.min(1, ramCapacity / Math.max(target.ramGb, minRamRequired));
-
+  const ramCapacityFactor = Math.min(1, ramCapacity / target.ramGb);
   const bandwidthRatio = bandwidth / target.bandwidthGbps;
   const channelFactor = channel === 'single' ? hardware.penalties.singleChannel : 1;
   const generationFactor = reference ? 1 : ramGeneration.score / hardware.ramGenerations[setup.ramGeneration].score;
@@ -1360,35 +1355,6 @@ function calculate(options = {}) {
             ? 'Alguns ajustes podem ajudar a manter a experiência mais estável.'
             : 'Reduza a meta gráfica ou priorize o componente limitante.';
   const fpsValues = [target.fps.minimum, target.fps.average, target.fps.low].map((fps) => Math.max(0, Math.round(fps * finalRatio)));
-
-  // FPS com referência 30 FPS e projeção 60 FPS
-  const baseline30 = 30;
-  const target60 = 60;
-  const fpsAt30 = [target.fps.minimum, target.fps.average, target.fps.low].map((fps) => Math.max(0, Math.round(fps * finalRatio)));
-  const fpsAt60 = [target.fps.minimum, target.fps.average, target.fps.low].map((fps) => Math.max(0, Math.round((fps * finalRatio) * (target60 / baseline30))));
-  const fpsProjection = finalRatio >= 1.0 ? '60 FPS viável' : finalRatio >= 0.75 ? 'Próximo de 60 FPS' : finalRatio >= 0.5 ? '30 FPS estável' : 'Abaixo de 30 FPS';
-
-  // Avaliação por componente (0-100%)
-  const componentScores = factors.map((factor) => ({
-    key: factor.key,
-    label: factor.label,
-    score: Math.max(0, Math.round(factor.score * 100))
-  }));
-
-  // Alertas de RAM e canal
-  const ramWarnings = [];
-  if (!reference) {
-    if (ramCapacity < minRamRequired) {
-      ramWarnings.push(`RAM ${ramGeneration.name}: ${ramCapacity} GB está abaixo do mínimo recomendado de ${minRamRequired} GB para esta geração.`);
-    }
-    if (channel === 'single') {
-      ramWarnings.push('Canal único detectado: ative canal duplo (módulos pareados) para máxima largura de banda e estabilidade.');
-    }
-    if (frequency.mhz < referenceMhz && memoryCompatible) {
-      ramWarnings.push(`Frequência ${frequency.mhz.toLocaleString('pt-BR')} MHz abaixo da referência ${referenceMhz.toLocaleString('pt-BR')} MHz: ative XMP/EXPO na BIOS.`);
-    }
-  }
-
   const evaluation = {
     setup,
     target,
@@ -1402,12 +1368,6 @@ function calculate(options = {}) {
     statusColor,
     summary,
     fpsValues,
-    fpsAt30,
-    fpsAt60,
-    fpsProjection,
-    componentScores,
-    ramWarnings,
-    minRamRequired,
     bandwidth,
     ramCapacity,
     ramGeneration,
@@ -1434,35 +1394,6 @@ function calculate(options = {}) {
   byId('fps-average').innerHTML = counterMarkup(fpsValues[1]);
   byId('fps-resolution').textContent = t(target.name);
   byId('fps-values').innerHTML = fpsValues.map((fps) => counterMarkup(fps)).join(' / ');
-
-  // FPS 30 FPS baseline / 60 FPS projection
-  const fps30El = byId('fps-at-30');
-  const fps60El = byId('fps-at-60');
-  const fpsProjEl = byId('fps-projection');
-  if (fps30El) fps30El.innerHTML = fpsAt30.map((fps) => counterMarkup(fps)).join(' / ');
-  if (fps60El) fps60El.innerHTML = fpsAt60.map((fps) => counterMarkup(fps)).join(' / ');
-  if (fpsProjEl) fpsProjEl.textContent = t(fpsProjection);
-
-  // Component scores
-  const compScoresEl = byId('component-scores');
-  if (compScoresEl) {
-    compScoresEl.innerHTML = componentScores.map((cs) =>
-      `<div class="component-score-row"><span class="component-score-label">${escapeHtml(t(cs.label))}</span><span class="component-score-value">${counterMarkup(cs.score, 'percent')}%</span></div>`
-    ).join('');
-  }
-
-  // RAM warnings
-  const ramWarningsEl = byId('ram-warnings');
-  if (ramWarningsEl) {
-    if (ramWarnings.length > 0) {
-      ramWarningsEl.innerHTML = ramWarnings.map((w) => `<li class="warning">${escapeHtml(t(w))}</li>`).join('');
-      ramWarningsEl.style.display = '';
-    } else {
-      ramWarningsEl.innerHTML = '';
-      ramWarningsEl.style.display = 'none';
-    }
-  }
-
   byId('fps-panel').classList.toggle('fps-incompatible', !isCompatible);
   byId('summary-cpu').textContent = t(cpu.name);
   byId('summary-gpu').textContent = `${gpu.integrated ? `${t('GPU integrada')} · ` : ''}${t(gpu.name)}`;
@@ -1497,7 +1428,7 @@ function calculate(options = {}) {
   updateBottleneckHumor(evaluation);
   updateSetupCardPreview(evaluation);
   renderUpgradeEconomics(setup);
-  renderRecommendations({ gpu, cpu, ramCapacity, ramGeneration, frequency, referenceMhz, memoryCompatible, storage, storageRatio, freeSpace, target, targetStorage, factors, bottleneckLabel, isCompatible, channel, backgroundId: setup.backgroundId, minRamRequired, componentScores, ramWarnings });
+  renderRecommendations({ gpu, cpu, ramCapacity, ramGeneration, frequency, referenceMhz, memoryCompatible, storage, storageRatio, freeSpace, target, targetStorage, factors, bottleneckLabel, isCompatible, channel, backgroundId: setup.backgroundId });
   window.KynosI18n.translateDom(byId('result-panel'), state.language);
   animateCounters(byId('result-panel'));
   if (options.trackSimulation !== false) {
@@ -1624,17 +1555,11 @@ function renderUpgradeEconomics(setup) {
 }
 
 function renderRecommendations(context) {
-  const { gpu, cpu, ramCapacity, ramGeneration, frequency, referenceMhz, memoryCompatible, storage, storageRatio, freeSpace, target, targetStorage, factors, bottleneckLabel, isCompatible, channel, backgroundId, minRamRequired, componentScores, ramWarnings } = context;
+  const { gpu, cpu, ramCapacity, ramGeneration, frequency, referenceMhz, memoryCompatible, storage, storageRatio, freeSpace, target, targetStorage, factors, bottleneckLabel, isCompatible, channel, backgroundId } = context;
   const recommendations = [];
   if (!storage.compatible) recommendations.push('Substitua o HDD por SSD SATA ou NVMe; HDD não atende ao requisito estimado.');
   else if (freeSpace < hardware.requiredFreeSpace) recommendations.push(`Libere pelo menos ${hardware.requiredFreeSpace} GB de espaço no SSD.`);
   if (!memoryCompatible) recommendations.push(`Use ${cpu.memoryGenerations.map((generation) => generation.toUpperCase()).join(' ou ')}: a geração escolhida não é compatível com este processador.`);
-
-  // RAM mínimas por geração (DDR4: 32 GB, DDR5: 24 GB)
-  const minRamByGen = { ddr4: 32, ddr5: 24 };
-  const genMinRam = minRamByGen[ramGeneration.name.toLowerCase?.() || ramGeneration.name] || target.ramGb;
-  if (ramCapacity < genMinRam) recommendations.push(`RAM ${ramGeneration.name}: ${ramCapacity} GB está abaixo do mínimo recomendado de ${genMinRam} GB para esta geração.`);
-
   if (channel === 'single') recommendations.push('Ative o canal duplo com módulos pareados para ampliar a largura de banda e reduzir engasgos.');
   if (ramCapacity < target.ramGb) recommendations.push(`Considere ${target.ramGb} GB de RAM ou mais para esta meta.`);
   if (frequency.mhz < referenceMhz && memoryCompatible) recommendations.push(`Ative XMP/EXPO na BIOS para aproximar a memória de ${referenceMhz.toLocaleString('pt-BR')} MHz.`);
@@ -2784,9 +2709,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
     </button>`;
   }).join('');
   const avatarTrailMarkup = avatarTrailProjects.length ? `
-    <div class="pw-avatar-trail" aria-label="${escapeHtml(t('Top 10 projetos por progresso'))}">
-      <span class="pw-avatar-trail-label">${escapeHtml(t('Top 10:'))}</span>
-      <div class="pw-avatar-trail-list">${avatarTrailItems}</div>
+    <div ${escapeHtml(t('Top 10 projetos por progresso'))}">
     </div>` : '';
 
   const markerCards = timelineProjects.map((project) => {
