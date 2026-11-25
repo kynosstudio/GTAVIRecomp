@@ -21,20 +21,10 @@
     <link rel="stylesheet" href="../styles.css">
     <link rel="stylesheet" href="styles.css">
   </head>
-  <body>
+  <body data-site-base="../">
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T57BH4Q9" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <header class="xlaunch-header">
-      <a class="xlaunch-brand" href="../index.html" aria-label="Voltar para KynosRecompVI">
-        <span class="brand-mark">K</span>
-        <span>Kynos <b>RecompVI</b></span>
-      </a>
-      <nav class="xlaunch-nav" aria-label="Navegação XLaunchVI">
-        <a href="../index.html">Início</a>
-        <a href="../index.html#repositories">Corrida</a>
-        <a href="../index.html#tracker">Monitoramento</a>
-        <a href="https://discord.gg/DnjUSJcGXg" target="_blank" rel="noopener noreferrer">Discord ↗</a>
-      </nav>
-    </header>
+    <div class="site-bg" aria-hidden="true"></div>
+    <div class="site-layout">
 
     <main class="xlaunch-page">
       <section class="xlaunch-support xlaunch-support--featured" aria-labelledby="support-title">
@@ -49,7 +39,7 @@
           <code id="xlaunch-pix-key">50450a25-89df-446c-92cc-e56f64a5ab7a</code>
           <button type="button" data-copy-pix="50450a25-89df-446c-92cc-e56f64a5ab7a">Copiar chave PIX</button>
           <p class="xlaunch-pix-status" id="xlaunch-pix-status" role="status" aria-live="polite"></p>
-          <img class="xlaunch-pix-qr" src="assets/pix-qr-placeholder.svg" alt="Espaço reservado para inserir o QR Code Pix oficial da equipe">
+          <img class="xlaunch-pix-qr" src="assets/pix-qr-placeholder.png" alt="Espaço reservado para inserir o QR Code Pix oficial da equipe">
           <small>Abra o app do seu banco, escolha Pix Copia e Cola e use a chave acima. O QR atual é apenas um placeholder e não pode ser escaneado.</small>
         </div>
       </section>
@@ -141,6 +131,8 @@
         <p class="xlaunch-facts-note">A meta da próxima semana é uma intenção interna informada para esta página. A projeção de 60 dias é aproximada e pode mudar conforme o tracker recebe dados; o contador da home permanece dinâmico e pode mostrar outro valor.</p>
       </section>
     </main>
+    </div>
     <script src="xlaunchvi.js"></script>
+    <script src="../site-sidebar.js"></script>
   </body>
 </html>

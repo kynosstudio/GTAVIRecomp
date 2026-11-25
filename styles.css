@@ -3031,7 +3031,7 @@ html[data-theme="light"] .xlaunch-repository-warning { color: #70520b; backgroun
 .br-support-actions .button { width: 100%; min-height: 40px; }
 .br-support-primary { color: #fff; background: linear-gradient(110deg, #087b36, #12428e); }
 .br-support-pix { color: #211b06; background: #ffdf00; }
-.br-support-pix-key { display: block; padding: 8px 9px; overflow-wrap: anywhere; border: 1px solid rgba(255, 223, 0, .22); border-radius: 6px; color: #ffdf70; background: rgba(0, 0, 0, .22); font: 10px/1.45 var(--mono); text-align: center; }
+.br-support-pix-key { display: block; padding: 8px 9px; overflow-wrap: anywhere; border: 1px solid rgba(255, 223, 0, .22); border-radius: 6px; color: #ffdf70; background: rgba(0, 0, 0, .22); font: 10px/1.45 var(--mono); text-align: center; margin-bottom: 10px; }
 .br-support-status { min-height: 16px; color: #8fe1b4; font-size: 11px; text-align: center; }
 html[data-theme="light"] .br-support-banner { border-color: rgba(0, 120, 48, .25); background: radial-gradient(ellipse at 2% 100%, rgba(0, 156, 59, .08), transparent 44%), radial-gradient(ellipse at 100% 0%, rgba(0, 39, 118, .08), transparent 42%), linear-gradient(110deg, #fff, #f8f6fb); }
 html[data-theme="light"] .br-support-kicker { color: #51495c; }
@@ -3182,6 +3182,16 @@ html[data-theme="light"] .br-support-pix-key { color: #315b3b; border-color: #d9
   .br-support-copy h2 { font-size: 18px; }
   .portwatch-section .pw-panel .pw-stats .pw-stat span { font-size: 10px; }
   .portwatch-section .pw-panel .pw-stats .pw-stat strong { font-size: 16px; }
+}
+
+.br-support-actions { grid-template-columns: minmax(0, 1fr); align-content: center; }
+.br-support-qr { display:fel; grid-template-columns:76px minmax(0,1fr); align-items:center; gap:9px; color:#bdb5c8; }
+.br-support-qr img { width:100px; height:100px; object-fit:cover; border:1px solid rgba(255,255,255,.16); border-radius:10px; background:#fff; }
+.br-support-qr small { font-size:10px; line-height:1.45; }
+.br-support-actions .br-support-status { margin:0; }
+@media(max-width:680px) {
+  .br-support-qr { grid-template-columns:64px minmax(0,1fr); }
+  .br-support-qr img { width:64px; height:64px; }
 }
 
 #portwatch-progress .pw-panel .pw-reading-time {
@@ -3456,6 +3466,30 @@ body { overflow-x: hidden; }
   line-height: 1.35;
   white-space: normal;
 }
+.site-sidebar .main-nav .nav-icon {
+  width: 21px;
+  height: 21px;
+  flex: 0 0 21px;
+  display: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.site-sidebar .main-nav .nav-label { min-width: 0; }
+.site-sidebar .main-nav .nav-link.nav-utility-link {
+  border-color: rgba(255, 190, 132, .2);
+  color: #ffc09d;
+  background: linear-gradient(110deg, rgba(255, 123, 71, .1), rgba(216, 117, 241, .045));
+  box-shadow: inset 0 0 18px rgba(255, 123, 71, .045);
+}
+.site-sidebar .main-nav .nav-link.nav-utility-link:hover,
+.site-sidebar .main-nav .nav-link.nav-utility-link.active {
+  border-color: rgba(255, 190, 132, .48);
+  color: #fff0e8;
+  background: linear-gradient(110deg, rgba(255, 123, 71, .2), rgba(216, 117, 241, .09));
+}
 .site-sidebar .main-nav .nav-link:hover,
 .site-sidebar .main-nav .nav-link.active {
   color: var(--white);
@@ -3574,10 +3608,11 @@ body.sidebar-collapsed .site-sidebar .main-nav .nav-link {
   font-size: 0;
 }
 body.sidebar-collapsed .site-sidebar .main-nav .nav-link::before {
-  content: attr(data-short);
-  color: #e8dfed;
-  font: 700 10px/1 var(--mono);
+  display: none;
+  content: none;
 }
+body.sidebar-collapsed .site-sidebar .main-nav .nav-icon { display: block; }
+body.sidebar-collapsed .site-sidebar .main-nav .nav-label { display: none; }
 body.sidebar-collapsed .site-sidebar .header-freshness { width: 38px; min-height: 38px; justify-content: center; padding: 0; }
 body.sidebar-collapsed .site-sidebar .header-freshness-full,
 body.sidebar-collapsed .site-sidebar .header-freshness-short { display: none; }
@@ -4160,10 +4195,11 @@ html[data-theme="light"] .repo-github-button {
   }
 
   .site-sidebar .main-nav .nav-link::before {
-    content: attr(data-short);
-    color: #e8dfed;
-    font: 700 10px/1 var(--mono);
+    display: none;
+    content: none;
   }
+  .site-sidebar .main-nav .nav-icon { display: block; }
+  .site-sidebar .main-nav .nav-label { display: none; }
 
   .site-sidebar .header-freshness {
     width: 38px;
@@ -4231,6 +4267,18 @@ html[data-theme="light"] .repo-github-button {
   body.sidebar-collapsed .site-sidebar:hover .main-nav .nav-link::before,
   body.sidebar-collapsed .site-sidebar:focus-within .main-nav .nav-link::before {
     display: none;
+  }
+  .site-sidebar:hover .main-nav .nav-icon,
+  .site-sidebar:focus-within .main-nav .nav-icon,
+  body.sidebar-collapsed .site-sidebar:hover .main-nav .nav-icon,
+  body.sidebar-collapsed .site-sidebar:focus-within .main-nav .nav-icon {
+    display: none;
+  }
+  .site-sidebar:hover .main-nav .nav-label,
+  .site-sidebar:focus-within .main-nav .nav-label,
+  body.sidebar-collapsed .site-sidebar:hover .main-nav .nav-label,
+  body.sidebar-collapsed .site-sidebar:focus-within .main-nav .nav-label {
+    display: inline;
   }
 
   .site-sidebar:hover .header-freshness,
@@ -4317,6 +4365,8 @@ html[data-theme="light"] .repo-github-button {
   .site-sidebar .main-nav .nav-link::before {
     display: none;
   }
+  .site-sidebar .main-nav .nav-icon { display: none; }
+  .site-sidebar .main-nav .nav-label { display: inline; }
 
   .site-sidebar .main-nav .nav-link.active::after {
     top: auto;
@@ -4363,6 +4413,118 @@ html[data-theme="light"] .repo-github-button {
     width: min(390px, calc(100vw - 24px));
   }
 }
+
+.site-sidebar:hover .main-nav .nav-label,
+.site-sidebar:focus-within .main-nav .nav-label { display: inline; }
+.site-sidebar:hover .main-nav .nav-icon,
+.site-sidebar:focus-within .main-nav .nav-icon { display: none; }
+.site-sidebar .main-nav .nav-link.nav-utility-link {
+  border-color: rgba(255, 190, 132, .2);
+  color: #ffc09d;
+  background: linear-gradient(110deg, rgba(255, 123, 71, .1), rgba(216, 117, 241, .045));
+  box-shadow: inset 0 0 18px rgba(255, 123, 71, .045);
+}
+.site-sidebar .main-nav .nav-link.nav-utility-link:hover,
+.site-sidebar .main-nav .nav-link.nav-utility-link.active {
+  border-color: rgba(255, 190, 132, .48);
+  color: #fff0e8;
+  background: linear-gradient(110deg, rgba(255, 123, 71, .2), rgba(216, 117, 241, .09));
+}
+
+.br-support-payment {
+  min-width: 0;
+  display: flex;
+  grid-template-columns: minmax(88px, 104px) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+.br-support-qr {
+  min-width: 0;
+  margin: 0;
+  padding: 7px;
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  border: 1px solid rgba(255, 223, 0, .28);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, .22);
+  box-shadow: 0 5px 16px rgba(0, 0, 0, .2);
+}
+.br-support-qr img {
+  width: 200%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+  border: 0;
+  border-radius: 4px;
+}
+.br-support-qr figcaption {
+  color: #c4bdcb;
+  font-size: 8px;
+  line-height: 1.3;
+  text-align: center;
+  
+}
+.br-support-pix-details { min-width: 0; gap: 6px; }
+.br-support-pix-label { color: #d7ceaa; font: 600 9px var(--mono); letter-spacing: .1em; }
+.br-support-pix-key { padding: 7px 5px; font-size: 10px; }
+.br-support-pix-details .button { min-height: 34px; font-size: 10px; }
+.br-support-pix-details .br-support-status { min-height: 12px; }
+.br-support-ranking {
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, .09);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, .17);
+}
+.br-support-ranking-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.br-support-ranking-heading h3 { margin: 0; color: #f5eadf; font: 600 11px var(--display); }
+.br-support-ranking-heading > span { color: #9e96aa; font-size: 8px; text-align: right; }
+.br-support-donors { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 4px; }
+.br-support-donors li {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  animation: donor-slide-down .42s ease both;
+  animation-delay: calc(var(--donor-order, 0) * 70ms);
+}
+.br-support-donor-position { color: #ffc27e; font: 600 10px var(--mono); }
+.br-support-donor-name { overflow: hidden; color: #eee8f4; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.br-support-donor-amount { color: #a9eccb; font: 500 9px var(--mono); white-space: nowrap; }
+.br-support-donor-empty { grid-template-columns: minmax(0, 1fr)!important; color: #b6adbf; font-size: 9px; }
+@keyframes donor-slide-down {
+  from { opacity: 0; transform: translateY(-7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+html[data-theme="light"] .br-support-ranking { border-color: #e4dce9; background: rgba(255, 255, 255, .72); }
+html[data-theme="light"] .br-support-ranking-heading h3,
+html[data-theme="light"] .br-support-donor-name { color: #30243c; }
+html[data-theme="light"] .br-support-qr { border-color: #e7d8a4; background: #fff; }
+html[data-theme="light"] .br-support-qr figcaption { color: #62596c; }
+@media (max-width: 680px) {
+  .br-support-payment { grid-template-columns: minmax(88px, 112px) minmax(0, 1fr); }
+  .br-support-ranking { padding: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .br-support-donors li { animation: none; }
+}
+.xlaunch-spotlight-latest-activity {
+  margin: 12px 0;
+  padding: 11px 13px;
+  border: 1px solid rgba(255, 190, 132, .2);
+  border-left: 3px solid #ff9a55;
+  border-radius: 8px;
+  background: rgba(255, 154, 85, .045);
+}
+.xlaunch-spotlight-latest-activity > strong { color: #ffd1a8; font-size: 10px; }
+.xlaunch-spotlight-latest-activity p { margin: 6px 0 0; color: #e4dbe9; font-size: 12px; line-height: 1.55; }
+.xlaunch-spotlight-latest-activity small { display:block; margin-top:6px; color:#aaa1b7; font-size:9px; line-height:1.45; }
+html[data-theme="light"] .xlaunch-spotlight-latest-activity { border-color:#ead6c7; background:rgba(255,154,85,.07); }
+html[data-theme="light"] .xlaunch-spotlight-latest-activity > strong { color:#8d4e22; }
+html[data-theme="light"] .xlaunch-spotlight-latest-activity p { color:#43374c; }
 
 @media (max-width: 680px) {
   .portal-home .pw-panel {

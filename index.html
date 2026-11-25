@@ -34,13 +34,24 @@
         <span class="brand-fallback" hidden><span class="brand-mark">K</span><span>Kynos<b>RecompVI</b></span></span>
       </a>
       <nav class="main-nav" id="main-navigation" aria-label="Navegação principal">
-        <a class="nav-link active" href="#home" data-page-link="home" data-short="IN">Início</a>
-        <a class="nav-link" href="#news" data-page-link="news" data-short="NT">Notícias</a>
-        <a class="nav-link" href="#repositories" data-page-link="repositories" data-short="CR">Corrida</a>
-        <a class="nav-link nav-utility-link" href="#utility" data-page-link="utility" data-short="PC">Meu PC Roda GTAVI</a>
-        <a class="nav-link" href="xlaunchvi/index.html" data-short="XL">XlaunchVI</a>
-        <a class="nav-link" href="#tracker" data-page-link="tracker" data-short="TR">Monitoramento do tracker</a>
-        <a class="nav-link nav-discord-link" data-official-link data-short="DC" href="#" target="_blank" rel="noopener noreferrer">Comunidades no Discord ↗</a>
+        <a class="nav-link active" href="#home" data-page-link="home" aria-current="page">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5M5.5 9.5V21h13V9.5M9 21v-7h6v7" /></svg><span class="nav-label">Início</span>
+        </a>
+        <a class="nav-link" href="#news" data-page-link="news">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" /></svg><span class="nav-label">Notícias</span>
+        </a>
+        <a class="nav-link" href="vaquinhas/index.html">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.5-9-9.2C1 5.2 6.8 2.4 12 7c5.2-4.6 11-1.8 9 3.8C19 15.5 12 20 12 20Z" /></svg><span class="nav-label">Vaquinhas e Apoiadores</span>
+        </a>
+        <a class="nav-link nav-utility-link" href="meu-pc-roda/index.html">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v12H3zM8 21h8M12 17v4M7 10h4M7 13h8" /></svg><span class="nav-label">Meu PC Roda GTAVI</span>
+        </a>
+        <a class="nav-link" href="xlaunchvi/index.html">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-4.5-6-11a6 6 0 0 1 12 0c0 6.5-6 11-6 11ZM12 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM6 13l-3 3v3l5-2M18 13l3 3v3l-5-2" /></svg><span class="nav-label">XLaunchVI</span>
+        </a>
+        <a class="nav-link" href="#tracker" data-page-link="tracker">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17h4l3-9 4 12 3-8h4M3 4v16h18" /></svg><span class="nav-label">Monitoramento do tracker</span>
+        </a>
       </nav>
       <div class="header-freshness" id="header-freshness" role="group" aria-label="Atualização do tracker" aria-live="off" hidden>
         <span class="header-freshness-dot" aria-hidden="true"></span>
@@ -110,7 +121,7 @@
             <div class="hero-meta"><span class="live-dot"></span> ATUALIZAÇÕES COM FONTES EM TEMPO REAL</div>
           </div>
           <div class="portal-hero-actions">
-            <a class="button simulator-hero-cta" href="#utility" data-page-link="utility">Meu PC Roda GTAVI <span aria-hidden="true">↗</span></a>
+            <a class="button simulator-hero-cta" href="meu-pc-roda/index.html">Meu PC Roda GTAVI <span aria-hidden="true">↗</span></a>
             <a class="button portal-utility-cta" href="#news" data-page-link="news">Ler últimas notícias <span aria-hidden="true">→</span></a>
           </div>
         </div>
@@ -118,41 +129,70 @@
           <aside class="br-support-banner" aria-label="Apoio ao XLaunchVI">
             <div class="br-support-copy">
               <span class="br-support-kicker"><b>BR</b> COMUNIDADE KYNOS</span>
-              <h2>Fortaleça o <span>XLaunchVI</span> — launcher 100% brasileiro.</h2>
-              <p>Mais do que só pelo GTA VI — é para mostrar que o Brasil também tem gente foda desenvolvendo engenharia reversa e recompilação de alto nível.</p>
+              <h2>Apoie o <span>XLaunchVI</span> e a engenharia brasileira.</h2>
+              <p id="home-fundraiser-split">A maior parte do apoio é destinada ao XLaunchVI; uma parcela mantém o KynosRecompVI. A divisão e as atualizações ficam visíveis na página da vaquinha.</p>
+
             </div>
             <div class="br-support-actions">
-              <a class="button br-support-primary" href="xlaunchvi/index.html">Conhecer o XLaunchVI <span aria-hidden="true">→</span></a>
-              <button class="button br-support-pix" type="button" data-br-pix="50450a25-89df-446c-92cc-e56f64a5ab7a">Apoiar via PIX <span aria-hidden="true">♥</span></button>
-              <code class="br-support-pix-key">50450a25-89df-446c-92cc-e56f64a5ab7a</code>
-              <small class="br-support-status" role="status" aria-live="polite"></small>
+              <a class="button br-support-primary" href="vaquinhas/index.html">Acessar vaquinha XLaunchVI <span aria-hidden="true">→</span></a>
+              <div class="br-support-payment">
+                <div class="br-support-pix-details">
+                  <span class="br-support-pix-label">CHAVE PIX</span>
+                  <code class="br-support-pix-key">kynos.studio@gmail.com</code>
+                  <button class="button br-support-pix" type="button" data-br-pix="kynos.studio@gmail.com">Copiar chave PIX</button>
+                  <small class="br-support-status" role="status" aria-live="polite"></small>
+                </div>
+              </div>
+              <section class="br-support-ranking" aria-labelledby="home-top-donors-title">
+                <div class="br-support-ranking-heading">
+                  <h3 id="home-top-donors-title">Top 3 · XLaunchVI</h3>
+                  <span id="home-top-donors-mode">Carregando ranking…</span>
+                </div>
+                <ol class="br-support-donors" id="home-top-donors" aria-live="polite"></ol>
+              </section>
             </div>
           </aside>
           <section id="portwatch-progress" class="portwatch-section" aria-label="Progresso geral da corrida" aria-busy="true"></section>
           <section class="home-race-ranking" aria-labelledby="home-race-ranking-title">
             <div class="section-heading">
               <div><span class="section-kicker">CORRIDA DOS PROJETOS</span><h2 id="home-race-ranking-title">Progresso da <span>corrida.</span></h2></div>
-              <div class="estimate-pill">EM ACOMPANHAMENTO <span id="home-repo-count" class="count-badge">0</span></div>
+              <div class="estimate-pill">EM ACOMPANHAMENTO <span id="repo-count" class="count-badge">0</span></div>
             </div>
-            <div id="home-tracker-race-summary" class="race-summary-grid"></div>
-            <div id="home-xlaunch-race-spotlight"></div>
+            <div id="tracker-race-summary" class="race-summary-grid"></div>
+            <div id="xlaunch-race-spotlight"></div>
             <div class="section-heading"><div><span class="section-kicker">RANKING DO SNAPSHOT</span><h2>Projetos mais <span>avançados.</span></h2></div></div>
-            <div id="home-repository-list" class="repository-list"></div>
+            <div class="race-controls" role="group" aria-label="Filtrar e ordenar projetos acompanhados">
+              <label>Escopo
+                <select id="race-scope" aria-label="Filtrar escopo dos projetos">
+                  <option value="all">Todos os projetos públicos</option>
+                  <option value="gta">Com alvo GTA VI</option>
+                  <option value="generic">Infraestrutura geral</option>
+                </select>
+              </label>
+              <label>Ordenar por
+                <select id="race-sort" aria-label="Ordenar projetos acompanhados">
+                  <option value="score">Progresso</option>
+                  <option value="stars">Estrelas</option>
+                  <option value="active">Atividade recente</option>
+                </select>
+              </label>
+            </div>
+            <div id="repository-list" class="repository-list"></div>
             <details class="tracked-projects-details">
-              <summary><span>Demais projetos públicos</span><span class="tracked-projects-count" id="home-tracked-project-count"></span></summary>
-              <div id="home-tracker-all-projects" class="repository-list"></div>
+              <summary><span>Demais projetos públicos</span><span class="tracked-projects-count" id="tracked-project-count"></span></summary>
+              <div id="tracker-all-projects" class="repository-list"></div>
             </details>
-            <details class="tracked-projects-details" id="home-private-builds" hidden>
-              <summary><span>Builds privadas · fora do ranking público</span><span class="tracked-projects-count" id="home-private-build-count"></span></summary>
-              <div id="home-private-repository-list" class="repository-list"></div>
+            <details class="tracked-projects-details" id="private-builds" hidden>
+              <summary><span>Builds privadas · fora do ranking público</span><span class="tracked-projects-count" id="private-build-count"></span></summary>
+              <div id="private-repository-list" class="repository-list"></div>
             </details>
-            <details class="tracked-projects-details" id="home-watchlist-projects" hidden>
-              <summary><span>Lista de observação</span><span class="tracked-projects-count" id="home-watchlist-project-count"></span></summary>
-              <div id="home-watchlist-repository-list" class="repository-list"></div>
+            <details class="tracked-projects-details" id="watchlist-projects" hidden>
+              <summary><span>Lista de observação</span><span class="tracked-projects-count" id="watchlist-project-count"></span></summary>
+              <div id="watchlist-repository-list" class="repository-list"></div>
             </details>
-            <section id="home-inactive-repositories" class="inactive-repositories" aria-labelledby="home-inactive-repositories-title" hidden>
-              <div class="section-heading"><div><span class="section-kicker">REGISTRO HISTÓRICO</span><h2 id="home-inactive-repositories-title">Projetos fora do <span>ar.</span></h2></div><div class="estimate-pill">FORA DO RANKING ATIVO</div></div>
-              <div id="home-inactive-repository-list" class="repository-list inactive-repository-list"></div>
+            <section id="inactive-repositories" class="inactive-repositories" aria-labelledby="inactive-repositories-title" hidden>
+              <div class="section-heading"><div><span class="section-kicker">REGISTRO HISTÓRICO</span><h2 id="inactive-repositories-title">Projetos fora do <span>ar.</span></h2></div><div class="estimate-pill">FORA DO RANKING ATIVO</div></div>
+              <div id="inactive-repository-list" class="repository-list inactive-repository-list"></div>
             </section>
           </section>
         </div>
@@ -375,48 +415,6 @@
         </div>
       </section>
 
-      <section class="page-section" id="repositories" data-page="repositories">
-        <div class="hero compact-hero"><div class="hero-content"><div class="eyebrow"><span class="eyebrow-dot"></span> CORRIDA DOS PROJETOS <span class="eyebrow-line"></span> MARCOS E EVIDÊNCIAS</div><h1>Progresso da <span>corrida.</span></h1><p class="hero-copy">Percentuais e marcos do snapshot do tracker. Relatos de projeto são identificados como autodeclarados; não há gráfico diário inventado.</p></div></div>
-        <div class="content-wrap page-content">
-          <div id="tracker-race-summary" class="race-summary-grid"></div>
-          <div id="xlaunch-race-spotlight"></div>
-          <div class="section-heading"><div><span class="section-kicker">RANKING DO SNAPSHOT</span><h2>Projetos mais <span>avançados.</span></h2></div><div class="estimate-pill">CORRIDA PÚBLICA <span id="repo-count" class="count-badge">0</span></div></div>
-          <div class="race-controls" role="group" aria-label="Filtrar e ordenar projetos públicos">
-            <label>Escopo
-              <select id="race-scope" aria-label="Filtrar escopo da corrida">
-                <option value="all">Todos os projetos públicos</option>
-                <option value="gta">Com alvo GTA VI</option>
-                <option value="generic">Infraestrutura geral</option>
-              </select>
-            </label>
-            <label>Ordenar por
-              <select id="race-sort" aria-label="Ordenar projetos da corrida">
-                <option value="score">Progresso</option>
-                <option value="stars">Estrelas</option>
-                <option value="active">Atividade recente</option>
-              </select>
-            </label>
-          </div>
-          <div id="repository-list" class="repository-list"></div>
-          <details class="tracked-projects-details">
-            <summary><span>Demais projetos públicos</span><span class="tracked-projects-count" id="tracked-project-count"></span></summary>
-            <div id="tracker-all-projects" class="repository-list"></div>
-          </details>
-          <details class="tracked-projects-details" id="private-builds" hidden>
-            <summary><span>Builds privadas · fora do ranking público</span><span class="tracked-projects-count" id="private-build-count"></span></summary>
-            <div id="private-repository-list" class="repository-list"></div>
-          </details>
-          <details class="tracked-projects-details" id="watchlist-projects" hidden>
-            <summary><span>Lista de observação</span><span class="tracked-projects-count" id="watchlist-project-count"></span></summary>
-            <div id="watchlist-repository-list" class="repository-list"></div>
-          </details>
-          <section id="inactive-repositories" class="inactive-repositories" aria-labelledby="inactive-repositories-title" hidden>
-            <div class="section-heading"><div><span class="section-kicker">REGISTRO HISTÓRICO</span><h2 id="inactive-repositories-title">Projetos fora do <span>ar.</span></h2></div><div class="estimate-pill">FORA DO RANKING ATIVO</div></div>
-            <div id="inactive-repository-list" class="repository-list inactive-repository-list"></div>
-          </section>
-        </div>
-      </section>
-
       <section class="page-section" id="news" data-page="news">
         <div class="hero compact-hero"><div class="hero-content"><div class="eyebrow"><span class="eyebrow-dot"></span> NOTÍCIAS E CONTEXTO <span class="eyebrow-line"></span> FONTES ORIGINAIS</div><h1>Notícias da <span>corrida.</span></h1><p class="hero-copy">Resumo em português, links para as fontes e distinção entre fatos confirmados e relatos dos projetos.</p></div></div>
         <div class="content-wrap page-content">
@@ -557,6 +555,7 @@
     </script>
     <script src="i18n.js" defer></script>
     <script src="data/portwatch-scoring.js" defer></script>
+    <script src="assets/js/fundraiser-banner.js" defer></script>
     <script src="app.js" defer></script>
   </body>
 </html>

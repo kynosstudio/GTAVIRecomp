@@ -148,6 +148,7 @@ let portwatchData = null;
 let repositoryData = [];
 let newsData = null;
 let trackerData = null;
+let managedEditorial = { news: [], tracker_updates: [] };
 let notificationPreferences = null;
 let notificationItems = [];
 let notificationSnapshot = null;
@@ -2871,6 +2872,7 @@ function saveNotificationPreferences() {
 
 function buildPortalNotifications(snapshot) {
   const notifications = [];
+  const editorial = withManagedEditorial(snapshot);
   const efforts = snapshot && Array.isArray(snapshot.efforts) ? snapshot.efforts : [];
   const offlineProjects = efforts.filter(isInactiveProject).slice(0, 2);
   const topProjects = topPublicTrackerProjects(snapshot, 5);
@@ -2900,7 +2902,7 @@ function buildPortalNotifications(snapshot) {
     });
   }
 
-  (snapshot && Array.isArray(snapshot.news) ? snapshot.news : []).slice(0, 5).forEach((story) => {
+  (editorial && Array.isArray(editorial.news) ? editorial.news : []).slice(0, 8).forEach((story) => {
     const newsId = String(story.id || story.title || story.date || '');
     const storyText = normalizeHardwareSearch([
       story.title, story.summary, story.dek, ...(Array.isArray(story.body) ? story.body : [])
@@ -2930,7 +2932,7 @@ function buildPortalNotifications(snapshot) {
       id: `offline:${project.repo || project.id || project.name}`,
       title: `${t('Projeto fora do ar')}: ${project.name}`,
       body: t('O tracker registra este projeto como fora do ar; o motivo da remoção pode não estar confirmado.'),
-      page: 'repositories',
+      page: 'home',
       kind: 'warning',
       date: snapshotDate
     });
@@ -3543,6 +3545,7 @@ function renderXlaunchSpotlight(project, team, snapshot, modifier = '') {
   if (!project) return '';
   const report = project.teamReport || (team && team.latestReport);
   if (!report) return '';
+  const latestActivity = team && team.latestActivity;
   const percentValue = Number(project.percent);
   const percent = Number.isFinite(percentValue) ? Math.max(0, Math.min(100, percentValue)) : 0;
   const repositoryUrl = safeUrl(project.url);
@@ -3567,6 +3570,7 @@ function renderXlaunchSpotlight(project, team, snapshot, modifier = '') {
       <span class="status-badge warning">${escapeHtml(t('Relato não verificado independentemente'))}</span>
     </div>
     <p class="xlaunch-spotlight-teaser">${escapeHtml(localizedValue(report, 'teaser') || localizedValue(report, 'summary') || '')}</p>
+    ${latestActivity && latestActivity.quote ? `<div class="xlaunch-spotlight-latest-activity"><strong>${escapeHtml(t('Atividade recente'))} · ${escapeHtml(latestActivity.reporter || 'XLaunchVI')}${latestActivity.date ? ` · ${publicationTimeMarkup(latestActivity.date)}` : ''}</strong><p>“${escapeHtml(latestActivity.quote)}”</p>${latestActivity.transparency ? `<small>${escapeHtml(latestActivity.transparency)}</small>` : ''}</div>` : ''}
     <div class="xlaunch-spotlight-progress">
       <div class="progress-label"><span>${escapeHtml(t('Estimativa editorial baseada em relato'))}</span><strong>${counterMarkup(percent, 'percent')}%</strong></div>
       <div class="progress-track" role="progressbar" aria-label="${escapeHtml(`${project.name}: ${formatPercent(percent)}% de estimativa editorial`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><span data-progress-value="${percent}"></span></div>
@@ -3874,7 +3878,7 @@ function renderTrackerProjectCard(project, rank, leaderId) {
       <span>${escapeHtml(stageLabel)}</span>
     </div>
     <div class="repo-card-milestones" role="list" aria-label="${escapeHtml(t('Marcos de progresso'))}">${milestoneMarkup}</div>
-    <details class="repo-card-details">
+    <details class="repo-card-details"${rank != null && Number(rank) > 0 && Number(rank) <= 5 ? ' open' : ''}>
       <summary><span>${escapeHtml(t('Ver detalhes'))}</span><span>${escapeHtml(t('Ocultar detalhes'))}</span></summary>
       <div class="repo-details-body">
         <section class="repo-metrics" aria-label="${escapeHtml(t('Métricas de qualidade'))}">${metricMarkup}</section>
@@ -3944,23 +3948,9 @@ function renderTrackerProjects(data) {
   byId('watchlist-project-count').textContent = `${watchlist.length} ${t('em observação')}`;
   byId('inactive-repositories').hidden = inactive.length === 0;
   byId('inactive-repository-list').innerHTML = inactive.map((project) => renderTrackerProjectCard(project, 0, leader && leader.id)).join('');
-  const homeTargets = [
-    ['tracker-race-summary', 'home-tracker-race-summary'],
-    ['xlaunch-race-spotlight', 'home-xlaunch-race-spotlight'],
-    ['repository-list', 'home-repository-list'],
-    ['tracker-all-projects', 'home-tracker-all-projects'],
-    ['private-repository-list', 'home-private-repository-list'],
-    ['watchlist-repository-list', 'home-watchlist-repository-list'],
-    ['inactive-repository-list', 'home-inactive-repository-list']
-  ];
-  homeTargets.forEach(([sourceId, targetId]) => {
-    byId(targetId).innerHTML = byId(sourceId).innerHTML;
-  });
   [
     'repository-list', 'tracker-all-projects', 'private-repository-list',
-    'watchlist-repository-list', 'inactive-repository-list',
-    'home-repository-list', 'home-tracker-all-projects', 'home-private-repository-list',
-    'home-watchlist-repository-list', 'home-inactive-repository-list'
+    'watchlist-repository-list', 'inactive-repository-list'
   ].forEach((id) => {
     const root = byId(id);
     if (!root) return;
@@ -3973,31 +3963,17 @@ function renderTrackerProjects(data) {
       if (image.complete && !image.naturalWidth) showFallback();
     });
   });
-  byId('home-repo-count').innerHTML = byId('repo-count').innerHTML;
-  byId('home-tracked-project-count').textContent = byId('tracked-project-count').textContent;
-  byId('home-private-builds').hidden = byId('private-builds').hidden;
-  byId('home-private-build-count').textContent = byId('private-build-count').textContent;
-  byId('home-watchlist-projects').hidden = byId('watchlist-projects').hidden;
-  byId('home-watchlist-project-count').textContent = byId('watchlist-project-count').textContent;
-  byId('home-inactive-repositories').hidden = byId('inactive-repositories').hidden;
   const translatedTargets = [
     'tracker-race-summary', 'repository-list', 'xlaunch-race-spotlight',
-    'tracker-all-projects', 'private-builds', 'watchlist-projects', 'inactive-repositories',
-    'home-tracker-race-summary', 'home-repository-list', 'home-xlaunch-race-spotlight',
-    'home-tracker-all-projects', 'home-private-builds', 'home-watchlist-projects', 'home-inactive-repositories'
+    'tracker-all-projects', 'private-builds', 'watchlist-projects', 'inactive-repositories'
   ];
   translatedTargets.forEach((id) => window.KynosI18n.translateDom(byId(id), state.language));
   attachAvatarFallbacks(byId('xlaunch-race-spotlight'));
-  attachAvatarFallbacks(byId('home-xlaunch-race-spotlight'));
   ['repo-count', 'tracker-race-summary', 'repository-list', 'xlaunch-race-spotlight',
-    'tracker-all-projects', 'private-repository-list', 'watchlist-repository-list', 'inactive-repositories',
-    'home-repo-count', 'home-tracker-race-summary',
-    'home-repository-list', 'home-xlaunch-race-spotlight', 'home-tracker-all-projects',
-    'home-private-repository-list', 'home-watchlist-repository-list', 'home-inactive-repositories'].forEach((id) => animateCounters(byId(id)));
+    'tracker-all-projects', 'private-repository-list', 'watchlist-repository-list', 'inactive-repositories']
+    .forEach((id) => animateCounters(byId(id)));
   ['repository-list', 'xlaunch-race-spotlight', 'tracker-all-projects', 'private-repository-list',
-    'watchlist-repository-list', 'inactive-repositories',
-    'home-repository-list', 'home-xlaunch-race-spotlight', 'home-tracker-all-projects',
-    'home-private-repository-list', 'home-watchlist-repository-list', 'home-inactive-repositories'].forEach((id) => animateProgress(byId(id)));
+    'watchlist-repository-list', 'inactive-repositories'].forEach((id) => animateProgress(byId(id)));
 }
 
 function setupRaceControls() {
@@ -4017,15 +3993,83 @@ function setupRaceControls() {
 }
 
 function renderNews(data) {
-  const headline = selectFeaturedStory(data);
+  const editorial = withManagedEditorial(data);
+  const headline = selectFeaturedStory(editorial);
   const sourceNote = t('Notícias traduzidas e relatos de equipe em PT-BR; confira fontes e rótulos de verificação em cada item.');
   const updatedAt = data.lastSyncedAt || data.updatedAt || data.updated;
   byId('news-source-note').innerHTML = `${escapeHtml(sourceNote)} <span>· ${escapeHtml(t('Atualizado em'))} ${publicationTimeMarkup(updatedAt)} · ${escapeHtml(t('Fontes'))}: <a href="data/tracker.json" target="_blank" rel="noopener noreferrer">tracker.json</a> · <a href="data/kynostracker.json" target="_blank" rel="noopener noreferrer">kynostracker.json</a> · <a href="data/tracker-pt-BR.json" target="_blank" rel="noopener noreferrer">${escapeHtml(t('Dados localizados'))}</a></span>`;
   if (headline) renderStoryFeature(headline, byId('news-feature'));
-  byId('news-list').innerHTML = (Array.isArray(data.news) ? data.news : [])
+  byId('news-list').innerHTML = (Array.isArray(editorial.news) ? editorial.news : [])
     .filter((story) => story !== headline).map((story) => renderStoryCard(story)).join('');
   window.KynosI18n.translateDom(byId('news-source-note'), state.language);
   window.KynosI18n.translateDom(byId('news-list'), state.language);
+}
+
+function mapNewsToPortuguese(story) {
+  if (state.language !== 'pt' || !story || typeof story !== 'object') return story;
+  try {
+    const translations = story.translations && typeof story.translations === 'object'
+      ? story.translations
+      : {};
+    const mapped = translations['pt-BR'] || translations.pt_BR || translations.pt || story.ptBR || story.pt_br;
+    if (!mapped || typeof mapped !== 'object' || Array.isArray(mapped)) return story;
+    const result = { ...story };
+    ['category', 'title', 'summary', 'dek'].forEach((field) => {
+      if (typeof mapped[field] === 'string' && mapped[field].trim()) result[field] = mapped[field];
+    });
+    if (Array.isArray(mapped.body)) {
+      result.body = mapped.body.filter((paragraph) => typeof paragraph === 'string' && paragraph.trim());
+    }
+    return result;
+  } catch (error) {
+    console.warn('Mapeamento PT-BR indisponível; mantendo o texto original da notícia.', error);
+    return story;
+  }
+}
+
+function withManagedEditorial(snapshot) {
+  const baseNews = snapshot && Array.isArray(snapshot.news) ? snapshot.news : [];
+  const managedNews = (Array.isArray(managedEditorial.news) ? managedEditorial.news : []).map((post) => ({
+    id: `managed-news:${post.id}`,
+    category: post.category || 'Notícia da comunidade',
+    title: post.title,
+    summary: post.summary,
+    dek: post.summary,
+    body: String(post.body || '').split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean),
+    date: post.published_at || post.created_at || '',
+    loggedAt: post.created_at || '',
+    sources: post.source_url ? [{ outlet: 'Fonte publicada', title: post.title, url: post.source_url }] : []
+  }));
+  const trackerNews = (Array.isArray(managedEditorial.tracker_updates) ? managedEditorial.tracker_updates : []).map((update) => ({
+    id: `managed-tracker:${update.id}`,
+    category: 'Atualização de tracker',
+    title: `${update.project_name} · ${update.milestone}`,
+    summary: `${update.percent}% · ${update.summary}`,
+    dek: update.summary,
+    body: [update.summary],
+    date: update.published_at || update.created_at || '',
+    loggedAt: update.created_at || '',
+    sources: update.source_url ? [{ outlet: 'Fonte publicada', title: update.project_name, url: update.source_url }] : []
+  }));
+  return Object.assign({}, snapshot || {}, {
+    news: [...managedNews, ...trackerNews, ...baseNews].map(mapNewsToPortuguese)
+  });
+}
+
+async function refreshManagedEditorial() {
+  if (window.location.protocol === 'file:') return;
+  const response = await fetch('/api/fundraisers', { headers: { Accept: 'application/json' }, cache: 'no-store' });
+  if (!response.ok) return;
+  const payload = await response.json();
+  if (!payload || payload.source !== 'database') return;
+  managedEditorial = {
+    news: Array.isArray(payload.news) ? payload.news : [],
+    tracker_updates: Array.isArray(payload.tracker_updates) ? payload.tracker_updates : []
+  };
+  if (trackerData) {
+    renderNews(trackerData);
+    if (notificationPreferences) renderNotificationCenter(trackerData);
+  }
 }
 
 function renderTrackerDetails(data) {
@@ -4642,6 +4686,13 @@ async function init() {
     renderXlaunchPage(trackerData);
     watchLiveViewers();
     setupNotificationCenter(trackerData);
+    refreshManagedEditorial().catch((error) => console.warn('Conteúdo editorial gerenciado indisponível; mantendo o feed local.', error));
+    if (window.location.protocol !== 'file:' && !window.__kynosManagedEditorialRefresh) {
+      window.__kynosManagedEditorialRefresh = true;
+      window.setInterval(() => {
+        refreshManagedEditorial().catch((error) => console.warn('Não foi possível atualizar notícias gerenciadas.', error));
+      }, 5 * 60 * 1000);
+    }
     setupXclFeed();
     renderDiscords(data.discords);
     initAdvancedTools();
