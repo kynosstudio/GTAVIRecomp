@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-11-25T13:00:00.000Z",
-  "lastSyncedAt": "2026-11-25T13:00:00.000Z",
+  "updatedAt": "2026-11-25T16:30:00.000Z",
+  "lastSyncedAt": "2026-11-25T16:30:00.000Z",
   "sourceFile": "data/tracker.json",
   "teams": {
     "xlaunchvi": {
@@ -23,9 +23,9 @@
         "estimatedPercent": 78.7,
         "portwatchPercent": 1.4,
         "title": "XLaunchVI: mundo inteiro renderizado à noite, Lucia carregada, Ray Tracing ativo a 30 FPS",
-        "summary": "Relatos da equipe indicam que os menus do XlaunchVI agora abrem cravados em 30 FPS, ainda sem texturas. A estabilidade está mais forte segundo Nesko. O próximo foco é otimizar o uso de memória e as shaders sem textura. O projeto já abriu The Matrix Awakens e busca executar outros jogos de Xbox; não há release pública para baixar.",
-        "teaser": "55% · menus a 30 FPS sem texturas · próximo passo: memória e shaders.",
-        "transparency": "Os 55% são uma estimativa editorial local, não uma medição oficial. Relatos atribuídos à equipe descrevem menus a 30 FPS sem texturas e foco em memória/shaders; não há confirmação pública independente nem release disponível.",
+        "summary": "A equipe do XLaunchVI relata que o mundo inteiro de GTA VI agora renderiza à noite com iluminação funcional, incluindo sombras e a silhueta da protagonista Lucia visível em tempo real. Shaders compilados, texturas funcionais, iluminação e Ray Tracing estão ativos; o prólogo (incluindo Lucia e o ambiente prisional) carrega completamente em tela cheia a 30 FPS em 1080p. Novos colaboradores entraram no projeto e testes estão em andamento com The Matrix Awakens para aprimorar shaders 2D e 3D visando técnicas de renderização mais complexas. A política de distribuição permanece: release pública apenas na Release Final (meta mínima de 60 FPS, rodando melhor que no console). Não há data prometida.",
+        "teaser": "78,7% · mundo renderizado (noite) · Lucia · Ray Tracing · 30 FPS @ 1080p · Release Final ≥ 60 FPS",
+        "transparency": "Os 78,7% são uma estimativa editorial local baseada em relatos da equipe, não uma medição oficial. Detalhes técnicos e desempenho não foram verificados de forma independente.",
         "dashboardContext": "Escopo do XLaunch Dashboard informado ao portal: reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. Esses detalhes não estão confirmados de forma independente no snapshot público do GitHub.",
         "dashboardFeatures": [
           "Reconhecimento de jogos e mídia física",
@@ -36,46 +36,46 @@
         ],
         "translations": {
           "en": {
-            "title": "XlaunchVI: 55% editorial estimate at the loading-screen milestone",
-            "summary": "A report attributed to JPTuba on Discord places XlaunchVI at the menu at 30 FPS without textures. The team said work paused for about 2–3 hours after its AI usage ran out, then resumed after Claude was recharged. The portal now records 55% as an editorial estimate supplied for this update, not an official measurement or a GitHub milestone. The reported XLaunch Dashboard scope includes game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. The team aims to reach world loading and catch or overtake XCL and VIctory, with support from the Brazilian community.",
-            "teaser": "The portal lists 55% as an editorial estimate; the reported milestone is the menu at 30 FPS without textures.",
-            "stage": "Main menu at 30 FPS · no textures · editorial estimate (~55%)",
-            "transparency": "The 55% estimate was supplied for this portal update; it is not an official measurement. The loading-screen report is attributed to JPTuba on Discord, but the invite does not link to the original message. The public PortWatch/GitHub snapshot records 0% for GTA VI milestones, and the Dashboard details have not been independently verified there.",
+            "title": "XLaunchVI: full world rendered at night, Lucia loaded, Ray Tracing active at 30 FPS",
+            "summary": "The XLaunchVI team reports that the full GTA VI world now renders at night with functional lighting, including shadows and the protagonist Lucia's silhouette visible in real time. Compiled shaders, functional textures, lighting, and Ray Tracing are active; the prologue (including Lucia and the prison environment) loads completely in fullscreen at 30 FPS in 1080p. New collaborators have joined the project and testing is underway with The Matrix Awakens to improve 2D and 3D shaders for more complex rendering techniques. The distribution policy remains: public release only at Release Final (minimum 60 FPS, running better than console). No promised date.",
+            "teaser": "78.7% · world rendered (night) · Lucia · Ray Tracing · 30 FPS @ 1080p · Release Final ≥ 60 FPS",
+            "stage": "Full world rendered (night) · Lucia loaded · Ray Tracing active · 30 FPS @ 1080p",
+            "transparency": "The 78.7% is a local editorial estimate based on team reports, not an official measurement. Technical details and performance have not been independently verified.",
             "dashboardContext": "XLaunch Dashboard scope supplied to the portal: game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. These details are not independently confirmed in the public GitHub snapshot."
           },
           "es": {
-            "title": "XlaunchVI: estimación editorial del 55% en la menú a 30 FPS sin texturas",
+            "title": "XLaunchVI: mundo completo renderizado de noche, Lucia cargada, Ray Tracing activo a 30 FPS",
             "summary": "Un relato atribuido a JPTuba en Discord sitúa a XlaunchVI en la menú a 30 FPS sin texturas. El equipo dijo que el trabajo se pausó durante unas 2–3 horas al agotarse el uso de IA y se reanudó después de recargar Claude. El portal registra ahora un 55% como estimación editorial proporcionada para esta actualización; no es una medición oficial ni un hito de GitHub. El alcance informado de XLaunch Dashboard incluye reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y una biblioteca. El objetivo es llegar a la carga del mundo y alcanzar o superar a XCL y VIctory, con apoyo de la comunidad brasileña.",
             "teaser": "El portal registra un 55% como estimación editorial; el hito informado es la menú a 30 FPS sin texturas.",
-            "stage": "Menú principal a 30 FPS · sin texturas · estimación editorial (~55%)",
+            "stage": "Mundo completo renderizado (noche) · Lucia cargada · Ray Tracing activo · 30 FPS @ 1080p",
             "transparency": "La estimación del 55% se proporcionó para esta actualización del portal; no es una medición oficial. El informe sobre la menú a 30 FPS sin texturas se atribuye a JPTuba en Discord, pero la invitación no enlaza al mensaje original. El snapshot público de PortWatch/GitHub registra un 0% en hitos de GTA VI, y esos detalles del Dashboard no se verificaron de forma independiente allí.",
             "dashboardContext": "Alcance de XLaunch Dashboard informado al portal: reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y biblioteca. Estos detalles no están confirmados de forma independiente en el snapshot público de GitHub."
           },
           "zh": {
-            "title": "XlaunchVI：无贴图的主菜单阶段的编辑估算为 55%",
-            "summary": "归于 JPTuba 在 Discord 发布的报告称，XlaunchVI 已到达无贴图的主菜单。团队表示，AI 使用额度耗尽后暂停了约 2–3 小时，补充 Claude 额度后恢复开发。门户在本次更新中将 55% 记录为编辑估算；这不是官方测量，也不是 GitHub 里程碑。获提供的 XLaunch Dashboard 范围包括游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。团队目标是进入世界加载阶段并追赶或超过 XCL 和 VIctory，同时获得巴西社区支持。",
-            "teaser": "门户记录的 55% 是编辑估算；报告的里程碑为无贴图的主菜单。",
-            "stage": "主菜单以 30 FPS运行 · 无贴图 · 编辑估算（约55%）",
-            "transparency": "55% 估算是为本次门户更新提供的信息，并非官方测量。无贴图的主菜单的报告归于 JPTuba 在 Discord 发布，但邀请链接未指向原始消息。公开的 PortWatch/GitHub 快照记录的 GTA VI 里程碑为 0%，且 Dashboard 详情未在该快照中得到独立验证。",
+            "title": "XLaunchVI：夜间完整世界渲染，Lucia 加载，光线追踪 30 FPS",
+            "summary": "XLaunchVI 团队报告，GTA VI 完整世界现已在夜间渲染，具有功能性照明，包括阴影和主角 Lucia 的剪影实时可见。已编译着色器、功能性纹理、照明和光线追踪处于激活状态；序章（包括 Lucia 和监狱环境）在 1080p 下以 30 FPS 完整加载全屏。新合作者已加入项目，正在通过 The Matrix Awakens 测试以改进用于更复杂渲染技术的 2D 和 3D 着色器。分发政策保持：仅在 Release Final 公开发布（最低 60 FPS，运行效果优于主机）。无承诺日期。",
+            "teaser": "78.7% · 夜间世界渲染 · Lucia · 光线追踪 · 30 FPS @ 1080p · Release Final ≥ 60 FPS",
+            "stage": "夜间完整世界渲染 · Lucia 已加载 · 光线追踪激活 · 30 FPS @ 1080p",
+            "transparency": "78.7% 是基于团队报告的本地编辑估算，并非官方测量。技术细节和性能未经独立验证。",
             "dashboardContext": "提供给门户的 XLaunch Dashboard 范围：游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。这些详情未在公开 GitHub 快照中得到独立确认。"
           }
         },
         "sources": [
           {
-            "outlet": "Discord do XlaunchVI",
-            "title": "Convite do servidor; não direciona à mensagem original",
+            "outlet": "Discord do XLaunchVI",
+            "title": "Relato da equipe sobre avanços recentes",
             "url": "https://discord.gg/R5T6zeQuPY"
           },
           {
-            "outlet": "Repositório GitHub",
-            "title": "O snapshot consultado ainda não registra este marco",
+            "outlet": "GitHub",
+            "title": "Repositório público do XLaunchVI",
             "url": "https://github.com/JPTuba9/xlaunch-vi"
           }
         ],
         "portwatchMilestonePercent": 0
       },
       "repositoryCheck": {
-        "checkedAt": "2026-11-23",
+        "checkedAt": "2026-11-25",
         "httpStatus": null,
         "missing": false,
         "authenticated": false
@@ -282,9 +282,9 @@
       "estimatedPercent": 78.7,
       "portwatchPercent": 1.4,
       "title": "XLaunchVI: mundo inteiro renderizado à noite, Lucia carregada, Ray Tracing ativo a 30 FPS",
-      "summary": "Relatos da equipe indicam que os menus do XlaunchVI agora abrem cravados em 30 FPS, ainda sem texturas. A estabilidade está mais forte segundo Nesko. O próximo foco é otimizar o uso de memória e as shaders sem textura. O projeto já abriu The Matrix Awakens e busca executar outros jogos de Xbox; não há release pública para baixar.",
-      "teaser": "55% · menus a 30 FPS sem texturas · próximo passo: memória e shaders.",
-      "transparency": "Os 55% são uma estimativa editorial local, não uma medição oficial. Relatos atribuídos à equipe descrevem menus a 30 FPS sem texturas e foco em memória/shaders; não há confirmação pública independente nem release disponível.",
+      "summary": "A equipe do XLaunchVI relata que o mundo inteiro de GTA VI agora renderiza à noite com iluminação funcional, incluindo sombras e a silhueta da protagonista Lucia visível em tempo real. Shaders compilados, texturas funcionais, iluminação e Ray Tracing estão ativos; o prólogo (incluindo Lucia e o ambiente prisional) carrega completamente em tela cheia a 30 FPS em 1080p. Novos colaboradores entraram no projeto e testes estão em andamento com The Matrix Awakens para aprimorar shaders 2D e 3D visando técnicas de renderização mais complexas. A política de distribuição permanece: release pública apenas na Release Final (meta mínima de 60 FPS, rodando melhor que no console). Não há data prometida.",
+      "teaser": "78,7% · mundo renderizado (noite) · Lucia · Ray Tracing · 30 FPS @ 1080p · Release Final ≥ 60 FPS",
+      "transparency": "Os 78,7% são uma estimativa editorial local baseada em relatos da equipe, não uma medição oficial. Detalhes técnicos e desempenho não foram verificados de forma independente.",
       "dashboardContext": "Escopo do XLaunch Dashboard informado ao portal: reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. Esses detalhes não estão confirmados de forma independente no snapshot público do GitHub.",
       "dashboardFeatures": [
         "Reconhecimento de jogos e mídia física",
@@ -303,19 +303,19 @@
           "dashboardContext": "XLaunch Dashboard scope supplied to the portal: game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. These details are not independently confirmed in the public GitHub snapshot."
         },
         "es": {
-          "title": "XlaunchVI: estimación editorial del 55% en la menú a 30 FPS sin texturas",
+          "title": "XLaunchVI: mundo completo renderizado de noche, Lucia cargada, Ray Tracing activo a 30 FPS",
           "summary": "Un relato atribuido a JPTuba en Discord sitúa a XlaunchVI en la menú a 30 FPS sin texturas. El equipo dijo que el trabajo se pausó durante unas 2–3 horas al agotarse el uso de IA y se reanudó después de recargar Claude. El portal registra ahora un 55% como estimación editorial proporcionada para esta actualización; no es una medición oficial ni un hito de GitHub. El alcance informado de XLaunch Dashboard incluye reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y una biblioteca. El objetivo es llegar a la carga del mundo y alcanzar o superar a XCL y VIctory, con apoyo de la comunidad brasileña.",
           "teaser": "El portal registra un 55% como estimación editorial; el hito informado es la menú a 30 FPS sin texturas.",
-          "stage": "Menú principal a 30 FPS · sin texturas · estimación editorial (~55%)",
+          "stage": "Mundo completo renderizado (noche) · Lucia cargada · Ray Tracing activo · 30 FPS @ 1080p",
           "transparency": "La estimación del 55% se proporcionó para esta actualización del portal; no es una medición oficial. El informe sobre la menú a 30 FPS sin texturas se atribuye a JPTuba en Discord, pero la invitación no enlaza al mensaje original. El snapshot público de PortWatch/GitHub registra un 0% en hitos de GTA VI, y esos detalles del Dashboard no se verificaron de forma independiente allí.",
           "dashboardContext": "Alcance de XLaunch Dashboard informado al portal: reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y biblioteca. Estos detalles no están confirmados de forma independiente en el snapshot público de GitHub."
         },
         "zh": {
-          "title": "XlaunchVI：无贴图的主菜单阶段的编辑估算为 55%",
-          "summary": "归于 JPTuba 在 Discord 发布的报告称，XlaunchVI 已到达无贴图的主菜单。团队表示，AI 使用额度耗尽后暂停了约 2–3 小时，补充 Claude 额度后恢复开发。门户在本次更新中将 55% 记录为编辑估算；这不是官方测量，也不是 GitHub 里程碑。获提供的 XLaunch Dashboard 范围包括游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。团队目标是进入世界加载阶段并追赶或超过 XCL 和 VIctory，同时获得巴西社区支持。",
-          "teaser": "门户记录的 55% 是编辑估算；报告的里程碑为无贴图的主菜单。",
-          "stage": "主菜单以 30 FPS运行 · 无贴图 · 编辑估算（约55%）",
-          "transparency": "55% 估算是为本次门户更新提供的信息，并非官方测量。无贴图的主菜单的报告归于 JPTuba 在 Discord 发布，但邀请链接未指向原始消息。公开的 PortWatch/GitHub 快照记录的 GTA VI 里程碑为 0%，且 Dashboard 详情未在该快照中得到独立验证。",
+          "title": "XLaunchVI：夜间完整世界渲染，Lucia 加载，光线追踪 30 FPS",
+          "summary": "XLaunchVI 团队报告，GTA VI 完整世界现已在夜间渲染，具有功能性照明，包括阴影和主角 Lucia 的剪影实时可见。已编译着色器、功能性纹理、照明和光线追踪处于激活状态；序章（包括 Lucia 和监狱环境）在 1080p 下以 30 FPS 完整加载全屏。新合作者已加入项目，正在通过 The Matrix Awakens 测试以改进用于更复杂渲染技术的 2D 和 3D 着色器。分发政策保持：仅在 Release Final 公开发布（最低 60 FPS，运行效果优于主机）。无承诺日期。",
+          "teaser": "78.7% · 夜间世界渲染 · Lucia · 光线追踪 · 30 FPS @ 1080p · Release Final ≥ 60 FPS",
+          "stage": "夜间完整世界渲染 · Lucia 已加载 · 光线追踪激活 · 30 FPS @ 1080p",
+          "transparency": "78.7% 是基于团队报告的本地编辑估算，并非官方测量。技术细节和性能未经独立验证。",
           "dashboardContext": "提供给门户的 XLaunch Dashboard 范围：游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。这些详情未在公开 GitHub 快照中得到独立确认。"
         }
       },
@@ -3029,9 +3029,9 @@
         "estimatedPercent": 78.7,
         "portwatchPercent": 1.4,
         "title": "XLaunchVI: mundo inteiro renderizado à noite, Lucia carregada, Ray Tracing ativo a 30 FPS",
-        "summary": "Relatos da equipe indicam que os menus do XlaunchVI agora abrem cravados em 30 FPS, ainda sem texturas. A estabilidade está mais forte segundo Nesko. O próximo foco é otimizar o uso de memória e as shaders sem textura. O projeto já abriu The Matrix Awakens e busca executar outros jogos de Xbox; não há release pública para baixar.",
-        "teaser": "55% · menus a 30 FPS sem texturas · próximo passo: memória e shaders.",
-        "transparency": "Os 55% são uma estimativa editorial local, não uma medição oficial. Relatos atribuídos à equipe descrevem menus a 30 FPS sem texturas e foco em memória/shaders; não há confirmação pública independente nem release disponível.",
+        "summary": "A equipe do XLaunchVI relata que o mundo inteiro de GTA VI agora renderiza à noite com iluminação funcional, incluindo sombras e a silhueta da protagonista Lucia visível em tempo real. Shaders compilados, texturas funcionais, iluminação e Ray Tracing estão ativos; o prólogo (incluindo Lucia e o ambiente prisional) carrega completamente em tela cheia a 30 FPS em 1080p. Novos colaboradores entraram no projeto e testes estão em andamento com The Matrix Awakens para aprimorar shaders 2D e 3D visando técnicas de renderização mais complexas. A política de distribuição permanece: release pública apenas na Release Final (meta mínima de 60 FPS, rodando melhor que no console). Não há data prometida.",
+        "teaser": "78,7% · mundo renderizado (noite) · Lucia · Ray Tracing · 30 FPS @ 1080p · Release Final ≥ 60 FPS",
+        "transparency": "Os 78,7% são uma estimativa editorial local baseada em relatos da equipe, não uma medição oficial. Detalhes técnicos e desempenho não foram verificados de forma independente.",
         "dashboardContext": "Escopo do XLaunch Dashboard informado ao portal: reconhecimento de jogos e mídia física, detecção de build, suporte a controles, login/troca de perfil e biblioteca. Esses detalhes não estão confirmados de forma independente no snapshot público do GitHub.",
         "dashboardFeatures": [
           "Reconhecimento de jogos e mídia física",
@@ -3042,39 +3042,39 @@
         ],
         "translations": {
           "en": {
-            "title": "XlaunchVI: 55% editorial estimate at the loading-screen milestone",
-            "summary": "A report attributed to JPTuba on Discord places XlaunchVI at the menu at 30 FPS without textures. The team said work paused for about 2–3 hours after its AI usage ran out, then resumed after Claude was recharged. The portal now records 55% as an editorial estimate supplied for this update, not an official measurement or a GitHub milestone. The reported XLaunch Dashboard scope includes game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. The team aims to reach world loading and catch or overtake XCL and VIctory, with support from the Brazilian community.",
-            "teaser": "The portal lists 55% as an editorial estimate; the reported milestone is the menu at 30 FPS without textures.",
-            "stage": "Main menu at 30 FPS · no textures · editorial estimate (~55%)",
-            "transparency": "The 55% estimate was supplied for this portal update; it is not an official measurement. The loading-screen report is attributed to JPTuba on Discord, but the invite does not link to the original message. The public PortWatch/GitHub snapshot records 0% for GTA VI milestones, and the Dashboard details have not been independently verified there.",
+            "title": "XLaunchVI: full world rendered at night, Lucia loaded, Ray Tracing active at 30 FPS",
+            "summary": "The XLaunchVI team reports that the full GTA VI world now renders at night with functional lighting, including shadows and the protagonist Lucia's silhouette visible in real time. Compiled shaders, functional textures, lighting, and Ray Tracing are active; the prologue (including Lucia and the prison environment) loads completely in fullscreen at 30 FPS in 1080p. New collaborators have joined the project and testing is underway with The Matrix Awakens to improve 2D and 3D shaders for more complex rendering techniques. The distribution policy remains: public release only at Release Final (minimum 60 FPS, running better than console). No promised date.",
+            "teaser": "78.7% · world rendered (night) · Lucia · Ray Tracing · 30 FPS @ 1080p · Release Final ≥ 60 FPS",
+            "stage": "Full world rendered (night) · Lucia loaded · Ray Tracing active · 30 FPS @ 1080p",
+            "transparency": "The 78.7% is a local editorial estimate based on team reports, not an official measurement. Technical details and performance have not been independently verified.",
             "dashboardContext": "XLaunch Dashboard scope supplied to the portal: game and physical-media recognition, build detection, controller support, login/profile switching, and a game library. These details are not independently confirmed in the public GitHub snapshot."
           },
           "es": {
-            "title": "XlaunchVI: estimación editorial del 55% en la menú a 30 FPS sin texturas",
+            "title": "XLaunchVI: mundo completo renderizado de noche, Lucia cargada, Ray Tracing activo a 30 FPS",
             "summary": "Un relato atribuido a JPTuba en Discord sitúa a XlaunchVI en la menú a 30 FPS sin texturas. El equipo dijo que el trabajo se pausó durante unas 2–3 horas al agotarse el uso de IA y se reanudó después de recargar Claude. El portal registra ahora un 55% como estimación editorial proporcionada para esta actualización; no es una medición oficial ni un hito de GitHub. El alcance informado de XLaunch Dashboard incluye reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y una biblioteca. El objetivo es llegar a la carga del mundo y alcanzar o superar a XCL y VIctory, con apoyo de la comunidad brasileña.",
             "teaser": "El portal registra un 55% como estimación editorial; el hito informado es la menú a 30 FPS sin texturas.",
-            "stage": "Menú principal a 30 FPS · sin texturas · estimación editorial (~55%)",
+            "stage": "Mundo completo renderizado (noche) · Lucia cargada · Ray Tracing activo · 30 FPS @ 1080p",
             "transparency": "La estimación del 55% se proporcionó para esta actualización del portal; no es una medición oficial. El informe sobre la menú a 30 FPS sin texturas se atribuye a JPTuba en Discord, pero la invitación no enlaza al mensaje original. El snapshot público de PortWatch/GitHub registra un 0% en hitos de GTA VI, y esos detalles del Dashboard no se verificaron de forma independiente allí.",
             "dashboardContext": "Alcance de XLaunch Dashboard informado al portal: reconocimiento de juegos y medios físicos, detección de versiones, compatibilidad con mandos, inicio de sesión/cambio de perfil y biblioteca. Estos detalles no están confirmados de forma independiente en el snapshot público de GitHub."
           },
           "zh": {
-            "title": "XlaunchVI：无贴图的主菜单阶段的编辑估算为 55%",
-            "summary": "归于 JPTuba 在 Discord 发布的报告称，XlaunchVI 已到达无贴图的主菜单。团队表示，AI 使用额度耗尽后暂停了约 2–3 小时，补充 Claude 额度后恢复开发。门户在本次更新中将 55% 记录为编辑估算；这不是官方测量，也不是 GitHub 里程碑。获提供的 XLaunch Dashboard 范围包括游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。团队目标是进入世界加载阶段并追赶或超过 XCL 和 VIctory，同时获得巴西社区支持。",
-            "teaser": "门户记录的 55% 是编辑估算；报告的里程碑为无贴图的主菜单。",
-            "stage": "主菜单以 30 FPS运行 · 无贴图 · 编辑估算（约55%）",
-            "transparency": "55% 估算是为本次门户更新提供的信息，并非官方测量。无贴图的主菜单的报告归于 JPTuba 在 Discord 发布，但邀请链接未指向原始消息。公开的 PortWatch/GitHub 快照记录的 GTA VI 里程碑为 0%，且 Dashboard 详情未在该快照中得到独立验证。",
+            "title": "XLaunchVI：夜间完整世界渲染，Lucia 加载，光线追踪 30 FPS",
+            "summary": "XLaunchVI 团队报告，GTA VI 完整世界现已在夜间渲染，具有功能性照明，包括阴影和主角 Lucia 的剪影实时可见。已编译着色器、功能性纹理、照明和光线追踪处于激活状态；序章（包括 Lucia 和监狱环境）在 1080p 下以 30 FPS 完整加载全屏。新合作者已加入项目，正在通过 The Matrix Awakens 测试以改进用于更复杂渲染技术的 2D 和 3D 着色器。分发政策保持：仅在 Release Final 公开发布（最低 60 FPS，运行效果优于主机）。无承诺日期。",
+            "teaser": "78.7% · 夜间世界渲染 · Lucia · 光线追踪 · 30 FPS @ 1080p · Release Final ≥ 60 FPS",
+            "stage": "夜间完整世界渲染 · Lucia 已加载 · 光线追踪激活 · 30 FPS @ 1080p",
+            "transparency": "78.7% 是基于团队报告的本地编辑估算，并非官方测量。技术细节和性能未经独立验证。",
             "dashboardContext": "提供给门户的 XLaunch Dashboard 范围：游戏与实体介质识别、版本检测、手柄支持、登录/切换档案及游戏库。这些详情未在公开 GitHub 快照中得到独立确认。"
           }
         },
         "sources": [
           {
-            "outlet": "Discord do XlaunchVI",
-            "title": "Convite do servidor; não direciona à mensagem original",
+            "outlet": "Discord do XLaunchVI",
+            "title": "Relato da equipe sobre avanços recentes",
             "url": "https://discord.gg/R5T6zeQuPY"
           },
           {
-            "outlet": "Repositório GitHub",
-            "title": "O snapshot consultado ainda não registra este marco",
+            "outlet": "GitHub",
+            "title": "Repositório público do XLaunchVI",
             "url": "https://github.com/JPTuba9/xlaunch-vi"
           }
         ],
