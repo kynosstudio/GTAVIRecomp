@@ -201,7 +201,7 @@
       <section class="page-section" id="utility" data-page="utility">
         <div class="hero hero-home">
           <div class="hero-content">
-            <div class="eyebrow"><span class="eyebrow-dot"></span> MEU PC RODA GTAVI <span class="eyebrow-line"></span> ESTIMATIVA DA COMUNIDADE</div>
+            <div class="eyebrow"><span class="eyebrow-dot"></span> MEU PC RODA GTAVI <span class="eyebrow-line"></span> KYNOS SISTEMAS · BUILD COMUNITÁRIA</div>
             <h1>Meu PC Roda<br /><span>GTAVI?</span></h1>
             <p class="hero-copy">Uma ferramenta complementar: estime o desempenho do seu hardware sem tirar o foco das notícias e do progresso dos projetos.</p>
             <div class="hero-meta"><span class="live-dot"></span> FEITO PELA COMUNIDADE <span class="meta-divider">/</span> PROJEÇÃO PARA PC</div>
@@ -214,6 +214,7 @@
             <div class="estimate-pill"><span class="live-dot"></span> ESTIMATIVA AO VIVO</div>
           </div>
           <div class="simulator-tools" aria-label="Ferramentas do simulador">
+            <button class="tool-button detect-pc-button" id="detect-pc" type="button">Detectar meu PC</button>
             <button class="tool-button" id="presets-open" type="button">Presets de PC</button>
             <button class="tool-button" id="compare-open" type="button">Comparar setups</button>
             <details class="what-if-menu">
@@ -246,7 +247,7 @@
               <article class="panel config-panel">
                 <div class="panel-title"><span class="step-number">01</span><div><h3>Meta de desempenho</h3><p>Escolha a resolução e a qualidade desejadas</p></div></div>
                 <div class="target-grid" id="target-options" role="group" aria-label="Meta de desempenho"></div>
-                <div class="console-reference"><b>Referências de console</b><span>Series S · RDNA 2 · 4,0 TFLOPs</span><span>PS5 · Zen 2 / RDNA 2 · 10,28 TFLOPs</span><span>Series X · Zen 2 / RDNA 2 · 12,15 TFLOPs</span></div>
+                <div class="console-reference"><b>Referências de console</b><span>Series S · RDNA 2 · 4,0 TFLOPs</span><span>PS5 · AMD Zen 2 (8C/16T até 3,5 GHz) · RDNA 2 · 10,3 TFLOPs</span><span>Series X · Zen 2 / RDNA 2 · 12,15 TFLOPs</span></div>
               </article>
               <article class="panel config-panel pc-panel">
                 <div class="panel-title"><span class="step-number">02</span><div><h3>Processador e placa de vídeo</h3><p>Escolha o modelo exato de cada componente</p></div></div>
@@ -304,6 +305,10 @@
                 <div class="fps-showcase" id="fps-panel">
                   <div class="fps-primary"><span>FPS MÉDIOS ESTIMADOS</span><strong><span id="fps-average">--</span><small>FPS</small></strong><span class="fps-resolution" id="fps-resolution">—</span></div>
                   <div class="fps-breakdown"><span>mínimo / médio / 1% baixo</span><strong id="fps-values">-- / -- / --</strong></div>
+                  <div class="fps-projections">
+                    <div><span>CENÁRIO BASE · 30 FPS</span><strong id="fps-30-baseline">-- / -- / --</strong><small>mínimo / médio / 1% low</small></div>
+                    <div><span>PROJEÇÃO OTIMIZADA · META 60 FPS</span><strong id="fps-60-projection">-- / -- / --</strong><small>mínimo / médio / 1% low · estimativa</small></div>
+                  </div>
                 </div>
                 <div class="result-score">
                   <span>COMPATIBILIDADE COM A META</span>
@@ -317,6 +322,7 @@
                   <div><span>Armazenamento</span><strong id="summary-storage">—</strong></div>
                   <div><span>SO / segundo plano</span><strong id="summary-os">—</strong></div>
                 </div>
+                <div class="community-memory-alert" id="community-memory-alert" role="status" aria-live="polite"></div>
               </section>
               <details class="result-details">
                 <summary>Ver análise detalhada e recomendações</summary>
@@ -333,7 +339,7 @@
                     <div class="recommendation-box"><span class="section-kicker">AJUSTES RECOMENDADOS</span><ul id="recommendation-list"></ul></div>
                   </section>
                   <div class="tech-tags"><span>DIRECTX 12 / VULKAN</span><span>DLSS</span><span>FSR</span><span>TECLADO E MOUSE</span><span>CONTROLES</span></div>
-                  <div class="estimate-note panel"><span class="note-icon">i</span><p><b>Transparência:</b> estimativa técnica baseada na arquitetura dos consoles e nas projeções de mercado para novembro de 2026. A Rockstar Games ainda não divulgou requisitos oficiais para a versão de PC. O cálculo considera SSD e aproximadamente 212 GB de espaço livre; não garante precisão ou desempenho real.</p></div>
+                  <div class="estimate-note panel"><span class="note-icon">i</span><div><p><b>Transparência:</b> estimativas preliminares de uma build não oficial/comunitária — não são requisitos oficiais da Rockstar Games. Nem todo componente foi testado individualmente; TFLOPS isolados não garantem compatibilidade. Intel Arc requer testes adicionais. Drivers, clocks e RAM, thermal throttling e aplicativos em segundo plano afetam o FPS. A projeção não garante precisão ou desempenho real.</p><ul id="community-notices"></ul><p>O cálculo considera SSD e aproximadamente 212 GB livres. As referências de console são apenas comparativos de arquitetura.</p></div></div>
                 </div>
               </details>
             </aside>
@@ -413,6 +419,22 @@
             </div>
           </section>
         </div>
+          <section class="pc-detection panel" aria-labelledby="pc-detection-title">
+            <div class="pc-detection-heading">
+              <div><span class="section-kicker">LEITURA LOCAL E PRIVADA</span><h3 id="pc-detection-title">Detecção transparente do PC</h3><p>Nenhum dado é enviado. O navegador não revela o modelo exato da CPU/GPU; confirme tudo nos seletores.</p></div>
+              <span class="pc-detection-source" id="pc-profile-source">Perfil atual: seleção manual</span>
+            </div>
+            <div class="pc-detection-tools">
+              <label for="hardware-import-json">Importe ou cole o JSON do helper PowerShell</label>
+              <textarea id="hardware-import-json" rows="3" spellcheck="false" autocomplete="off" placeholder="Cole aqui o conteúdo de kynos-hardware-report.json"></textarea>
+              <div class="pc-detection-actions">
+                <input id="hardware-import-file" type="file" accept=".json,application/json" aria-label="Selecionar relatório local de hardware em JSON">
+                <button class="tool-button" id="import-pc-report" type="button">Ler relatório local</button>
+                <a class="text-link" href="scripts/detect-pc.ps1" download>Baixar helper PowerShell</a>
+              </div>
+            </div>
+            <div class="pc-detection-result" id="pc-detection-result" role="status" aria-live="polite">Use “Detectar meu PC” para uma leitura aproximada do navegador ou importe um relatório local do Windows.</div>
+          </section>
       </section>
 
       <section class="page-section" id="news" data-page="news">

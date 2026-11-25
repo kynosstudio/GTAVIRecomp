@@ -2249,6 +2249,49 @@ html[data-theme="light"] .xlaunch-repository-warning { color: #70520b; backgroun
 }
 @media (max-width: 360px) {
   .header-freshness { min-width: 29px; width: 29px; padding: 0 3px; gap: 3px; }
+}
+.pc-detection {
+  margin: 0 0 16px;
+  padding: clamp(16px, 2vw, 22px);
+  border-color: rgba(255, 204, 82, .25);
+  background: radial-gradient(ellipse at 100% 0, rgba(255, 204, 82, .08), transparent 44%), var(--panel);
+}
+.pc-detection-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.pc-detection-heading h3 { margin: 6px 0; color: var(--white); font: 600 17px var(--display); }
+.pc-detection-heading p, .pc-detection-result p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
+.pc-detection-source { padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; color: #ffd879; font: 10px/1.4 var(--mono); text-align: center; }
+.pc-detection-tools { display: grid; gap: 8px; margin-top: 15px; }
+.pc-detection-tools > label { color: var(--soft); font-size: 11px; font-weight: 600; }
+.pc-detection-tools textarea { width: 100%; min-height: 76px; padding: 10px; resize: vertical; border: 1px solid var(--line); border-radius: 6px; color: var(--white); background: rgba(0, 0, 0, .16); font: 11px/1.5 var(--mono); }
+.pc-detection-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
+.pc-detection-actions input[type="file"] { min-width: 0; flex: 1 1 220px; color: var(--muted); font-size: 10px; }
+.pc-detection-actions .tool-button { min-height: 40px; }
+.pc-detection-actions .text-link { padding: 8px 0; color: #ffc09d; font-size: 11px; }
+.pc-detection-result { margin-top: 13px; padding: 12px; border: 1px solid var(--line); border-radius: 6px; color: var(--soft); background: rgba(0, 0, 0, .12); font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+.pc-detection-result strong { display: block; margin-bottom: 5px; color: var(--white); }
+.pc-detection-result ul { margin: 7px 0; padding-left: 18px; display: grid; gap: 3px; }
+.pc-detection-result li::marker, #community-notices li::marker { color: #ffd879; }
+.pc-detection-result p { margin-top: 7px; }
+.fps-projections { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+.fps-projections > div { min-width: 0; padding: 10px; display: grid; gap: 5px; border: 1px solid var(--line); border-radius: 6px; background: rgba(0, 0, 0, .12); }
+.fps-projections > div > span { color: var(--muted); font: 9px/1.45 var(--mono); }
+.fps-projections strong { color: var(--white); font: 600 12px/1.45 var(--mono); overflow-wrap: anywhere; }
+.fps-projections small { color: var(--muted); font-size: 9px; }
+.community-memory-alert { margin-top: 12px; padding: 10px 12px; border: 1px solid rgba(255, 204, 82, .45); border-radius: 6px; color: #ffe3a0; background: rgba(255, 204, 82, .08); font-size: 11px; line-height: 1.55; }
+.community-memory-alert[hidden] { display: none; }
+.estimate-note #community-notices { margin: 8px 0; padding-left: 18px; color: var(--soft); font-size: 11px; line-height: 1.55; }
+html[data-theme="light"] .pc-detection-heading h3, html[data-theme="light"] .pc-detection-result strong,
+html[data-theme="light"] .fps-projections strong { color: #30243b; }
+html[data-theme="light"] .pc-detection-source { color: #745607; }
+html[data-theme="light"] .pc-detection-tools textarea { color: #30243b; background: rgba(255, 255, 255, .76); }
+html[data-theme="light"] .pc-detection-result, html[data-theme="light"] .fps-projections > div { background: rgba(255, 255, 255, .55); }
+html[data-theme="light"] .community-memory-alert { color: #70520b; background: rgba(255, 222, 120, .18); }
+@media (max-width: 680px) {
+  .pc-detection-heading { flex-direction: column; }
+  .pc-detection-source { max-width: 100%; }
+  .pc-detection-actions { align-items: stretch; flex-direction: column; }
+  .pc-detection-actions input[type="file"] { flex: auto; }
+  .fps-projections { grid-template-columns: minmax(0, 1fr); }
   .header-freshness-dot { width: 5px; height: 5px; flex-basis: 5px; }
   .header-freshness-short { font-size: 8px; }
   .xlaunch-project-facts { grid-template-columns: minmax(0, 1fr); }

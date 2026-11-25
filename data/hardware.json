@@ -7,7 +7,9 @@
     { "name": "Recomendado · 1440p alto", "description": "60 FPS · RTX 4070 / RX 7800 XT", "gpuScore": 60, "cpuScore": 59, "vramGb": 12, "ramGb": 32, "ramGeneration": "ddr5", "frequencyMhz": 5600, "bandwidthGbps": 89.6, "storageTier": "nvme4", "fps": { "minimum": 50, "average": 60, "low": 42 } },
     { "name": "Ultra · 4K", "description": "60+ FPS · RTX 4090 / RTX 5080", "gpuScore": 94, "cpuScore": 82, "vramGb": 16, "ramGb": 48, "ramGeneration": "ddr5", "frequencyMhz": 6000, "bandwidthGbps": 96, "storageTier": "nvme4", "fps": { "minimum": 52, "average": 65, "low": 44 } },
     { "name": "720p (HD) · Maior FPS", "description": "45–60 FPS estimados · carga gráfica reduzida", "displayOrder": 0, "gpuScore": 15, "cpuScore": 24, "vramGb": 4, "ramGb": 16, "ramGeneration": "ddr4", "frequencyMhz": 3200, "bandwidthGbps": 51.2, "storageTier": "sata", "fps": { "minimum": 45, "average": 60, "low": 34 } },
-    { "name": "900p (HD+) · Equilíbrio e FPS extra", "description": "40–55 FPS estimados · menos carga que 1080p", "displayOrder": 1, "gpuScore": 21, "cpuScore": 28, "vramGb": 6, "ramGb": 16, "ramGeneration": "ddr4", "frequencyMhz": 3200, "bandwidthGbps": 51.2, "storageTier": "sata", "fps": { "minimum": 40, "average": 55, "low": 31 } }
+    { "name": "900p (HD+) · Equilíbrio e FPS extra", "description": "40–55 FPS estimados · menos carga que 1080p", "displayOrder": 1, "gpuScore": 21, "cpuScore": 28, "vramGb": 6, "ramGb": 16, "ramGeneration": "ddr4", "frequencyMhz": 3200, "bandwidthGbps": 51.2, "storageTier": "sata", "fps": { "minimum": 40, "average": 55, "low": 31 } },
+    { "id": "community-1080p-30", "name": "Build comunitária · 1080p / 30 FPS", "description": "Referência preliminar de 30 FPS · DDR4 32 GB / DDR5 24 GB", "displayOrder": 2, "gpuScore": 27, "cpuScore": 30, "vramGb": 8, "ramGb": 24, "ramGeneration": "ddr5", "frequencyMhz": 5600, "bandwidthGbps": 89.6, "storageTier": "nvme3", "fps": { "minimum": 26, "average": 30, "low": 21 } },
+    { "id": "community-1080p-60", "name": "Build comunitária · 1080p / meta 60 FPS", "description": "Projeção de otimização para 60 FPS · estimativa, não garantia", "displayOrder": 3, "gpuScore": 45, "cpuScore": 44, "vramGb": 10, "ramGb": 24, "ramGeneration": "ddr5", "frequencyMhz": 5600, "bandwidthGbps": 89.6, "storageTier": "nvme3", "fps": { "minimum": 45, "average": 60, "low": 38 } }
   ],
   "consoles": [
     { "name": "Xbox Series S", "architecture": "CPU Zen 2 · GPU RDNA 2", "gpuTflops": 4.0, "memory": "10 GB GDDR6", "target": "1080p · 30 FPS" },
@@ -83,7 +85,7 @@
     { "id": "arc-a380", "name": "Intel Arc A380", "score": 13, "vram": 6 },
     { "id": "arc-a580", "name": "Intel Arc A580", "score": 22, "vram": 8 },
     { "id": "arc-a750", "name": "Intel Arc A750", "score": 27, "vram": 8 },
-    { "id": "arc-a770", "name": "Intel Arc A770", "score": 35, "vram": 16 },
+    { "id": "arc-a770", "name": "Intel Arc A770 16GB", "score": 35, "vram": 16 },
     { "id": "arc-b570", "name": "Intel Arc B570", "score": 37, "vram": 10 },
     { "id": "arc-b580", "name": "Intel Arc B580", "score": 46, "vram": 12 },
     { "id": "igpu-radeon-vega8", "name": "AMD Radeon Vega 8 integrada", "score": 8, "vram": 0, "integrated": true },
@@ -262,6 +264,28 @@
   ],
   "freeSpaceOptions": [50, 180, 212, 250, 500],
   "requiredFreeSpace": 212,
+  "communityBuild": {
+    "status": "preliminary-community-estimate",
+    "minimumRamGb": { "ddr4": 32, "ddr5": 24 },
+    "recommendedMemoryChannel": "dual",
+    "base30FpsTargetId": "community-1080p-30",
+    "optimized60FpsTargetId": "community-1080p-60",
+    "potentialCpuIds": [
+      "ryzen-7-5700x", "ryzen-7-5800x", "ryzen-7-5800x3d", "ryzen-7-7700", "ryzen-7-7800x3d", "ryzen-7-9700x", "ryzen-7-9800x3d", "ryzen-5-7600", "ryzen-9-7900x", "ryzen-9-7950x", "ryzen-9-9950x",
+      "i5-12600k", "i5-13400", "i5-13600k", "i5-14400", "i5-14600k", "i7-11700k", "i7-12700k", "i7-13700k", "i7-14700k", "i9-12900k", "i9-13900k"
+    ],
+    "potentialGpuIds": [
+      "rx-6700xt", "rx-6750xt", "rx-6800", "rx-6800xt", "rx-6900xt", "rx-6950xt", "rx-7700xt", "rx-7800xt", "rx-7900gre", "rx-7900xt", "rx-9070", "rx-9070xt",
+      "rtx-3050", "rtx-3060", "rtx-3060ti", "rtx-3070", "rtx-3070ti", "rtx-3080", "rtx-3080ti", "rtx-3090", "rtx-3090ti", "rtx-4070", "rtx-4070s", "rtx-4070ti", "rtx-4070tis", "rtx-5070", "rtx-5070ti", "rtx-4080", "rtx-4080s", "rtx-5080", "rtx-4090", "rtx-5090",
+      "arc-b580", "arc-a770"
+    ],
+    "notices": [
+      "Estimativas preliminares de uma build não oficial/comunitária; não são requisitos oficiais da Rockstar Games.",
+      "Nem todo componente foi testado individualmente; TFLOPS isolados não garantem compatibilidade ou desempenho.",
+      "Intel Arc precisa de testes adicionais de compatibilidade e drivers.",
+      "Drivers, clocks, memória, thermal throttling e aplicativos em segundo plano alteram o FPS real."
+    ]
+  },
   "operatingSystems": [
     { "id": "windows-11", "name": "Windows 11 padrão", "score": 0.93 },
     { "id": "windows-10", "name": "Windows 10 padrão", "score": 0.94 },
