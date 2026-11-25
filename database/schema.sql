@@ -227,18 +227,20 @@ create or replace view public.public_campaigns with (security_invoker = true) as
 
 -- Deliberately excludes donor messages, account IDs, and operator metadata.
 create or replace view public.donor_leaderboard with (security_invoker = true) as
-  select campaign_id,
-    coalesce(nullif(btrim(donor_alias), ''), 'Apoiador anônimo') as donor_alias,
-    sum(amount) as total_amount,
-    count(*)::integer as donation_count,
-    max(created_at) as last_donation_at
-  from public.donations
-  join public.campaigns on public.campaigns.id = public.donations.campaign_id
-  where public.donations.status = 'confirmed'
-    and public.donations.show_in_ranking
+  select
+    public.campaigns.id as campaign_id,
+    coalesce(nullif(btrim(d.donor_alias), ''), 'Apoiador anônimo') as donor_alias,
+    count(*) filter (where d.status = 'confirmed') as donations_count,
+    coalesce(round(sum(d.amount) filter (where d.status = 'confirmed') * 100)::bigint, 0) as total_cents,
+    max(d.created_at) as last_donation_at
+  from public.donations as d
+  join public.campaigns on public.campaigns.id = d.campaign_id
+  where d.status = 'confirmed'
+    and d.show_in_ranking
     and public.campaigns.status in ('active', 'paused', 'completed', 'archived')
-  group by public.donations.campaign_id,
-    coalesce(nullif(btrim(public.donations.donor_alias), ''), 'Apoiador anônimo');
+  group by
+    public.campaigns.id,
+    coalesce(nullif(btrim(d.donor_alias), ''), 'Apoiador anônimo');
 
 create or replace view public.published_news with (security_invoker = true) as
   select id, slug, category, title, summary, body, source_url, published_at, created_at

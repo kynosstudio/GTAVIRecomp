@@ -32,6 +32,24 @@ function getAllowedUserIds(env) {
     .filter(Boolean);
 }
 
+function getAdminSetup(env) {
+  const config = getSupabaseConfig(env);
+  const allowedIds = getAllowedUserIds(env);
+  const missing = [];
+  if (!config) missing.push('SUPABASE_URL (invalid URL or configuration)');
+  if (!config || !config.serviceKey) missing.push('SUPABASE_SERVICE_ROLE_KEY');
+  if (!allowedIds.length) missing.push('ADMIN_USER_IDS');
+  return { config, allowedIds, missing };
+}
+
+function adminConfigurationError(missing) {
+  return jsonResponse({
+    error: `Admin backend is not configured. Set these server variables: ${missing.join(', ')}.`,
+    code: 'ADMIN_BACKEND_NOT_CONFIGURED',
+    missing
+  }, 503);
+}
+
 function getCookie(request) {
   const cookieHeader = request.headers.get('Cookie') || '';
   const entry = cookieHeader.split(';').map((part) => part.trim()).find((part) => part.startsWith(`${SESSION_COOKIE}=`));
@@ -61,17 +79,23 @@ async function authUser(config, token) {
 }
 
 export async function requireAdmin(context) {
-  const config = getSupabaseConfig(context.env);
-  const allowedIds = getAllowedUserIds(context.env);
-  if (!config || !config.serviceKey || !allowedIds.length) {
-    return { response: jsonResponse({ error: 'Admin backend is not configured.' }, 503) };
-  }
+  const setup = getAdminSetup(context.env);
+  if (setup.missing.length) return { response: adminConfigurationError(setup.missing) };
+  const { config, allowedIds } = setup;
   const token = getCookie(context.request);
-  if (!token) return { response: jsonResponse({ error: 'Operator session required.' }, 401) };
+  if (!token) {
+    return { response: jsonResponse({
+      error: 'Operator session required.',
+      code: 'OPERATOR_SESSION_REQUIRED'
+    }, 401) };
+  }
   try {
     const user = await authUser(config, token);
     if (!user || !allowedIds.includes(user.id.toLowerCase())) {
-      return { response: jsonResponse({ error: 'Operator session is not authorized.' }, 401) };
+      return { response: jsonResponse({
+        error: 'Operator session is not authorized.',
+        code: 'OPERATOR_SESSION_NOT_AUTHORIZED'
+      }, 401) };
     }
     return { config, user };
   } catch (error) {
@@ -81,10 +105,12 @@ export async function requireAdmin(context) {
 }
 
 export async function login(context) {
-  if (!isSameOriginRequest(context.request)) return jsonResponse({ error: 'Same-origin request required.' }, 403);
-  const config = getSupabaseConfig(context.env);
-  const allowedIds = getAllowedUserIds(context.env);
-  if (!config || !config.serviceKey || !allowedIds.length) return jsonResponse({ error: 'Admin authentication is not configured.' }, 503);
+  if (!isSameOriginRequest(context.request)) {
+    return jsonResponse({ error: 'Same-origin request required.', code: 'SAME_ORIGIN_REQUIRED' }, 403);
+  }
+  const setup = getAdminSetup(context.env);
+  if (setup.missing.length) return adminConfigurationError(setup.missing);
+  const { config, allowedIds } = setup;
   const body = await readJsonBody(context.request, 8192);
   if (body.error) return body.error;
   const email = body.value && typeof body.value.email === 'string' ? body.value.email.trim() : '';
@@ -98,9 +124,37 @@ export async function login(context) {
       headers: { apikey: config.anonKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     });
-    const result = response.ok ? await response.json() : null;
-    if (!result || !result.access_token || !result.user || !allowedIds.includes(String(result.user.id).toLowerCase())) {
-      return jsonResponse({ error: 'Authentication failed or this account is not an authorized operator.' }, 401);
+    const result = await response.json().catch(() => null);
+    if (!response.ok) {
+      const authCode = result && (result.code || result.error_code);
+      if (authCode === 'email_not_confirmed') {
+        return jsonResponse({
+          error: 'This Supabase Auth user exists but its email is not confirmed. Confirm it in Supabase Auth, then try again.',
+          code: 'AUTH_EMAIL_NOT_CONFIRMED'
+        }, 401);
+      }
+      if (response.status >= 500 || response.status === 429) {
+        return jsonResponse({
+          error: 'Supabase Auth is temporarily unavailable. Check the Supabase project URL and public key, then try again.',
+          code: 'AUTH_SERVICE_UNAVAILABLE'
+        }, 502);
+      }
+      return jsonResponse({
+        error: 'Supabase Auth did not accept these credentials. Confirm the user exists and is enabled in Supabase Auth, and check the email and password.',
+        code: 'AUTH_INVALID_CREDENTIALS'
+      }, 401);
+    }
+    if (!result || !result.access_token || !result.user || typeof result.user.id !== 'string') {
+      return jsonResponse({
+        error: 'Supabase Auth returned an invalid sign-in response.',
+        code: 'AUTH_RESPONSE_INVALID'
+      }, 502);
+    }
+    if (!allowedIds.includes(result.user.id.toLowerCase())) {
+      return jsonResponse({
+        error: 'Supabase Auth accepted this account, but its UID is not listed in the server variable ADMIN_USER_IDS. Add the operator UID there and try again.',
+        code: 'OPERATOR_NOT_ALLOWLISTED'
+      }, 403);
     }
     const age = Math.max(60, Math.min(Number(result.expires_in) || 3600, 3600));
     return jsonResponse({ authenticated: true, email: result.user.email || '' }, 200, {
@@ -119,7 +173,9 @@ export async function session(context) {
 }
 
 export async function logout(context) {
-  if (!isSameOriginRequest(context.request)) return jsonResponse({ error: 'Same-origin request required.' }, 403);
+  if (!isSameOriginRequest(context.request)) {
+    return jsonResponse({ error: 'Same-origin request required.', code: 'SAME_ORIGIN_REQUIRED' }, 403);
+  }
   return jsonResponse({ authenticated: false }, 200, { 'Set-Cookie': clearedSessionCookie() });
 }
 

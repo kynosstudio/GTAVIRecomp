@@ -10,12 +10,10 @@ const env = {
   ADMIN_USER_IDS: allowedId
 };
 
-function request(path, origin, body, cookie) {
-  const headers = { Origin: origin, 'Content-Type': 'application/json' };
-  if (cookie) headers.Cookie = cookie;
+function request(path, origin, body) {
   return new Request(`https://portal.example/api/admin/${path}`, {
     method: 'POST',
-    headers,
+    headers: { Origin: origin, 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
 }
@@ -94,7 +92,7 @@ test('admin mutations reject executable image URLs before calling a write RPC', 
       request: request('campaigns', 'https://portal.example', {
         slug: 'xlaunchvi',
         banner_url: 'javascript:alert(1)'
-      }, 'kynos_operator=test-token')
+      }).clone()
     }, 'campaigns', 'admin_upsert_campaign');
     assert.equal(response.status, 400);
     assert.equal(paths.length, 1);
