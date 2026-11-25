@@ -169,18 +169,22 @@ const pageNames = {
 };
 
 const PORTWATCH_FALLBACK = {
-  updatedAt: '23/11/2026 · 20:57',
-  sourceNote: 'Os dados são atualizados manualmente retirados do site oficial PortWatch VI.',
-  overallProgress: 55,
-  leaderId: 'xcl',
+  updatedAt: '25/11/2026 · 03:15',
+  sourceNote: 'Os dados são atualizados manualmente retirados do site oficial PortWatch VI e do tracker local KynosRecompVI.',
+  overallProgress: 78.7,
+  leaderId: 'xlaunchvi',
   milestones: [
-    { key: 'groundwork', percent: 0, label: 'Preparação', description: 'Carregador, bibliotecas e camada gráfica.' },
-    { key: 'loads', percent: 10, label: 'Executável em execução', description: 'O executável é mapeado e inicia o próprio código.' },
-    { key: 'boots', percent: 20, label: 'Primeiro quadro', description: 'O jogo apresenta os primeiros quadros.' },
-    { key: 'menu', percent: 30, label: 'Menu principal', description: 'Os menus são alcançados e respondem à entrada.' },
-    { key: 'world', percent: 40, label: 'Dentro do mundo', description: 'O modo história carrega e desenha o mundo.' },
-    { key: 'playable', percent: 50, label: 'Jogável', description: 'É possível controlar um personagem no mundo.' },
-    { key: 'complete', percent: 100, label: 'Jogo completo', description: 'O jogo pode ser concluído com qualidade e estabilidade.' }
+    { key: 'groundwork', percent: 0, label: 'Preparação', description: 'Carregador, bibliotecas base e camada gráfica inicial.' },
+    { key: 'loads', percent: 10, label: 'Executável em execução', description: 'O executável do jogo é mapeado e inicia o próprio código no Windows.' },
+    { key: 'boots', percent: 20, label: 'Primeiro quadro', description: 'O jogo apresenta os primeiros quadros renderizados.' },
+    { key: 'menu', percent: 30, label: 'Menu principal', description: 'Os menus são alcançados e respondem à entrada (relatado a 30 FPS).' },
+    { key: 'world', percent: 40, label: 'Dentro do mundo', description: 'O modo história carrega e desenha o mundo; edificações e modelos aparecem.' },
+    { key: 'playable', percent: 50, label: 'Jogável', description: 'É possível controlar um personagem no mundo; prólogo (Lucia, prisão) carregado.' },
+    { key: 'shaders_lighting_rt', percent: 60, label: 'Shaders, iluminação e Ray Tracing', description: 'Shaders compilados, texturas funcionais, iluminação e Ray Tracing ativos a 30+ FPS estável.' },
+    { key: 'prologue_60fps', percent: 70, label: 'Prólogo a 60 FPS', description: 'Alcançar 60 FPS no prólogo (Lucia, ambiente prisional) com qualidade visual completa.' },
+    { key: 'openworld_60fps', percent: 80, label: 'Mundo aberto a 60 FPS', description: 'Estender 60 FPS estável para o mundo aberto completo: missões, tráfego, IA, sistemas dinâmicos.' },
+    { key: 'final_polish', percent: 90, label: 'Otimização final / Xbox 360', description: 'Polimento geral, correção de edge cases, início da compatibilidade com títulos de Xbox 360.' },
+    { key: 'complete', percent: 100, label: 'Jogo completo / Release Final', description: 'Release pública apenas na Release Final: meta mínima 60 FPS, rodando melhor que no console.' }
   ],
   projects: [
     { id: 'xcl', name: 'XCL', author: 'ivall', gta: { loads: 1, boots: 1, menu: 1 }, avatar: 'XC', avatarUrl: 'https://github.com/ivall.png?size=88' },
