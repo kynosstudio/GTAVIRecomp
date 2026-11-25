@@ -1,0 +1,48 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [main, Kynos]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to Cloudflare Pages
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build admin config
+        run: |
+          cat > admin/config.js << 'EOF'
+  // Admin Configuration for KynosRecompVI
+  // Injected at build time by GitHub Actions
+
+  window.KynosAdminConfig = {
+    supabase: {
+      url: '${{ secrets.SUPABASE_URL }}',
+      anonKey: '${{ secrets.SUPABASE_ANON_KEY }}'
+    },
+    adminUserIds: ${{ secrets.ADMIN_USER_IDS }},
+    features: {
+      enableAuditLog: true,
+      enableCommunityPosts: true,
+      enablePointsSystem: true
+    }
+  };
+  EOF
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: gta-v-recomp
+          directory: .
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          wranglerVersion: '3'

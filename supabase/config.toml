@@ -1,0 +1,48 @@
+# Supabase CLI Configuration
+# Run `supabase init` to create this file, then customize as needed.
+
+project_id = "fefvytprogasugctxdom"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "private", "extensions"]
+
+[auth]
+enabled = true
+port = 54322
+site_url = "https://kynosstudio.github.io/GTAVIRecomp/"
+additional_redirect_urls = [
+  "http://localhost:3000/**",
+  "http://127.0.0.1:3000/**"
+]
+jwt_expiry = 3600
+enable_signup = true
+enable_anonymous_sign_ins = false
+enable_email_confirmation = true
+
+[auth.external]
+# github = { enabled = true, client_id = "env(GITHUB_CLIENT_ID)", secret = "env(GITHUB_CLIENT_SECRET)" }
+# google = { enabled = true, client_id = "env(GOOGLE_CLIENT_ID)", secret = "env(GOOGLE_CLIENT_SECRET)" }
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[edge_runtime]
+enabled = true
+port = 54324
+
+[inbucket]
+enabled = true
+port = 54325
+smtp_port = 54326
+pop3_port = 54327
+
+[analytics]
+enabled = false
+port = 54328
