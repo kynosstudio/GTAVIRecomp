@@ -2672,6 +2672,48 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
   if (xlaunchReportProject && !timelineProjects.some((project) => project.id === xlaunchReportProject.id)) {
     timelineProjects.push(xlaunchReportProject);
   }
+
+  /* Avatar trail - Top 10 repos by progress (for home page) */
+  const avatarTrailProjects = rankedProjects.slice(0, 10);
+  const avatarTrailItems = avatarTrailProjects.map((project, index) => {
+    const projectProgress = scoreForProject(project);
+    const avatar = String(project.avatar || project.name.slice(0, 2)).slice(0, 3);
+    const stage = portwatchMilestone(project, milestones).label;
+    const progressLabel = formatPercent(projectProgress);
+    const reportStage = project.teamReport && localizedValue(project.teamReport, 'stage');
+    const snapshotPercent = Number.isFinite(Number(project.portwatchPercent))
+      ? formatPercent(project.portwatchPercent)
+      : progressLabel;
+    const estimateLabel = project.progressBasis === 'team-report-estimate'
+      ? ` · ${t('estimativa editorial da equipe')}; ${t('snapshot GitHub/tracker')}: ${snapshotPercent}%`
+      : reportStage ? ` · ${t('Relato do Discord')}: ${reportStage}; ${t('snapshot GitHub/tracker')}: ${snapshotPercent}%` : '';
+    const tooltip = `${project.name}: ${progressLabel}% · ${stage}${estimateLabel}`;
+    const repositoryUrl = project.repo ? `https://github.com/${encodeURIComponent(String(project.repo).split('/')[0])}/${encodeURIComponent(String(project.repo).split('/')[1] || '')}` : '';
+    const publicUrl = project.id !== 'cgbj' && safeUrl(repositoryUrl) !== '#' ? repositoryUrl : '';
+    const isPrivate = project.private === true || project.id === 'cgbj' || !publicUrl;
+    const status = String(project.status || '').toLowerCase();
+    const isBlocked = isInactiveProject(project) || project.blocked === true
+      || ['blocked', 'private', 'privado', 'bloqueado'].includes(status);
+    const isFirst = index === 0;
+    const isLast = index === avatarTrailProjects.length - 1;
+    const alignClass = isFirst ? 'align-left' : isLast ? 'align-right' : '';
+    const lockMarkup = isPrivate || isBlocked
+      ? '<span class="pw-avatar-lock" aria-hidden="true">🔒</span>'
+      : '';
+    const avatarMarkup = project.avatarUrl
+      ? `<img class="pw-avatar-image" width="36" height="36" src="${escapeHtml(safeUrl(project.avatarUrl))}" alt="" loading="lazy" decoding="async" /><span class="pw-avatar-fallback" hidden>${escapeHtml(avatar)}</span>${lockMarkup}`
+      : `${escapeHtml(avatar)}${lockMarkup}`;
+    return `<button class="pw-avatar-trail-item ${alignClass}" type="button" data-tooltip="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(publicUrl ? `${project.name}: ${tooltip}` : `${project.name}. ${tooltip}`)}" ${publicUrl ? `data-repository-url="${escapeHtml(publicUrl)}"` : 'data-private-repository="true"'}>
+      ${avatarMarkup}
+      <span class="pw-avatar-trail-tooltip">${escapeHtml(tooltip)}</span>
+    </button>`;
+  }).join('');
+  const avatarTrailMarkup = avatarTrailProjects.length ? `
+    <div class="pw-avatar-trail" aria-label="${escapeHtml(t('Top 10 projetos por progresso'))}">
+      <span class="pw-avatar-trail-label">${escapeHtml(t('Top 10:'))}</span>
+      <div class="pw-avatar-trail-list">${avatarTrailItems}</div>
+    </div>` : '';
+
   const markerCards = timelineProjects.map((project) => {
     const projectProgress = scoreForProject(project);
     const avatar = String(project.avatar || project.name.slice(0, 2)).slice(0, 3);
@@ -2794,9 +2836,10 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
       </div>
       <div class="pw-divider"></div>
       <div class="pw-timeline-heading"><div><span class="section-kicker">${escapeHtml(t('TRILHA DE MARCOS'))}</span><h3>${escapeHtml(t('Do primeiro executável à estabilidade.'))}</h3></div></div>
-      <div class="pw-timeline-viewport" tabindex="0" aria-label="Trilha de progresso; deslize horizontalmente para ver todos os marcos">
+      <div class="pw-timeline-viewport" tabindex="0" aria-label="${escapeHtml(t('Trilha de progresso da portabilidade'))}">
         <div class="pw-timeline">
           <svg class="pw-connectors" aria-hidden="true"></svg>
+          ${avatarTrailMarkup}
           ${markerCards}
           <div class="pw-progress-track" role="progressbar" aria-label="${escapeHtml(t('Progresso geral da portabilidade'))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}">
             <span class="pw-progress-fill" style="width:${progress}%"></span>
@@ -2804,7 +2847,6 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
           <div class="pw-milestones">${milestoneButtons}</div>
         </div>
       </div>
-      <p class="pw-scroll-hint">${escapeHtml(t('Deslize a trilha para conferir todos os marcos.'))}</p>
     </div>${projectProgressDetails}${changeStrip}`;
   section.querySelectorAll('.pw-avatar-image').forEach((image) => {
     image.addEventListener('error', () => {

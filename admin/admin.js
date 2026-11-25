@@ -1,6 +1,15 @@
 (function () {
   'use strict';
 
+  // Load configuration from config.js (injected at build time or loaded at runtime)
+  const config = window.KynosAdminConfig || {};
+  const SUPABASE_URL = config.supabase?.url || 'https://fefvytprogasugctxdom.supabase.co';
+  const SUPABASE_ANON_KEY = config.supabase?.anonKey || 'sb_publishable_xhdlCMR97qQGNiIXtx1s2g_-V9jVpPy';
+  const ADMIN_USER_IDS = config.adminUserIds || [];
+
+  const SESSION_STORAGE_KEY = 'kynos_admin_session';
+  const SESSION_EXPIRY_KEY = 'kynos_admin_session_expiry';
+
   const data = { campaigns: [], donations: [], news: [], tracker: [] };
   const loginForm = document.getElementById('login-form');
   const loginStatus = document.getElementById('login-status');
@@ -11,32 +20,93 @@
   const newsSelect = document.getElementById('news-edit-select');
   const trackerSelect = document.getElementById('tracker-edit-select');
 
+  let supabase = null;
+
   function setStatus(id, message, isError) {
     const node = document.getElementById(id);
     node.textContent = message || '';
     node.classList.toggle('is-error', Boolean(isError));
   }
 
-  async function request(path, options) {
-    const response = await fetch(`../api/admin/${path}`, Object.assign({
-      credentials: 'same-origin',
-      cache: 'no-store',
-      headers: { Accept: 'application/json' }
-    }, options || {}));
-    let payload = {};
-    if (!response.headers.get('Content-Type') || !response.headers.get('Content-Type').includes('application/json')) {
-      if (response.status === 404 || response.status === 405) {
-        throw new Error('Backend não configurado. Alterações administrativas estão desativadas.');
+  async function loadSupabase() {
+    if (supabase) return supabase;
+
+    // Load @supabase/supabase-js from CDN
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('Failed to load Supabase SDK'));
+      document.head.appendChild(script);
+    });
+
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: false, // We handle session storage manually
+        autoRefreshToken: true,
+        detectSessionInUrl: false
       }
-      throw new Error('O servidor retornou uma resposta inválida.');
-    }
+    });
+    return supabase;
+  }
+
+  function getStoredSession() {
     try {
-      payload = await response.json();
-    } catch (error) {
-      throw new Error('O servidor retornou uma resposta inválida.');
+      const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
+      const expiry = sessionStorage.getItem(SESSION_EXPIRY_KEY);
+      if (token && expiry && Date.now() < parseInt(expiry, 10)) {
+        return token;
+      }
+    } catch (e) {
+      // Ignore storage errors
     }
-    if (!response.ok) throw new Error(payload.error || `Falha na solicitação (${response.status}).`);
-    return payload;
+    return null;
+  }
+
+  function storeSession(token, expiresIn) {
+    try {
+      sessionStorage.setItem(SESSION_STORAGE_KEY, token);
+      sessionStorage.setItem(SESSION_EXPIRY_KEY, String(Date.now() + expiresIn * 1000));
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }
+
+  function clearSession() {
+    try {
+      sessionStorage.removeItem(SESSION_STORAGE_KEY);
+      sessionStorage.removeItem(SESSION_EXPIRY_KEY);
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }
+
+  function isAuthorized(user) {
+    if (!user || !user.id) return false;
+    // Check client-side allowlist (ADMIN_USER_IDS)
+    // Note: The database also enforces this via public.is_admin() which checks public.admins table
+    return ADMIN_USER_IDS.length === 0 || ADMIN_USER_IDS.includes(user.id.toLowerCase());
+  }
+
+  async function supabaseRequest(fn) {
+    const token = getStoredSession();
+    if (!token) throw new Error('No active session');
+
+    const client = await loadSupabase();
+    // Set the auth token for this request
+    const { data, error } = await client.auth.getUser(token);
+    if (error || !data.user) {
+      clearSession();
+      throw new Error('Session expired. Please sign in again.');
+    }
+
+    // Verify user is still authorized
+    if (!isAuthorized(data.user)) {
+      clearSession();
+      throw new Error('User no longer authorized.');
+    }
+
+    return fn(client, data.user);
   }
 
   function field(form, name) {
@@ -188,17 +258,75 @@
   }
 
   async function refreshDashboard() {
-    const [campaigns, donations, news, tracker] = await Promise.all([
-      request('campaigns'),
-      request('donations'),
-      request('news'),
-      request('tracker')
-    ]);
-    data.campaigns = campaigns.items || [];
-    data.donations = donations.items || [];
-    data.news = news.items || [];
-    data.tracker = tracker.items || [];
-    renderLists();
+    try {
+      await supabaseRequest(async (client, user) => {
+        // Fetch campaigns using the public view (readable by anon/authenticated)
+        const { data: campaigns, error: campaignsError } = await client
+          .from('public_campaigns')
+          .select('*')
+          .order('updated_at', { ascending: false });
+        if (campaignsError) throw campaignsError;
+
+        // Fetch donations using the public view (readable by anon/authenticated)
+        const { data: donations, error: donationsError } = await client
+          .from('donor_leaderboard')
+          .select('*');
+        if (donationsError) throw donationsError;
+
+        // Fetch news using the public view
+        const { data: news, error: newsError } = await client
+          .from('published_news')
+          .select('*')
+          .order('published_at', { ascending: false });
+        if (newsError) throw newsError;
+
+        // Fetch tracker updates using the public view
+        const { data: tracker, error: trackerError } = await client
+          .from('published_tracker_updates')
+          .select('*')
+          .order('published_at', { ascending: false });
+        if (trackerError) throw trackerError;
+
+        // Also fetch all campaigns (including drafts) for admin editing
+        // This requires the user to be authenticated and authorized
+        const { data: allCampaigns, error: allCampaignsError } = await client
+          .from('campaigns')
+          .select('id,slug,title,summary,description,goal_amount,banner_url,color_start,color_end,gradient_angle,pix_key,qr_code_url,xlaunch_percent,kynos_maintenance_percent,status,is_active,created_at,updated_at')
+          .order('updated_at', { ascending: false });
+        if (allCampaignsError) throw allCampaignsError;
+
+        // Fetch all donations for admin (including pending)
+        const { data: allDonations, error: allDonationsError } = await client
+          .from('donations')
+          .select('id,campaign_id,amount,donor_alias,message,status,show_in_ranking,created_at,confirmed_at')
+          .order('created_at', { ascending: false })
+          .limit(100);
+        if (allDonationsError) throw allDonationsError;
+
+        // Fetch all news for admin
+        const { data: allNews, error: allNewsError } = await client
+          .from('news_posts')
+          .select('id,slug,category,title,summary,body,source_url,status,published_at,created_at,updated_at')
+          .order('created_at', { ascending: false });
+        if (allNewsError) throw allNewsError;
+
+        // Fetch all tracker updates for admin
+        const { data: allTracker, error: allTrackerError } = await client
+          .from('tracker_updates')
+          .select('id,project_id,project_name,percent,milestone,summary,source_url,status,published_at,created_at,updated_at')
+          .order('created_at', { ascending: false });
+        if (allTrackerError) throw allTrackerError;
+
+        data.campaigns = allCampaigns || [];
+        data.donations = allDonations || [];
+        data.news = allNews || [];
+        data.tracker = allTracker || [];
+        renderLists();
+      });
+    } catch (error) {
+      setStatus('campaign-status', error.message, true);
+      throw error;
+    }
   }
 
   function campaignPayload(form) {
@@ -226,7 +354,7 @@
     const title = fieldValue(form, 'title');
     return {
       id: fieldValue(form, 'id') || null,
-      slug: fieldValue(form, 'slug') || title.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 100),
+      slug: fieldValue(form, 'slug') || title.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 100),
       category: fieldValue(form, 'category'),
       title,
       summary: fieldValue(form, 'summary'),
@@ -249,19 +377,58 @@
     };
   }
 
-  function setupMutationForm(name, endpoint, payloadBuilder, successMessage) {
+  async function mutateCampaign(payload, user) {
+    const client = await loadSupabase();
+    const { data, error } = await client.rpc('admin_upsert_campaign', {
+      p_payload: payload,
+      p_actor: user.id
+    });
+    if (error) throw error;
+    return data;
+  }
+
+  async function mutateDonation(payload, user) {
+    const client = await loadSupabase();
+    const { data, error } = await client.rpc('admin_record_donation', {
+      p_payload: payload,
+      p_actor: user.id
+    });
+    if (error) throw error;
+    return data;
+  }
+
+  async function mutateNews(payload, user) {
+    const client = await loadSupabase();
+    const { data, error } = await client.rpc('admin_upsert_news', {
+      p_payload: payload,
+      p_actor: user.id
+    });
+    if (error) throw error;
+    return data;
+  }
+
+  async function mutateTracker(payload, user) {
+    const client = await loadSupabase();
+    const { data, error } = await client.rpc('admin_upsert_tracker_update', {
+      p_payload: payload,
+      p_actor: user.id
+    });
+    if (error) throw error;
+    return data;
+  }
+
+  function setupMutationForm(name, payloadBuilder, mutateFn, successMessage) {
     const form = document.getElementById(`${name}-form`);
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       const statusId = `${name}-status`;
-      setStatus(statusId, 'Salvando e registrando auditoria…', false);
+      setStatus(statusId, 'Salvando…', false);
       const submit = form.querySelector('[type="submit"]');
       submit.disabled = true;
       try {
-        await request(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify(payloadBuilder(form))
+        const payload = payloadBuilder(form);
+        await supabaseRequest(async (client, user) => {
+          await mutateFn(payload, user);
         });
         setStatus(statusId, successMessage, false);
         await refreshDashboard();
@@ -274,13 +441,13 @@
     });
   }
 
-  async function activateWorkspace(email) {
+  async function activateWorkspace(user) {
     workspace.hidden = false;
     logoutButton.hidden = false;
     loginForm.hidden = true;
-    loginStatus.textContent = email ? `Sessão autorizada: ${email}` : 'Sessão de operador autorizada.';
+    loginStatus.textContent = user.email ? `Sessão autorizada: ${user.email}` : 'Sessão de operador autorizada.';
     adminMode.dataset.state = 'connected';
-    adminMode.textContent = 'Backend conectado · sessão de operador autenticada';
+    adminMode.textContent = 'Supabase conectado · sessão de operador autenticada';
     try {
       await refreshDashboard();
     } catch (error) {
@@ -288,27 +455,51 @@
     }
   }
 
+  async function checkExistingSession() {
+    try {
+      const client = await loadSupabase();
+      const { data: { session } } = await client.auth.getSession();
+      if (session && session.access_token) {
+        // Verify the session is still valid and user is authorized
+        const { data: { user } } = await client.auth.getUser(session.access_token);
+        if (user && isAuthorized(user)) {
+          storeSession(session.access_token, session.expires_in || 3600);
+          await activateWorkspace(user);
+          return true;
+        }
+      }
+    } catch (e) {
+      // Session check failed
+    }
+    return false;
+  }
+
   loginForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const submit = loginForm.querySelector('[type="submit"]');
     submit.disabled = true;
-    loginStatus.textContent = 'Validando credenciais e autorização do operador…';
+    loginStatus.textContent = 'Autenticando com Supabase…';
     loginStatus.classList.remove('is-error');
     const email = fieldValue(loginForm, 'email');
     const password = field(loginForm, 'password').value;
     try {
-      const result = await request('login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
+      const client = await loadSupabase();
+      const { data, error } = await client.auth.signInWithPassword({ email, password });
+      if (error) throw error;
       field(loginForm, 'password').value = '';
-      await activateWorkspace(result.email);
+      if (!data.user || !isAuthorized(data.user)) {
+        await client.auth.signOut();
+        throw new Error('Conta não autorizada para acesso administrativo. Contate o administrador para adicionar seu UID à allowlist (window.KynosAdminConfig.adminUserIds no admin/config.js e/ou tabela public.admins no Supabase).');
+      }
+      if (data.session) {
+        storeSession(data.session.access_token, data.session.expires_in || 3600);
+      }
+      await activateWorkspace(data.user);
     } catch (error) {
       loginStatus.textContent = error.message;
       loginStatus.classList.add('is-error');
       adminMode.dataset.state = 'local';
-      adminMode.textContent = 'Backend local ou autenticação indisponível';
+      adminMode.textContent = 'Autenticação falhou · verifique credenciais e allowlist';
     } finally {
       submit.disabled = false;
     }
@@ -316,10 +507,12 @@
 
   logoutButton.addEventListener('click', async () => {
     try {
-      await request('logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
-    } catch (error) {
-      loginStatus.textContent = error.message;
+      const client = await loadSupabase();
+      await client.auth.signOut();
+    } catch (e) {
+      // Ignore sign out errors
     }
+    clearSession();
     workspace.hidden = true;
     loginForm.hidden = false;
     logoutButton.hidden = true;
@@ -347,8 +540,8 @@
   document.getElementById('new-news').addEventListener('click', () => resetForm('news'));
   document.getElementById('new-tracker').addEventListener('click', () => resetForm('tracker'));
 
-  setupMutationForm('campaign', 'campaigns', campaignPayload, 'Campanha salva; registro de auditoria criado.');
-  setupMutationForm('donation', 'donations', (form) => ({
+  setupMutationForm('campaign', campaignPayload, mutateCampaign, 'Campanha salva com sucesso.');
+  setupMutationForm('donation', (form) => ({
     id: fieldValue(form, 'id') || null,
     campaign_id: fieldValue(form, 'campaign_id'),
     amount: fieldValue(form, 'amount'),
@@ -356,22 +549,25 @@
     message: fieldValue(form, 'message') || null,
     status: fieldValue(form, 'status'),
     show_in_ranking: field(form, 'show_in_ranking').checked
-  }), 'Doação registrada; o ranking reflete somente confirmações autorizadas.');
-  setupMutationForm('news', 'news', newsPayload, 'Notícia salva; o feed e a Central de Avisos serão atualizados.');
-  setupMutationForm('tracker', 'tracker', trackerPayload, 'Atualização salva; o feed e a Central de Avisos serão atualizados.');
+  }), mutateDonation, 'Doação registrada com sucesso.');
+  setupMutationForm('news', newsPayload, mutateNews, 'Notícia salva com sucesso.');
+  setupMutationForm('tracker', trackerPayload, mutateTracker, 'Atualização salva com sucesso.');
 
+  // Initialize: check for existing session
   if (window.location.protocol === 'file:') {
     adminMode.dataset.state = 'local';
-    adminMode.textContent = 'Backend não configurado · modo local, alterações desativadas';
-    loginStatus.textContent = 'Publique as Cloudflare Pages Functions e configure o Supabase para habilitar o gerenciamento.';
+    adminMode.textContent = 'Modo arquivo local · Supabase Auth requer HTTPS';
+    loginStatus.textContent = 'Publique no GitHub Pages (HTTPS) para habilitar Supabase Auth.';
   } else {
-    request('session').then((result) => activateWorkspace(result.email)).catch((error) => {
-      adminMode.dataset.state = error.message.includes('not configured') || error.message.includes('Backend não configurado') ? 'local' : '';
-      adminMode.textContent = error.message.includes('not configured') || error.message.includes('Backend não configurado')
-        ? 'Backend não configurado · modo local, alterações desativadas'
-        : 'Entre com uma conta autorizada para gerenciar os dados';
-      if (error.message.includes('Backend não configurado')) loginStatus.textContent = error.message;
-      else if (!error.message.includes('not configured') && !error.message.includes('session')) loginStatus.textContent = error.message;
+    adminMode.textContent = 'Verificando sessão existente…';
+    checkExistingSession().then((hasSession) => {
+      if (!hasSession) {
+        adminMode.dataset.state = 'local';
+        adminMode.textContent = 'Entre com uma conta autorizada para gerenciar os dados';
+      }
+    }).catch(() => {
+      adminMode.dataset.state = 'local';
+      adminMode.textContent = 'Erro ao verificar sessão · tente fazer login';
     });
   }
 }());

@@ -21,6 +21,7 @@
     <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="../styles.css">
     <link rel="stylesheet" href="styles.css">
+    <script src="config.js" defer></script>
     <script src="../site-sidebar.js" defer></script>
     <script src="admin.js" defer></script>
   </head>
@@ -30,18 +31,18 @@
     <div class="site-layout">
       <main class="admin-page">
         <header class="admin-heading">
-          <div><span class="admin-kicker">ÁREA RESTRITA · OPERAÇÃO SEGURA</span><h1>Gerenciar o portal.</h1><p>Autenticação Supabase e allowlist de operadores no backend. Nenhuma senha ou chave privada é armazenada nesta página.</p></div>
-          <p class="admin-mode" id="admin-mode" role="status" aria-live="polite">Verificando conexão segura…</p>
+          <div><span class="admin-kicker">ÁREA RESTRITA · OPERAÇÃO SEGURA</span><h1>Gerenciar o portal.</h1><p>Autenticação direta com Supabase Auth. Allowlist de operadores via ADMIN_USER_IDS no admin.js. Executa 100% no navegador (GitHub Pages compatível).</p></div>
+          <p class="admin-mode" id="admin-mode" role="status" aria-live="polite">Verificando sessão…</p>
         </header>
 
         <section class="admin-panel login-panel" aria-labelledby="login-title">
-          <h2 id="login-title">Acesso do operador</h2>
+          <h2 id="login-title">Autenticação Supabase</h2>
           <form id="login-form" class="admin-form login-form">
             <label class="admin-field">E-mail do operador<input name="email" type="email" autocomplete="username" required maxlength="254"></label>
             <label class="admin-field">Senha<input name="password" type="password" autocomplete="current-password" required maxlength="1024"></label>
-            <button class="button admin-primary" type="submit">Entrar com Supabase Auth</button>
+            <button class="button admin-primary" type="submit">Entrar</button>
           </form>
-          <p id="login-status" class="admin-status" role="status" aria-live="polite">O acesso só funciona após configurar o backend e autorizar o UUID do operador.</p>
+          <p id="login-status" class="admin-status" role="status" aria-live="polite">Use credenciais de um operador autorizado (UID na allowlist ADMIN_USER_IDS).</p>
           <button type="button" class="admin-logout" id="logout-button" hidden>Sair da sessão</button>
         </section>
 
