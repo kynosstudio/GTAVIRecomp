@@ -11,7 +11,7 @@
   ],
   "consoles": [
     { "name": "Xbox Series S", "architecture": "CPU Zen 2 · GPU RDNA 2", "gpuTflops": 4.0, "memory": "10 GB GDDR6", "target": "1080p · 30 FPS" },
-    { "name": "PlayStation 5", "architecture": "CPU Zen 2 · GPU RDNA 2", "gpuTflops": 10.28, "memory": "16 GB GDDR6", "target": "1080p/1440p dinâmico · 30 FPS" },
+    { "name": "PlayStation 5", "architecture": "CPU AMD Zen 2 (8C/16T até 3,5 GHz) · GPU AMD RDNA 2 (10,3 TFLOPS)", "gpuTflops": 10.3, "memory": "16 GB GDDR6", "target": "1080p/1440p dinâmico · 30 FPS" },
     { "name": "Xbox Series X", "architecture": "CPU Zen 2 · GPU RDNA 2", "gpuTflops": 12.15, "memory": "16 GB GDDR6", "target": "4K dinâmico · 30 FPS" }
   ],
   "gpus": [
@@ -37,6 +37,7 @@
     { "id": "rtx-3080", "name": "NVIDIA GeForce RTX 3080", "score": 61, "vram": 10 },
     { "id": "rtx-3080ti", "name": "NVIDIA GeForce RTX 3080 Ti", "score": 67, "vram": 12 },
     { "id": "rtx-3090", "name": "NVIDIA GeForce RTX 3090", "score": 72, "vram": 24 },
+    { "id": "rtx-3090ti", "name": "NVIDIA GeForce RTX 3090 Ti", "score": 75, "vram": 24 },
     { "id": "rtx-4060", "name": "NVIDIA GeForce RTX 4060", "score": 38, "vram": 8 },
     { "id": "rtx-4060ti16", "name": "NVIDIA GeForce RTX 4060 Ti 16 GB", "score": 46, "vram": 16 },
     { "id": "rtx-4070", "name": "NVIDIA GeForce RTX 4070", "score": 60, "vram": 12 },
@@ -207,6 +208,7 @@
     { "id": "ryzen-7-7700x", "name": "AMD Ryzen 7 7700X", "score": 68, "memoryGenerations": ["ddr5"] },
     { "id": "ryzen-7-7800x3d", "name": "AMD Ryzen 7 7800X3D", "score": 83, "memoryGenerations": ["ddr5"] },
     { "id": "ryzen-9-7900x", "name": "AMD Ryzen 9 7900X", "score": 76, "memoryGenerations": ["ddr5"] },
+    { "id": "ryzen-9-7950x", "name": "AMD Ryzen 9 7950X · Série 7000", "score": 82, "memoryGenerations": ["ddr5"] },
     { "id": "ryzen-9-7950x3d", "name": "AMD Ryzen 9 7950X3D", "score": 88, "memoryGenerations": ["ddr5"] },
     { "id": "ryzen-5-9600", "name": "AMD Ryzen 5 9600 · Série 9000", "score": 61, "memoryGenerations": ["ddr5"] },
     { "id": "ryzen-5-9600x", "name": "AMD Ryzen 5 9600X", "score": 64, "memoryGenerations": ["ddr5"] },
