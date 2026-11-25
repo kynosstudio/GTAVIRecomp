@@ -43,7 +43,16 @@
 .xlaunch-progress-heading { display:flex; justify-content:space-between; color:var(--x-muted); font-size:12px; }
 .xlaunch-progress-heading strong { color:var(--x-yellow); font-size:20px; }
 .xlaunch-progress-track { height:10px; margin:8px 0; overflow:hidden; border-radius:999px; background:#30283b; }
-.xlaunch-progress-track span { display:block; width:55%; height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--x-green),var(--x-yellow),#7dcfff); transition:width 1.2s cubic-bezier(.2,.85,.2,1); }
+.xlaunch-progress-track span { display:block; width:0%; height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--x-green),var(--x-yellow),#7dcfff); transition:width 1.2s cubic-bezier(.2,.85,.2,1); }
+
+/* Animação do contador percentual */
+#xlaunch-percent {
+  font-variant-numeric: tabular-nums;
+  transition: none;
+}
+#xlaunch-percent.animating {
+  will-change: transform, opacity;
+}
 .xlaunch-actions { display:flex; gap:10px; margin-top:18px; }
 .xlaunch-primary { background:linear-gradient(110deg,var(--x-green),var(--x-blue)); color:white; }
 .xlaunch-pix { border-color:rgba(255,223,0,.38); color:#201900; background:var(--x-yellow); }

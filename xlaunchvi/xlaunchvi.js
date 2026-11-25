@@ -96,6 +96,54 @@ document.getElementById('xlaunch-team').innerHTML = team.map((member) => `
   </article>
 `).join('');
 
+/**
+ * Anima o contador percentual de 0,0% até o valor alvo
+ * Usa requestAnimationFrame com easing cubic-out e respeita prefers-reduced-motion
+ * Formata com vírgula decimal (pt-BR): ex. "78,7%"
+ */
+function animatePercentCounter(targetPercent, elementId, fillId) {
+  const element = document.getElementById(elementId);
+  const fill = document.getElementById(fillId);
+  if (!element || !Number.isFinite(targetPercent)) return;
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const duration = 1200; // ms
+  const startTime = performance.now();
+
+  // Formata com vírgula decimal (pt-BR), 1 casa decimal
+  function formatPercent(value) {
+    return value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+  }
+
+  if (reduceMotion || targetPercent === 0) {
+    element.textContent = formatPercent(targetPercent);
+    if (fill) fill.style.width = `${targetPercent}%`;
+    return;
+  }
+
+  element.classList.add('animating');
+  element.textContent = formatPercent(0);
+
+  function tick(now) {
+    const progress = Math.min(1, (now - startTime) / duration);
+    // Easing cubic-out: 1 - (1 - t)^3
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = targetPercent * eased;
+    element.textContent = formatPercent(current);
+    if (fill) fill.style.width = `${current}%`;
+
+    if (progress < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      element.textContent = formatPercent(targetPercent);
+      if (fill) fill.style.width = `${targetPercent}%`;
+      element.classList.remove('animating');
+    }
+  }
+
+  requestAnimationFrame(tick);
+}
+
 loadTracker().then((tracker) => {
   const effort = tracker && Array.isArray(tracker.efforts)
     ? tracker.efforts.find((item) => item.id === 'xlaunchvi')
@@ -103,9 +151,11 @@ loadTracker().then((tracker) => {
   if (!effort) throw new Error('O tracker carregou, mas não contém o projeto XLaunchVI.');
   const percent = Math.max(0, Math.min(100, Number(effort.percent)));
   if (!Number.isFinite(percent)) throw new Error('O progresso informado para o XLaunchVI não é válido.');
-  document.querySelector('#xlaunch-percent').textContent = `${percent}%`;
-  document.querySelector('#xlaunch-progress-fill').style.width = `${percent}%`;
-  document.querySelector('#xlaunch-stage').textContent = effort.stage || 'Menu principal a 30 FPS · sem texturas';
+
+  // Anima o contador e a barra de progresso
+  animatePercentCounter(percent, 'xlaunch-percent', 'xlaunch-progress-fill');
+
+  document.querySelector('#xlaunch-stage').textContent = effort.stage || 'Mundo renderizado (noite) · Lucia em tempo real · Ray Tracing ativo · 30 FPS @ 1080p';
   document.querySelector('.xlaunch-progress').setAttribute('aria-valuenow', String(percent));
   document.querySelector('#xlaunch-summary').textContent = effort.summary || effort.verification || '';
 }).catch((error) => {

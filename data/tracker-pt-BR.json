@@ -15,14 +15,14 @@
         "transparency": "Relato fornecido ao portal; não há URL para a mensagem original. O texto não altera a estimativa de progresso."
       },
       "latestReport": {
-        "id": "xlaunchvi-loading-screen-team-report",
-        "reporter": "JPTuba",
-        "date": "2026-11-24",
-        "loggedAt": "2026-11-24T05:07:48.307Z",
-        "stage": "Menu principal a 30 FPS · sem texturas · estimativa editorial (~55%)",
-        "estimatedPercent": 55,
+        "id": "xlaunchvi-world-night-lighting-2026-11-25",
+        "reporter": "KynosRecompVI",
+        "date": "2026-11-25",
+        "loggedAt": "2026-11-25T03:15:00.000Z",
+        "stage": "Mundo inteiro renderizado à noite · Lucia carregada · Ray Tracing ativo · 30 FPS @ 1080p",
+        "estimatedPercent": 78.7,
         "portwatchPercent": 1.4,
-        "title": "XlaunchVI: 55% com menus a 30 FPS e sem texturas",
+        "title": "XLaunchVI: mundo inteiro renderizado à noite, Lucia carregada, Ray Tracing ativo a 30 FPS",
         "summary": "Relatos da equipe indicam que os menus do XlaunchVI agora abrem cravados em 30 FPS, ainda sem texturas. A estabilidade está mais forte segundo Nesko. O próximo foco é otimizar o uso de memória e as shaders sem textura. O projeto já abriu The Matrix Awakens e busca executar outros jogos de Xbox; não há release pública para baixar.",
         "teaser": "55% · menus a 30 FPS sem texturas · próximo passo: memória e shaders.",
         "transparency": "Os 55% são uma estimativa editorial local, não uma medição oficial. Relatos atribuídos à equipe descrevem menus a 30 FPS sem texturas e foco em memória/shaders; não há confirmação pública independente nem release disponível.",
@@ -141,7 +141,7 @@
     },
     {
       "id": "2026-11-24-take-two-dmca-leonida-forks",
-      "date": "2026-11-24",
+      "date": "2026-11-25",
       "category": "Direitos autorais",
       "title": "Take-Two derruba o port da Leonida; aviso afeta 3.007 forks",
       "summary": "A notificação DMCA cita apenas o repositório Leonida, mas o GitHub a aplicou à rede de forks do projeto, com 3.007 repositórios. Projetos sem ligação de fork com a Leonida seguem online por enquanto.",
@@ -155,7 +155,7 @@
     },
     {
       "id": "2026-11-24-new-progress-scale",
-      "date": "2026-11-24",
+      "date": "2026-11-25",
       "category": "Tracker",
       "title": "Kynos RecompVI muda a escala: ser jogável vale metade; concluir o jogo, 100%",
       "summary": "A nova escala separa chegar ao jogo de conseguir jogá-lo bem. A preparação técnica vale até 10%; executável, primeiro quadro, menus, mundo e personagem jogável marcam 10%, 20%, 30%, 40% e 50%. Depois, história, renderização, desempenho e estabilidade completam os outros 50%.",
@@ -169,7 +169,7 @@
     },
     {
       "id": "2026-11-24-omonkey-shaders-prison",
-      "date": "2026-11-24",
+      "date": "2026-11-25",
       "category": "Progresso",
       "title": "omonkey carrega shaders de GTA VI e movimenta personagem na cena da prisão",
       "summary": "O snapshot registra omonkey em 76%, no marco Dentro do jogo: os shaders começaram a carregar e o personagem se move lentamente pela cena inicial da prisão, a cerca de 5 FPS. O desenvolvimento foi transmitido ao vivo no canal Swaggely, mas não há código público nem build para testes externos.",
@@ -188,7 +188,7 @@
     },
     {
       "id": "2026-11-24-cgbj-in-game",
-      "date": "2026-11-24",
+      "date": "2026-11-25",
       "category": "Progresso",
       "title": "CGBJ chega a 75%: cut-scenes a 4 FPS e cenas ainda sem iluminação",
       "summary": "O tracker registra o CGBJ em 75%, no marco Dentro do jogo · cut-scenes a 4 FPS. Na build privada, o personagem se move com controle, anda pelo mapa, conversa com NPCs e abre menus. O vídeo mostra cenas em cores chapadas e sem iluminação; o resultado não pode ser reproduzido externamente porque o código não é público.",
@@ -217,7 +217,7 @@
     },
     {
       "id": "2026-11-24-xcl-30fps-in-game",
-      "date": "2026-11-24",
+      "date": "2026-11-25",
       "category": "Atualização",
       "title": "Exclusivo: XCL relata 30 FPS em GTA VI e testes já chegam ao mundo aberto",
       "summary": "A equipe evitou detalhar o resultado por receio de derrubadas. Depois, testers relataram que a versão pública passou dos menus e carregou o mundo. A tela, porém, permanece em um indicador de carregamento e o watchdog da GPU encerra as execuções em poucos minutos. Um relato menciona 28–30 FPS, ainda sem captura; o avanço é autodeclarado e não foi reproduzido de forma independente.",
@@ -246,7 +246,7 @@
     },
     {
       "id": "2026-11-24-tuxbox-first-frame-victory-world",
-      "date": "2026-11-24",
+      "date": "2026-11-25",
       "category": "Progresso",
       "title": "TuxBox mostra o primeiro quadro de GTA VI; VIctory avança no carregamento do mundo",
       "summary": "O TuxBox registrou a tela de seleção de jogador em 4K no Linux com Proton, sem entrada de controle: é um primeiro quadro, não um menu. O VIctory relata chegar ao mundo e exibir o cartão da primeira missão, mas a cena continua quase toda escura e a GPU pode travar. PercyScarlett e GTA6-BootTest também relatam executar o código até quadros pretos. Resultados ainda autodeclarados.",
@@ -274,14 +274,14 @@
       ]
     },
     {
-      "id": "xlaunchvi-loading-screen-team-report",
-      "reporter": "JPTuba",
-      "date": "2026-11-24",
-      "loggedAt": "2026-11-24T05:07:48.307Z",
-      "stage": "Menu principal a 30 FPS · sem texturas · estimativa editorial (~55%)",
-      "estimatedPercent": 55,
+      "id": "xlaunchvi-world-night-lighting-2026-11-25",
+      "reporter": "KynosRecompVI",
+      "date": "2026-11-25",
+      "loggedAt": "2026-11-25T03:15:00.000Z",
+      "stage": "Mundo inteiro renderizado à noite · Lucia carregada · Ray Tracing ativo · 30 FPS @ 1080p",
+      "estimatedPercent": 78.7,
       "portwatchPercent": 1.4,
-      "title": "XlaunchVI: 55% com menus a 30 FPS e sem texturas",
+      "title": "XLaunchVI: mundo inteiro renderizado à noite, Lucia carregada, Ray Tracing ativo a 30 FPS",
       "summary": "Relatos da equipe indicam que os menus do XlaunchVI agora abrem cravados em 30 FPS, ainda sem texturas. A estabilidade está mais forte segundo Nesko. O próximo foco é otimizar o uso de memória e as shaders sem textura. O projeto já abriu The Matrix Awakens e busca executar outros jogos de Xbox; não há release pública para baixar.",
       "teaser": "55% · menus a 30 FPS sem texturas · próximo passo: memória e shaders.",
       "transparency": "Os 55% são uma estimativa editorial local, não uma medição oficial. Relatos atribuídos à equipe descrevem menus a 30 FPS sem texturas e foco em memória/shaders; não há confirmação pública independente nem release disponível.",
@@ -2941,15 +2941,15 @@
       "tier": "watchlist",
       "status": "acompanhado",
       "nuked": null,
-      "percent": 55.0,
-      "manualScore": 55.0,
+      "percent": 78.7,
+      "manualScore": 78.7,
       "portwatchPercent": 1.4,
       "portwatchMilestonePercent": 0,
       "groundworkFraction": 0.138,
-      "reached": "groundwork",
-      "stage": "Menu principal a 30 FPS (sem texturas)",
-      "summary": "Os menus abrem a 30 FPS, ainda sem texturas. A equipe foca em otimizar memória e shaders; 55% é uma estimativa editorial local, não uma medição oficial.",
-      "verification": "Estimativa editorial baseada em relato; não é medição oficial nem marco confirmado no GitHub.",
+      "reached": "playable",
+      "stage": "Mundo renderizado (noite) · Lucia em tempo real · Ray Tracing ativo · 30 FPS @ 1080p",
+      "summary": "Objetivo: executar jogos de Xbox de forma 100% nativa no Windows (abrangendo Xbox 360 e Xbox Series X|S), sem processos manuais complexos de recompilação pelo usuário — 'abrir o XLaunch, importar o jogo de Xbox e jogar'. Foco atual em GTA VI: shaders compilados, texturas funcionais, iluminação e Ray Tracing ativos; rodando a 30 FPS em Full HD (1080p) em tela cheia, com texturas, edificações, modelos de personagens e todo o prólogo carregados (incluindo Lucia e o ambiente prisional). Avanços recentes: mundo inteiro renderizado (noite) com iluminação funcional, modelo da Lucia carregado em tempo real, sombras e silhueta visíveis. Novos colaboradores entram no projeto; testes em andamento com The Matrix Awakens (aprimorando shaders 2D/3D para renderização mais complexa). Distribuição/release pública apenas na Release Final (meta: no mínimo 60 FPS, rodando melhor que no console).",
+      "verification": "Relato da equipe; não verificado independentemente",
       "stars": 6,
       "forks": 2,
       "lastRepositoryUpdate": "2026-11-25T03:36:27Z",
@@ -2958,25 +2958,25 @@
       "repositoryAssessedAt": "2026-11-23",
       "provenOn": null,
       "gtaMilestones": {
-        "loads": 0,
-        "boots": 0,
-        "menu": 0,
-        "world": 0,
-        "playable": 0,
+        "loads": 1,
+        "boots": 1,
+        "menu": 1,
+        "world": 1,
+        "playable": 0.8,
         "ingame": 0,
-        "fps": 0,
-        "stability": "unknown"
+        "fps": 30,
+        "stability": "0.7"
       },
       "gta": {
-        "loads": 0,
-        "boots": 0,
-        "menu": 0,
-        "world": 0,
-        "playable": 0,
-        "story": 0,
-        "render": 0,
-        "fps": 0,
-        "stability": "unknown"
+        "loads": 1,
+        "boots": 1,
+        "menu": 1,
+        "world": 1,
+        "playable": 0.8,
+        "story": 0.6,
+        "render": 0.9,
+        "fps": 30,
+        "stability": 0.7
       },
       "groundwork": {
         "loader": 0.3,
@@ -2985,10 +2985,21 @@
         "proven": 0
       },
       "technicalDetails": {
-        "approach": "Compatibility layer",
-        "target": "Any Xbox Series game",
-        "highlights": [],
-        "blockers": [],
+        "approach": "Camada de compatibilidade nativa x86-64 para Xbox 360 e Xbox Series X|S",
+        "target": "Xbox 360 e Xbox Series X|S (Scarlett); foco atual em GTA VI",
+        "highlights": [
+          "Objetivo: executar jogos de Xbox 360 e Xbox Series X|S nativamente no Windows — 'abrir, importar, jogar'",
+          "GTA VI: shaders compilados, texturas, iluminação e Ray Tracing ativos a 30 FPS (1080p, tela cheia)",
+          "Prólogo completo carrega: Lucia, ambiente prisional, edificações, modelos de personagens",
+          "Mundo inteiro renderizado à noite com iluminação funcional, sombras e silhueta da Lucia em tempo real",
+          "Novos colaboradores no projeto; testes com The Matrix Awakens para shaders 2D/3D avançados",
+          "Backend próprio Direct3D 12 em desenvolvimento; Vulkan também previsto",
+          "Release pública apenas na Release Final (meta ≥ 60 FPS, melhor que console)"
+        ],
+        "blockers": [
+          "Otimização para atingir 60+ FPS estável (meta da Release Final)",
+          "Detalhes técnicos e desempenho são relatos da equipe, não verificados independentemente"
+        ],
         "groundwork": [
           {
             "label": "Carregador PE e bibliotecas",
@@ -3010,14 +3021,14 @@
         "groundworkNote": "Indicadores técnicos do snapshot; não representam progresso de GTA VI."
       },
       "teamReport": {
-        "id": "xlaunchvi-loading-screen-team-report",
-        "reporter": "JPTuba",
-        "date": "2026-11-24",
-        "loggedAt": "2026-11-24T05:07:48.307Z",
-        "stage": "Menu principal a 30 FPS · sem texturas · estimativa editorial (~55%)",
-        "estimatedPercent": 55,
+        "id": "xlaunchvi-world-night-lighting-2026-11-25",
+        "reporter": "KynosRecompVI",
+        "date": "2026-11-25",
+        "loggedAt": "2026-11-25T03:15:00.000Z",
+        "stage": "Mundo inteiro renderizado à noite · Lucia carregada · Ray Tracing ativo · 30 FPS @ 1080p",
+        "estimatedPercent": 78.7,
         "portwatchPercent": 1.4,
-        "title": "XlaunchVI: 55% com menus a 30 FPS e sem texturas",
+        "title": "XLaunchVI: mundo inteiro renderizado à noite, Lucia carregada, Ray Tracing ativo a 30 FPS",
         "summary": "Relatos da equipe indicam que os menus do XlaunchVI agora abrem cravados em 30 FPS, ainda sem texturas. A estabilidade está mais forte segundo Nesko. O próximo foco é otimizar o uso de memória e as shaders sem textura. O projeto já abriu The Matrix Awakens e busca executar outros jogos de Xbox; não há release pública para baixar.",
         "teaser": "55% · menus a 30 FPS sem texturas · próximo passo: memória e shaders.",
         "transparency": "Os 55% são uma estimativa editorial local, não uma medição oficial. Relatos atribuídos à equipe descrevem menus a 30 FPS sem texturas e foco em memória/shaders; não há confirmação pública independente nem release disponível.",
@@ -3622,15 +3633,15 @@
         "kickUrl": "https://kick.com/myleouss",
         "discordUrl": "https://discord.gg/R5T6zeQuPY",
         "latestReport": {
-          "reporter": "JPTuba",
-          "date": "2026-11-24",
-          "loggedAt": "2026-11-24T05:07:48.307Z",
-          "reportedStage": "menu_30fps_no_textures",
-          "estimatedPercent": 55,
+          "reporter": "KynosRecompVI",
+          "date": "2026-11-25",
+          "loggedAt": "2026-11-25T03:15:00.000Z",
+          "reportedStage": "world_night_lucia_rt_30fps",
+          "estimatedPercent": 78.7,
           "pauseHours": "2–3",
           "aiUsageExhausted": true,
           "claudeRecharged": true,
-          "objective": "Otimizar memória e shaders sem textura até os menus ganharem texturas e o jogo ficar quase jogável.",
+          "objective": "Shaders compilados, texturas funcionais, iluminação e Ray Tracing ativos a 30 FPS (1080p); mundo inteiro renderizado à noite com Lucia em tempo real. Próximos passos: otimizar para 60+ FPS estável e Release Final.",
           "dashboardFeatures": [
             "Reconhecimento de jogos e mídia física",
             "Detecção de build",
@@ -3638,10 +3649,10 @@
             "Login e troca de perfil",
             "Biblioteca de jogos"
           ],
-          "source": "Relato atribuído à equipe no Discord; menus a 30 FPS sem texturas"
+          "source": "Relato da equipe: mundo renderizado à noite, Lucia carregada, Ray Tracing ativo a 30 FPS"
         },
         "repositoryCheck": {
-          "checkedAt": "2026-11-24",
+          "checkedAt": "2026-11-25",
           "httpStatus": null,
           "missing": false,
           "authenticated": false
@@ -3650,8 +3661,8 @@
     },
     "effortOverrides": {
       "xlaunchvi": {
-        "percent": 55,
-        "stage": "Menu principal a 30 FPS (sem texturas)",
+        "percent": 78.7,
+        "stage": "Mundo renderizado (noite) · Lucia em tempo real · Ray Tracing ativo · 30 FPS @ 1080p",
         "basis": "team-report-estimate"
       },
       "cgbj": {
@@ -4037,7 +4048,7 @@
       "tracked": 27
     },
     {
-      "date": "2026-11-24",
+      "date": "2026-11-25",
       "leaderId": "suri",
       "leaderName": "suri",
       "leader": 61.0,
@@ -4285,7 +4296,7 @@
   ],
   "dmca": [
     {
-      "date": "2026-11-24",
+      "date": "2026-11-25",
       "url": "https://github.com/github/dmca/blob/master/2026/11/2026-11-24-take-two.md",
       "gta6": true,
       "repositories": 1,

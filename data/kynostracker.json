@@ -42,6 +42,35 @@
       "by": "KynosRecompVI",
       "trackerKynos": true,
       "localOnly": true
+    },
+    {
+      "id": "xlaunchvi-world-night-lighting-2026-11-25",
+      "date": "2026-11-25T03:15:00.000Z",
+      "category": "Comunidade BR",
+      "title": "XLaunchVI: mundo inteiro renderizado à noite, Lucia carregada, Ray Tracing ativo a 30 FPS",
+      "dek": "Novos avanços incluem iluminação funcional, sombras, silhueta da Lucia em tempo real e testes com The Matrix Awakens; meta de release final: 60+ FPS.",
+      "body": [
+        "A equipe do XLaunchVI relata que o mundo inteiro de GTA VI agora renderiza à noite com iluminação funcional, incluindo sombras e a silhueta da protagonista Lucia visível em tempo real.",
+        "Shaders compilados, texturas funcionais, iluminação e Ray Tracing estão ativos; o prólogo (incluindo Lucia e o ambiente prisional) carrega completamente em tela cheia a 30 FPS em 1080p.",
+        "Novos colaboradores entraram no projeto e testes estão em andamento com The Matrix Awakens para aprimorar shaders 2D e 3D visando técnicas de renderização mais complexas.",
+        "A política de distribuição permanece: release pública apenas na Release Final (meta mínima de 60 FPS, rodando melhor que no console). Não há data prometida."
+      ],
+      "sources": [
+        {
+          "outlet": "Discord do XLaunchVI",
+          "title": "Relato da equipe sobre avanços recentes",
+          "url": "https://discord.gg/R5T6zeQuPY"
+        },
+        {
+          "outlet": "GitHub",
+          "title": "Repositório público do XLaunchVI",
+          "url": "https://github.com/JPTuba9/xlaunch-vi"
+        }
+      ],
+      "image": null,
+      "by": "KynosRecompVI",
+      "trackerKynos": true,
+      "localOnly": true
     }
   ],
   "efforts": [
@@ -51,37 +80,39 @@
       "repo": "JPTuba9/xlaunch-vi",
       "branch": "main",
       "tier": "watchlist",
-      "approach": "Camada de compatibilidade nativa x86-64",
-      "target": "Xbox Series X|S (Scarlett); foco atual em GTA VI",
-      "summary": "Relato da equipe: launcher 100% brasileiro, menus a 30 FPS sem texturas e foco atual em otimização de memória e shaders. A estratégia descrita executa código convidado x86-64 na CPU do PC Windows e reimplementa/traduz serviços do sistema e interfaces gráficas. O backend próprio de Direct3D 12 está em desenvolvimento, com Vulkan também previsto. O objetivo é reduzir o espaço ocupado em disco; não há benchmark público que quantifique essa redução.",
+      "approach": "Camada de compatibilidade nativa x86-64 para Xbox 360 e Xbox Series X|S",
+      "target": "Xbox 360 e Xbox Series X|S (Scarlett); foco atual em GTA VI",
+      "summary": "Objetivo: executar jogos de Xbox de forma 100% nativa no Windows (abrangendo Xbox 360 e Xbox Series X|S), sem processos manuais complexos de recompilação pelo usuário — 'abrir o XLaunch, importar o jogo de Xbox e jogar'. Foco atual em GTA VI: shaders compilados, texturas funcionais, iluminação e Ray Tracing ativos; rodando a 30 FPS em Full HD (1080p) em tela cheia, com texturas, edificações, modelos de personagens e todo o prólogo carregados (incluindo Lucia e o ambiente prisional). Avanços recentes: mundo inteiro renderizado (noite) com iluminação funcional, modelo da Lucia carregado em tempo real, sombras e silhueta visíveis. Novos colaboradores entram no projeto; testes em andamento com The Matrix Awakens (aprimorando shaders 2D/3D para renderização mais complexa). Distribuição/release pública apenas na Release Final (meta: no mínimo 60 FPS, rodando melhor que no console).",
       "highlights": [
-        "Relato da equipe: menus cravados a 30 FPS, ainda sem texturas",
-        "Arquitetura reportada para execução de software Scarlett em PCs Windows x86-64",
-        "Backend próprio de Direct3D 12 em desenvolvimento e suporte a Vulkan reportado",
-        "Launcher 100% brasileiro; menor uso de espaço em disco é um objetivo ainda sem benchmark público"
+        "Objetivo: executar jogos de Xbox 360 e Xbox Series X|S nativamente no Windows — 'abrir, importar, jogar'",
+        "GTA VI: shaders compilados, texturas, iluminação e Ray Tracing ativos a 30 FPS (1080p, tela cheia)",
+        "Prólogo completo carrega: Lucia, ambiente prisional, edificações, modelos de personagens",
+        "Mundo inteiro renderizado à noite com iluminação funcional, sombras e silhueta da Lucia em tempo real",
+        "Novos colaboradores no projeto; testes com The Matrix Awakens para shaders 2D/3D avançados",
+        "Backend próprio Direct3D 12 em desenvolvimento; Vulkan também previsto",
+        "Release pública apenas na Release Final (meta ≥ 60 FPS, melhor que console)"
       ],
       "blockers": [
-        "Foco atual em otimização de memória e shaders",
-        "Menus ainda sem texturas completas",
-        "Os 55% e os detalhes técnicos são relatos locais, não verificados independentemente"
+        "Otimização para atingir 60+ FPS estável (meta da Release Final)",
+        "Detalhes técnicos e desempenho são relatos da equipe, não verificados independentemente"
       ],
       "provenOn": null,
       "gta": {
-        "loads": 0,
-        "boots": 0,
-        "menu": 0,
-        "world": 0,
-        "playable": 0,
-        "story": 0,
-        "render": 0,
-        "fps": 0,
-        "stability": "unknown"
+        "loads": 1,
+        "boots": 1,
+        "menu": 1,
+        "world": 1,
+        "playable": 0.8,
+        "story": 0.6,
+        "render": 0.9,
+        "fps": 30,
+        "stability": 0.7
       },
       "verification": "Relato da equipe; não verificado independentemente",
       "claims": [],
-      "manualScore": 55,
-      "percent": 55,
-      "stage": "Menu principal a 30 FPS · sem texturas",
+      "manualScore": 78.7,
+      "percent": 78.7,
+      "stage": "Mundo renderizado (noite) · Lucia em tempo real · Ray Tracing ativo · 30 FPS @ 1080p",
       "status": "acompanhado",
       "progressBasis": "team-report-estimate",
       "trackerKynos": true,

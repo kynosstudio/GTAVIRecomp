@@ -48,11 +48,11 @@
         <div class="xlaunch-hero-copy">
           <span class="xlaunch-br-badge">Projeto 100% Brasileiro</span>
           <h1 id="xlaunch-title">O futuro da recompilação do GTA VI <span>começa no Brasil.</span></h1>
-          <p>Mais do que só pelo GTA VI — é para mostrar que o Brasil também tem gente foda desenvolvendo engenharia reversa e recompilação de alto nível.</p>
-          <div class="xlaunch-progress" role="progressbar" aria-label="Progresso do XLaunchVI" aria-valuemin="0" aria-valuemax="100" aria-valuenow="55">
-            <div class="xlaunch-progress-heading"><span>Status atual</span><strong id="xlaunch-percent">55%</strong></div>
-            <div class="xlaunch-progress-track"><span id="xlaunch-progress-fill"></span></div>
-            <small id="xlaunch-stage">Menu principal a 30 FPS · sem texturas</small>
+          <p>Objetivo: executar jogos de Xbox 360 e Xbox Series X|S de forma 100% nativa no Windows — <b>abrir o XLaunch, importar o jogo de Xbox e jogar</b>, sem processos manuais complexos de recompilação.</p>
+          <div class="xlaunch-progress" role="progressbar" aria-label="Progresso do XLaunchVI" aria-valuemin="0" aria-valuemax="100" aria-valuenow="78.7">
+            <div class="xlaunch-progress-heading"><span>Status atual</span><strong id="xlaunch-percent">0,0%</strong></div>
+            <div class="xlaunch-progress-track"><span id="xlaunch-progress-fill" data-progress-value="78.7"></span></div>
+            <small id="xlaunch-stage">Mundo renderizado (noite) · Lucia em tempo real · Ray Tracing ativo · 30 FPS @ 1080p</small>
             <p class="xlaunch-tracker-summary" id="xlaunch-summary"></p>
             <small class="xlaunch-data-status" id="xlaunch-data-status" role="status" aria-live="polite"></small>
           </div>
@@ -62,7 +62,6 @@
           </div>
           <p class="xlaunch-copy-status" role="status" aria-live="polite"></p>
         </div>
-        <!-- Troque o src por uma captura real; os slots da galeria seguem o mesmo padrão. -->
         <div class="xlaunch-hero-art" aria-label="Área reservada para captura do launcher">
           <img src="assets/launcher-placeholder.png" alt="Fixture sintético da interface do XLaunchVI; não é uma captura do GTA VI">
           <span>Captura do launcher</span>
@@ -72,25 +71,25 @@
         <section class="xlaunch-section xlaunch-architecture" aria-labelledby="architecture-title">
           <div class="xlaunch-section-heading">
             <span>ARQUITETURA REPORTADA PELA EQUIPE</span>
-            <h2 id="architecture-title">Uma estratégia própria de <b>compatibilidade.</b></h2>
+            <h2 id="architecture-title">Uma estratégia própria de <b>compatibilidade nativa.</b></h2>
           </div>
-          <p class="xlaunch-architecture-intro">Segundo a descrição do projeto, o XLaunchVI busca executar software de Xbox Series X|S (Scarlett) em PCs Windows x86-64 por meio de uma camada de compatibilidade própria.</p>
+          <p class="xlaunch-architecture-intro">O XLaunchVI busca executar software de Xbox 360 e Xbox Series X|S (Scarlett) em PCs Windows x86-64 por meio de uma camada de compatibilidade própria. O código convidado roda diretamente na CPU do computador; serviços do sistema e interfaces gráficas são reimplementados ou traduzidos para o ambiente Windows.</p>
           <div class="xlaunch-architecture-grid">
             <article>
-              <h3>Execução no PC</h3>
-              <p>O código convidado deve rodar diretamente na CPU do computador. Serviços do sistema e interfaces gráficas são reimplementados ou traduzidos para o ambiente Windows.</p>
+              <h3>Execução nativa no PC</h3>
+              <p>O código convidado (Xbox 360 / Series X|S) roda diretamente na CPU x86-64 do computador. Serviços do sistema e interfaces gráficas são reimplementados ou traduzidos para Windows — sem emulação de CPU.</p>
             </article>
             <article>
-              <h3>Gráficos</h3>
-              <p>A equipe descreve um backend próprio de Direct3D 12 em desenvolvimento, além de suporte a Vulkan. A abordagem é apresentada como distinta das soluções de compatibilidade citadas como VIctory e XCL.</p>
+              <h3>Gráficos: Direct3D 12 + Vulkan</h3>
+              <p>A equipe desenvolve um backend próprio de Direct3D 12, com suporte a Vulkan também planejado. A abordagem é distinta de soluções como VIctory e XCL; foco em shaders compilados, Ray Tracing e renderização avançada.</p>
             </article>
             <article>
               <h3>Launcher brasileiro e leve</h3>
-              <p>O launcher segue uma estratégia própria de tradução e execução no Windows. O objetivo é ocupar menos espaço em disco no PC; ainda não há benchmark público que quantifique essa redução.</p>
+              <p>O launcher segue estratégia própria de tradução e execução no Windows. Objetivo: ocupar menos espaço em disco; ainda não há benchmark público que quantifique essa redução.</p>
             </article>
             <article>
-              <h3>Visão de longo prazo</h3>
-              <p>A ambição inclui jogos de Xbox 360 até Xbox Series S. Neste momento, o foco informado foi redirecionado para GTA VI, com interface personalizável e atualizações contínuas como objetivos do projeto.</p>
+              <h3>Visão: Xbox 360 → Series X|S</h3>
+              <p>A ambição abrange Xbox 360 até Xbox Series S. Foco atual redirecionado para GTA VI: shaders, iluminação, Ray Tracing, 30 FPS no prólogo. Interface personalizável e atualizações contínuas são objetivos do projeto.</p>
             </article>
           </div>
           <p class="xlaunch-facts-note">Os detalhes de arquitetura e desempenho acima refletem informações fornecidas pela equipe e não foram verificados de forma independente por este site.</p>
@@ -102,7 +101,6 @@
           <h2 id="gallery-title">Launcher em <b>desenvolvimento.</b></h2>
         </div>
         <div class="xlaunch-gallery">
-          <!-- Troque as imagens de fixture por capturas reais quando estiverem disponíveis. -->
           <figure><img src="assets/xlaunchvi-home-preview.png" alt="Biblioteca do launcher em fixture sintético, não é um jogo real"><figcaption>Biblioteca · fixture sintético</figcaption></figure>
           <figure><img src="assets/xlaunchvi-home-ptbr.png" alt="Interface em português do fixture sintético do launcher"><figcaption>Interface PT-BR · fixture sintético</figcaption></figure>
           <figure><img src="assets/xlaunchvi-home-settings.png" alt="Configurações gráficas do fixture sintético do launcher"><figcaption>Configurações · fixture sintético</figcaption></figure>
@@ -123,12 +121,20 @@
           <h2 id="achievements-title">Marcos reais, metas e <b>horizonte.</b></h2>
         </div>
         <ol class="xlaunch-achievements">
-          <li class="is-reported"><span class="xlaunch-milestone-state">RELATADO</span><b>Jogo abre</b><p>A equipe relata a inicialização do jogo; o resultado não foi reproduzido independentemente.</p></li>
-          <li class="is-current"><span class="xlaunch-milestone-state">STATUS ATUAL · ~55%</span><b>Menus a 30 FPS</b><p>Menus reportados a 30 FPS, ainda sem texturas. O foco técnico atual é otimizar memória e shaders.</p></li>
-          <li class="is-internal-goal"><span class="xlaunch-milestone-state">META INTERNA · PRÓXIMA SEMANA</span><b>Próximo avanço da equipe</b><p>Janela de planejamento interna, não uma promessa: avançar na otimização de memória/shaders e no estágio de renderização.</p></li>
-          <li class="is-projection"><span class="xlaunch-milestone-state">PROJEÇÃO DO TRACKER</span><strong class="xlaunch-projection-days">~60 dias</strong><b>Horizonte: jogo completo</b><p>Estimativa baseada no progresso e no ritmo das notícias do tracker. Não é uma data de lançamento oficial nem uma garantia.</p></li>
+          <li class="is-reported"><span class="xlaunch-milestone-state">RELATADO</span><b>0% — Preparação</b><p>Carregador, bibliotecas base e camada gráfica inicial reportados pela equipe.</p></li>
+          <li class="is-reported"><span class="xlaunch-milestone-state">RELATADO</span><b>10% — Executável em execução</b><p>O executável do jogo é mapeado e inicia o próprio código no Windows.</p></li>
+          <li class="is-reported"><span class="xlaunch-milestone-state">RELATADO</span><b>20% — Primeiro quadro</b><p>O jogo apresenta os primeiros quadros renderizados.</p></li>
+          <li class="is-reported"><span class="xlaunch-milestone-state">RELATADO</span><b>30% — Menu principal</b><p>Os menus são alcançados e respondem à entrada (relatado a 30 FPS).</p></li>
+          <li class="is-reported"><span class="xlaunch-milestone-state">RELATADO</span><b>40% — Dentro do mundo</b><p>O modo história carrega e desenha o mundo; edificações e modelos aparecem.</p></li>
+          <li class="is-reported"><span class="xlaunch-milestone-state">RELATADO</span><b>50% — Jogável</b><p>É possível controlar um personagem no mundo; prólogo (Lucia, prisão) carregado.</p></li>
+          <li class="is-current"><span class="xlaunch-milestone-state">STATUS ATUAL · ~78,7%</span><b>Shaders, iluminação, Ray Tracing · 30 FPS @ 1080p</b><p>Shaders compilados, texturas funcionais, iluminação e Ray Tracing ativos. Mundo inteiro renderizado à noite com sombras e silhueta da Lucia em tempo real. Prólogo completo em tela cheia. Testes com The Matrix Awakens para shaders 2D/3D avançados. Novos colaboradores no projeto.</p></li>
+          <li class="is-internal-goal"><span class="xlaunch-milestone-state">META INTERNA · PRÓXIMA ETAPA</span><b>60% — Otimização de shaders / 30+ FPS estável</b><p>Foco em estabilizar 30+ FPS no mundo aberto, otimizar memória e pipeline de shaders para cenas complexas.</p></li>
+          <li class="is-internal-goal"><span class="xlaunch-milestone-state">META INTERNA</span><b>70% — Prólogo a 60 FPS</b><p>Alcançar 60 FPS no prólogo (Lucia, ambiente prisional) com qualidade visual completa.</p></li>
+          <li class="is-internal-goal"><span class="xlaunch-milestone-state">META INTERNA</span><b>80% — Mundo aberto a 60 FPS</b><p>Estender 60 FPS estável para o mundo aberto completo: missões, tráfego, IA, sistemas dinâmicos.</p></li>
+          <li class="is-internal-goal"><span class="xlaunch-milestone-state">META INTERNA</span><b>90% — Otimização final / Compatibilidade Xbox 360</b><p>Polimento geral, correção de edge cases, início da compatibilidade com títulos de Xbox 360.</p></li>
+          <li class="is-projection"><span class="xlaunch-milestone-state">HORIZONTE · RELEASE FINAL</span><b>100% — Jogo completo / Release Final</b><p><strong>Distribuição pública apenas na Release Final.</strong> Meta: no mínimo 60 FPS, rodando melhor que no console. Não há data prometida.</p></li>
         </ol>
-        <p class="xlaunch-facts-note">A meta da próxima semana é uma intenção interna informada para esta página. A projeção de 60 dias é aproximada e pode mudar conforme o tracker recebe dados; o contador da home permanece dinâmico e pode mostrar outro valor.</p>
+        <p class="xlaunch-facts-note">Os marcos de 60% a 90% são metas internas informadas pela equipe; não são promessas de cronograma. A projeção de 100% (Release Final) reflete a política declarada: release pública apenas quando atingir ≥ 60 FPS e qualidade superior ao console. O contador da home (78,7%) é uma estimativa editorial baseada nos relatos e pode mudar.</p>
       </section>
     </main>
     </div>
