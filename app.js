@@ -2667,7 +2667,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
     { label: 'Iniciam o GTA VI', markup: `<span class="pw-stat-value">${counterMarkup(launchingCount)} / ${counterMarkup(rankedScores.ranked.length)}</span>` },
     { label: 'Projetos acompanhados', markup: `<span class="pw-stat-value">${counterMarkup(rankedScores.ranked.length)}</span>` }
   ];
-  const timelineProjects = rankedProjects.slice(0, 8).filter((project) => scoreForProject(project) >= 0);
+  const timelineProjects = rankedProjects.slice(0, 10).filter((project) => scoreForProject(project) >= 0);
   const xlaunchReportProject = projects.find((project) => project.id === 'xlaunchvi' && project.teamReport);
   if (xlaunchReportProject && !timelineProjects.some((project) => project.id === xlaunchReportProject.id)) {
     timelineProjects.push(xlaunchReportProject);

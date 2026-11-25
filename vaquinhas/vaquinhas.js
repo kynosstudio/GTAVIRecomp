@@ -87,6 +87,14 @@
       appendText(body, 'p', 'campaign-total', 'Meta financeira: a definir');
     }
 
+      // Create main content wrapper for side-by-side layout
+      const mainContent = document.createElement('div');
+      mainContent.className = 'campaign-main-content';
+
+      // Left side: PIX info, progress, totals
+      const leftSide = document.createElement('div');
+      leftSide.className = 'campaign-pix-section';
+
     const canShowPix = campaign.is_active === true || state.source === 'local';
     const pix = document.createElement('div');
     pix.className = 'campaign-pix';
@@ -115,14 +123,6 @@
       });
       row.append(keyWrap, copy);
       pix.append(row, copyStatus);
-      const qr = makeImage(campaign.qr_code_url, `QR Code PIX da campanha ${campaign.title || ''}`, 'campaign-qr');
-      if (qr) {
-        const frame = document.createElement('figure');
-        frame.className = 'campaign-qr-frame';
-        frame.append(qr);
-        appendText(frame, 'figcaption', 'campaign-qr-note', state.source === 'local' ? 'Imagem demonstrativa; não é um QR Code pagável.' : 'Confira o valor e a chave no app do banco antes de confirmar.');
-        pix.append(frame);
-      }
     } else {
       appendText(pix, 'p', 'campaign-qr-note', 'PIX temporariamente indisponível para esta campanha.');
     }
@@ -152,7 +152,25 @@
       appendText(volume, 'small', '', 'Escala visual de volume, não representa uma meta financeira.');
       pix.append(volume);
     }
-    body.append(pix);
+      leftSide.append(pix);
+      mainContent.append(leftSide);
+
+      // Right side: QR Code frame
+      const rightSide = document.createElement('div');
+      rightSide.className = 'campaign-qr-section';
+      if (canShowPix) {
+        const qr = makeImage(campaign.qr_code_url, `QR Code PIX da campanha ${campaign.title || ''}`, 'campaign-qr');
+        if (qr) {
+          const frame = document.createElement('figure');
+          frame.className = 'campaign-qr-frame';
+          frame.append(qr);
+          appendText(frame, 'figcaption', 'campaign-qr-note', state.source === 'local' ? 'Imagem demonstrativa; não é um QR Code pagável.' : 'Confira o valor e a chave no app do banco antes de confirmar.');
+          rightSide.append(frame);
+        }
+      }
+      mainContent.append(rightSide);
+
+      body.append(mainContent);
     card.append(body);
     return card;
   }
