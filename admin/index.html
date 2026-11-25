@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','GTM-T57BH4Q9');
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4039651654349639" crossorigin="anonymous"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0d0a16">
+    <meta name="robots" content="noindex,nofollow">
+    <meta name="description" content="Gerenciamento autenticado das vaquinhas, doações, notícias e atualizações do tracker KynosRecompVI.">
+    <title>Gerenciamento — KynosRecompVI</title>
+    <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="../site-sidebar.js" defer></script>
+    <script src="admin.js" defer></script>
+  </head>
+  <body class="sidebar-collapsed" data-site-base="../">
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T57BH4Q9" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <div class="site-bg" aria-hidden="true"></div>
+    <div class="site-layout">
+      <main class="admin-page">
+        <header class="admin-heading">
+          <div><span class="admin-kicker">ÁREA RESTRITA · OPERAÇÃO SEGURA</span><h1>Gerenciar o portal.</h1><p>Autenticação Supabase e allowlist de operadores no backend. Nenhuma senha ou chave privada é armazenada nesta página.</p></div>
+          <p class="admin-mode" id="admin-mode" role="status" aria-live="polite">Verificando conexão segura…</p>
+        </header>
+
+        <section class="admin-panel login-panel" aria-labelledby="login-title">
+          <h2 id="login-title">Acesso do operador</h2>
+          <form id="login-form" class="admin-form login-form">
+            <label class="admin-field">E-mail do operador<input name="email" type="email" autocomplete="username" required maxlength="254"></label>
+            <label class="admin-field">Senha<input name="password" type="password" autocomplete="current-password" required maxlength="1024"></label>
+            <button class="button admin-primary" type="submit">Entrar com Supabase Auth</button>
+          </form>
+          <p id="login-status" class="admin-status" role="status" aria-live="polite">O acesso só funciona após configurar o backend e autorizar o UUID do operador.</p>
+          <button type="button" class="admin-logout" id="logout-button" hidden>Sair da sessão</button>
+        </section>
+
+        <div class="admin-workspace" id="admin-workspace" hidden>
+          <section class="admin-panel" aria-labelledby="campaign-admin-title">
+            <div class="admin-panel-heading"><div><span class="admin-kicker">CAMPANHAS</span><h2 id="campaign-admin-title">Criar ou editar vaquinha</h2></div><button type="button" class="admin-secondary" id="new-campaign">Nova vaquinha</button></div>
+            <label class="admin-field">Editar campanha existente<select id="campaign-edit-select"><option value="">Nova campanha</option></select></label>
+            <form id="campaign-form" class="admin-form admin-grid">
+              <input name="id" type="hidden">
+              <label class="admin-field">Slug<input name="slug" required maxlength="60" pattern="[a-z0-9][a-z0-9-]{1,59}" placeholder="xlaunchvi"></label>
+              <label class="admin-field">Título<input name="title" required maxlength="120"></label>
+              <label class="admin-field admin-wide">Resumo<input name="summary" maxlength="500"></label>
+              <label class="admin-field admin-wide">Descrição<textarea name="description" rows="3" maxlength="4000"></textarea></label>
+              <label class="admin-field">Meta em reais (opcional)<input name="goal_amount" type="number" min="0.01" max="9999999999.99" step="0.01"></label>
+              <label class="admin-field">Chave PIX<input name="pix_key" required maxlength="120" value="kynos.studio@gmail.com"></label>
+              <label class="admin-field">Imagem / banner (caminho do site ou HTTPS)<input name="banner_url" maxlength="2048" placeholder="/assets/vaquinhas/xlaunchvi-banner.webp"></label>
+              <label class="admin-field">QR Code (caminho do site ou HTTPS)<input name="qr_code_url" maxlength="2048" placeholder="/assets/vaquinhas/xlaunchvi-qr.png"></label>
+              <label class="admin-field">Cor inicial<input name="color_start" type="color" value="#ff7b47"></label>
+              <label class="admin-field">Cor final<input name="color_end" type="color" value="#8157e8"></label>
+              <label class="admin-field">Ângulo do gradiente<input name="gradient_angle" type="number" min="0" max="360" step="1" value="125"></label>
+              <label class="admin-field">Percentual XLaunchVI<input name="xlaunch_percent" type="number" min="0" max="100" step="1"></label>
+              <label class="admin-field">Percentual manutenção Kynos<input name="kynos_maintenance_percent" type="number" min="0" max="100" step="1"></label>
+              <label class="admin-field">Status<select name="status"><option value="draft">Rascunho</option><option value="active">Ativa</option><option value="paused">Pausada</option><option value="completed">Concluída</option><option value="archived">Arquivada</option></select></label>
+              <p class="admin-hint admin-wide">Para ativar: informe ambos os percentuais somando 100, confira chave PIX, meta e QR real. Alterações geram registro de auditoria.</p>
+              <button class="button admin-primary admin-wide" type="submit">Salvar campanha</button>
+            </form>
+            <p class="admin-status" id="campaign-status" role="status" aria-live="polite"></p>
+          </section>
+
+          <section class="admin-panel" aria-labelledby="donations-admin-title">
+            <div class="admin-panel-heading"><div><span class="admin-kicker">REGISTRO AUDITÁVEL</span><h2 id="donations-admin-title">Registrar / confirmar doação</h2></div></div>
+            <form id="donation-form" class="admin-form admin-grid">
+              <input name="id" type="hidden">
+              <label class="admin-field admin-wide">Campanha<select name="campaign_id" required></select></label>
+              <label class="admin-field">Valor em reais<input name="amount" type="number" min="0.01" max="9999999999.99" step="0.01" required></label>
+              <label class="admin-field">Apelido público<input name="donor_alias" maxlength="60" placeholder="Opcional; não use e-mail"></label>
+              <label class="admin-field admin-wide">Mensagem privada (não aparece no ranking)<textarea name="message" rows="2" maxlength="500"></textarea></label>
+              <label class="admin-field">Status<select name="status"><option value="pending">Pendente</option><option value="confirmed">Confirmada</option><option value="rejected">Rejeitada</option></select></label>
+              <label class="admin-check"><input name="show_in_ranking" type="checkbox" checked> Incluir apelido e total no ranking público</label>
+              <button class="button admin-primary admin-wide" type="submit">Registrar doação</button>
+            </form>
+            <div class="admin-record-list"><h3>Registros recentes · até 100</h3><div id="donation-records"></div></div>
+            <p class="admin-status" id="donation-status" role="status" aria-live="polite"></p>
+          </section>
+
+          <section class="admin-panel" aria-labelledby="news-admin-title">
+            <div class="admin-panel-heading"><div><span class="admin-kicker">NOTÍCIAS E CENTRAL DE AVISOS</span><h2 id="news-admin-title">Publicar notícia</h2></div><button type="button" class="admin-secondary" id="new-news">Nova notícia</button></div>
+            <label class="admin-field">Editar notícia existente<select id="news-edit-select"><option value="">Nova notícia</option></select></label>
+            <form id="news-form" class="admin-form admin-grid">
+              <input name="id" type="hidden">
+              <label class="admin-field">Slug<input name="slug" required maxlength="100" pattern="[a-z0-9][a-z0-9-]{1,99}"></label>
+              <label class="admin-field">Categoria<input name="category" maxlength="60" value="Comunidade"></label>
+              <label class="admin-field admin-wide">Título<input name="title" required maxlength="180"></label>
+              <label class="admin-field admin-wide">Resumo<input name="summary" required maxlength="1200"></label>
+              <label class="admin-field admin-wide">Texto completo<textarea name="body" rows="4" maxlength="12000"></textarea></label>
+              <label class="admin-field admin-wide">Fonte HTTPS (opcional)<input name="source_url" type="url" maxlength="2048" placeholder="https://..."></label>
+              <label class="admin-field">Status<select name="status"><option value="draft">Rascunho</option><option value="published">Publicada</option><option value="archived">Arquivada</option></select></label>
+              <button class="button admin-primary admin-wide" type="submit">Salvar notícia</button>
+            </form>
+            <div class="admin-record-list"><h3>Notícias recentes</h3><div id="news-records"></div></div>
+            <p class="admin-status" id="news-status" role="status" aria-live="polite"></p>
+          </section>
+
+          <section class="admin-panel" aria-labelledby="tracker-admin-title">
+            <div class="admin-panel-heading"><div><span class="admin-kicker">ATUALIZAÇÃO EDITORIAL</span><h2 id="tracker-admin-title">Publicar atualização do tracker</h2></div><button type="button" class="admin-secondary" id="new-tracker">Nova atualização</button></div>
+            <label class="admin-field">Editar atualização existente<select id="tracker-edit-select"><option value="">Nova atualização</option></select></label>
+            <form id="tracker-form" class="admin-form admin-grid">
+              <input name="id" type="hidden">
+              <label class="admin-field">ID do projeto<input name="project_id" required maxlength="80" pattern="[a-z0-9][a-z0-9-]{1,79}" placeholder="xlaunchvi"></label>
+              <label class="admin-field">Nome do projeto<input name="project_name" required maxlength="120"></label>
+              <label class="admin-field">Progresso (%)<input name="percent" type="number" min="0" max="100" step="0.01" required></label>
+              <label class="admin-field">Marco atual<input name="milestone" required maxlength="80"></label>
+              <label class="admin-field admin-wide">Resumo e contexto<input name="summary" required maxlength="1200"></label>
+              <label class="admin-field admin-wide">Fonte HTTPS (opcional)<input name="source_url" type="url" maxlength="2048" placeholder="https://..."></label>
+              <label class="admin-field">Status<select name="status"><option value="draft">Rascunho</option><option value="published">Publicado</option><option value="archived">Arquivado</option></select></label>
+              <button class="button admin-primary admin-wide" type="submit">Salvar atualização</button>
+            </form>
+            <div class="admin-record-list"><h3>Atualizações recentes</h3><div id="tracker-records"></div></div>
+            <p class="admin-status" id="tracker-status" role="status" aria-live="polite"></p>
+          </section>
+        </div>
+      </main>
+      <footer class="site-footer"><span>KynosRecompVI · gerenciamento</span><a href="../index.html">Voltar ao início ↗</a></footer>
+    </div>
+  </body>
+</html>

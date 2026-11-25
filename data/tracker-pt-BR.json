@@ -1,12 +1,19 @@
 {
-  "updatedAt": "2026-11-25T10:45:44.000Z",
-  "lastSyncedAt": "2026-11-24T05:07:48.307Z",
+  "updatedAt": "2026-11-25T13:00:00.000Z",
+  "lastSyncedAt": "2026-11-25T13:00:00.000Z",
   "sourceFile": "data/tracker.json",
   "teams": {
     "xlaunchvi": {
       "pixKey": "galinhafritadubs@gmail.com",
       "kickUrl": "https://kick.com/myleouss",
       "discordUrl": "https://discord.gg/R5T6zeQuPY",
+      "latestActivity": {
+        "id": "xlaunchvi-memory-d3d12-bvh-2026-11-25-1000",
+        "reporter": "Bellic Linguiça [DⴹV]",
+        "date": "2026-11-25T10:00:00-03:00",
+        "quote": "Fazendo agora, correção memória e endereçamento compatível, verificando compatibilidade D3D12 e pipelines gráficos e depois, shaders BVH e iluminação em tempo real.",
+        "transparency": "Relato fornecido ao portal; não há URL para a mensagem original. O texto não altera a estimativa de progresso."
+      },
       "latestReport": {
         "id": "xlaunchvi-loading-screen-team-report",
         "reporter": "JPTuba",
@@ -76,6 +83,20 @@
     }
   },
   "news": [
+    {
+      "id": "2026-11-25-xlaunchvi-memory-d3d12-bvh",
+      "date": "2026-11-25T10:00:00-03:00",
+      "loggedAt": "2026-11-25T13:00:00.000Z",
+      "category": "Atualização de projeto",
+      "title": "XLaunchVI verifica memória, D3D12 e pipelines gráficos",
+      "summary": "Bellic Linguiça [DⴹV], às 10:00 de 25/11: “Fazendo agora, correção memória e endereçamento compatível, verificando compatibilidade D3D12 e pipelines gráficos e depois, shaders BVH e iluminação em tempo real.”",
+      "body": [
+        "Bellic Linguiça [DⴹV] relatou às 10:00 de 25/11 que o trabalho atual envolve correção de memória e endereçamento compatível, verificação de compatibilidade com D3D12 e pipelines gráficos; depois, o foco será shaders BVH e iluminação em tempo real.",
+        "O relato foi informado ao portal e não inclui um link para a mensagem original. Esta atualização registra atividade, sem alterar a estimativa de progresso do projeto."
+      ],
+      "sources": [],
+      "by": "Bellic Linguiça [DⴹV]"
+    },
     {
       "id": "2026-11-25-belobug-way-ahead",
       "date": "2026-11-25",
@@ -1202,7 +1223,7 @@
       "name": "xbox-emulator",
       "repo": "omonkeyz/xbox-emulator",
       "url": "https://github.com/omonkeyz/xbox-emulator",
-      "tier": "tracked",
+      "tier": "watchlist",
       "status": "acompanhado",
       "nuked": null,
       "percent": 6.5,
@@ -1362,7 +1383,7 @@
       "name": "ScarlettX",
       "repo": "Freminet/ScarlettX",
       "url": "https://github.com/Freminet/ScarlettX",
-      "tier": "tracked",
+      "tier": "watchlist",
       "status": "acompanhado",
       "nuked": null,
       "percent": 5.2,
@@ -1438,7 +1459,7 @@
       "name": "TuxBox",
       "repo": "brcly/TuxBox",
       "url": "https://github.com/brcly/TuxBox",
-      "tier": "tracked",
+      "tier": "watchlist",
       "status": "acompanhado",
       "nuked": null,
       "percent": 20.0,
@@ -1688,7 +1709,7 @@
       "name": "OpenScarlett",
       "repo": "californiaAlmonds/OpenScarlett",
       "url": "https://github.com/californiaAlmonds/OpenScarlett",
-      "tier": "tracked",
+      "tier": "watchlist",
       "status": "acompanhado",
       "nuked": null,
       "percent": 4.5,
@@ -1764,7 +1785,7 @@
       "name": "scarlett-layer",
       "repo": "jadeowaowa/scarlett-layer",
       "url": "https://github.com/jadeowaowa/scarlett-layer",
-      "tier": "tracked",
+      "tier": "watchlist",
       "status": "acompanhado",
       "nuked": null,
       "percent": 3.4,
@@ -1840,7 +1861,7 @@
       "name": "Xbox2Windows",
       "repo": "R0Y00/Xbox2Windows",
       "url": "https://github.com/R0Y00/Xbox2Windows",
-      "tier": "tracked",
+      "tier": "watchlist",
       "status": "acompanhado",
       "nuked": null,
       "percent": 25.0,
@@ -1924,7 +1945,7 @@
       "name": "AnyXboxX",
       "repo": "LooperSalty/AnyXboxX",
       "url": "https://github.com/LooperSalty/AnyXboxX",
-      "tier": "tracked",
+      "tier": "watchlist",
       "status": "acompanhado",
       "nuked": null,
       "percent": 2.5,
@@ -2000,7 +2021,7 @@
       "name": "XValkyrie",
       "repo": "sammwyy/xvalkyrie",
       "url": "https://github.com/sammwyy/xvalkyrie",
-      "tier": "tracked",
+      "tier": "watchlist",
       "status": "acompanhado",
       "nuked": null,
       "percent": 2.9,
@@ -3055,7 +3076,7 @@
       "name": "OpenScarlett (Community Edition)",
       "repo": "OpenCommunityEdition/OpenScarlett",
       "url": "https://github.com/OpenCommunityEdition/OpenScarlett",
-      "tier": "tracked",
+      "tier": "watchlist",
       "status": "acompanhado",
       "nuked": null,
       "percent": 4.9,
