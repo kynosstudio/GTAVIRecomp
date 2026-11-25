@@ -143,6 +143,9 @@ let xclFeedLoading = false;
 let xclFeedStatusRaw = 'A atividade do GitHub será carregada ao abrir esta aba.';
 const THEME_KEY = 'kynos-gta-vi-theme';
 let hardware;
+let hardwareProfileSource = 'Seleção manual';
+let hardwareProfileMemoryGenerationUnknown = false;
+let applyingHardwareProfile = false;
 let pageData = {};
 let portwatchData = null;
 let repositoryData = [];
@@ -1049,11 +1052,205 @@ function renderStorageOptions() {
 function renderConsoleReference() {
   const reference = byId('target-options').nextElementSibling;
   reference.innerHTML = `<b>Referências de console · projeções de mercado para novembro de 2026</b>${hardware.consoles.map((consoleItem) =>
-    `<span><strong>${escapeHtml(consoleItem.name)}</strong> · ${escapeHtml(consoleItem.architecture)} · ${consoleItem.gpuTflops.toFixed(2).replace('.', ',')} TFLOPs · ${escapeHtml(consoleItem.memory)} · meta ${escapeHtml(consoleItem.target)}</span>`).join('')}`;
+    `<span><strong>${escapeHtml(consoleItem.name)}</strong> · ${escapeHtml(consoleItem.architecture)} · ${consoleItem.gpuTflops.toFixed(1).replace('.', ',')} TFLOPs · ${escapeHtml(consoleItem.memory)} · meta ${escapeHtml(consoleItem.target)}</span>`).join('')}`;
 }
 
 function updateRamValue() {
   byId('ram-value').textContent = `${byId('ram-select').value} GB`;
+}
+
+function updateHardwareProfileSource(source, edited = false) {
+  hardwareProfileSource = source;
+  const suffix = edited && source !== 'Seleção manual' ? ' · ajustes manuais' : '';
+  byId('pc-profile-source').textContent = `Origem: ${source}${suffix}`;
+}
+
+function markHardwareProfileEdited() {
+  if (applyingHardwareProfile) return;
+  updateHardwareProfileSource(hardwareProfileSource, hardwareProfileSource !== 'Seleção manual');
+}
+
+function getBrowserHardwareSummary() {
+  const summary = {
+    logicalProcessors: Number.isFinite(navigator.hardwareConcurrency) ? navigator.hardwareConcurrency : null,
+    approximateMemoryGb: Number.isFinite(navigator.deviceMemory) ? navigator.deviceMemory : null,
+    resolution: `${screen.width} × ${screen.height}`,
+    devicePixelRatio: Number.isFinite(window.devicePixelRatio) ? window.devicePixelRatio : null,
+    webglRenderer: 'Indisponível'
+  };
+  let canvas;
+  let context;
+  try {
+    canvas = document.createElement('canvas');
+    context = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (context) {
+      const debugInfo = context.getExtension('WEBGL_debug_renderer_info');
+      if (debugInfo) {
+        summary.webglVendor = context.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) || '';
+        summary.webglRenderer = context.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || 'Mascarado pelo navegador';
+      } else {
+        summary.webglRenderer = context.getParameter(context.RENDERER) || 'Mascarado pelo navegador';
+      }
+    }
+  } catch (error) {
+    console.warn('Não foi possível consultar o renderer WebGL:', error);
+    summary.webglRenderer = 'Bloqueado ou indisponível';
+  } finally {
+    if (context) {
+      const loseContext = context.getExtension('WEBGL_lose_context');
+      if (loseContext) loseContext.loseContext();
+    }
+  }
+  return summary;
+}
+
+function renderBrowserHardwareSummary() {
+  const summary = getBrowserHardwareSummary();
+  const processor = summary.logicalProcessors === null ? 'Não informado' : `${summary.logicalProcessors} threads lógicas (aproximação)`;
+  const memory = summary.approximateMemoryGb === null
+    ? 'Não exposta pelo navegador'
+    : `cerca de ${summary.approximateMemoryGb} GB reportados (valor aproximado/limitado)`;
+  const dpi = summary.devicePixelRatio === null ? 'Não informado' : `${summary.devicePixelRatio}×`;
+  const renderer = [summary.webglVendor, summary.webglRenderer].filter(Boolean).join(' · ');
+  byId('pc-detection-result').innerHTML = `<strong>Leitura do navegador — estimativa, não inventário exato</strong>
+    <ul><li>CPU: ${escapeHtml(processor)}</li><li>Memória: ${escapeHtml(memory)}</li>
+    <li>Tela: ${escapeHtml(summary.resolution)} · escala/DPI ${escapeHtml(dpi)}</li>
+    <li>WebGL: ${escapeHtml(renderer)}</li></ul>
+    <p>O navegador pode limitar ou mascarar estes dados; não identifica com confiança o modelo exato da CPU/GPU nem o canal de RAM. Confirme CPU e GPU nos seletores.</p>`;
+  updateHardwareProfileSource('Leitura do navegador (aproximada)');
+}
+
+function matchHardwareModel(items, reportedName) {
+  const reported = normalizeHardwareSearch(reportedName);
+  if (!reported) return null;
+  return items
+    .filter((item) => {
+      const modelName = normalizeHardwareSearch(item.name.split(' · ')[0]);
+      return modelName.length >= 5 && reported.includes(modelName);
+    })
+    .sort((left, right) => right.name.split(' · ')[0].length - left.name.split(' · ')[0].length)[0] || null;
+}
+
+function ensureRamCapacityOption(capacity) {
+  const select = byId('ram-select');
+  if (!Array.from(select.options).some((option) => Number(option.value) === capacity)) {
+    const option = document.createElement('option');
+    option.value = String(capacity);
+    option.textContent = `${capacity} GB · personalizado`;
+    select.add(option);
+    hardware.ramCapacities = [...new Set([...hardware.ramCapacities, capacity])].sort((left, right) => left - right);
+  }
+}
+
+function parseLocalHardwareReport(report) {
+  if (!report || report.schemaVersion !== 1 || report.source !== 'kynos-windows-hardware-helper') {
+    throw new Error('Formato não reconhecido. Gere o relatório com o helper PowerShell do Kynos.');
+  }
+  if (!report.cpu || typeof report.cpu.name !== 'string'
+    || !report.memory || !Number.isFinite(Number(report.memory.totalGb))) {
+    throw new Error('O relatório precisa conter CPU e memória total válidas.');
+  }
+  if (report.memory.totalGb < 1 || report.memory.totalGb > 1024) {
+    throw new Error('A capacidade de RAM do relatório está fora do intervalo permitido.');
+  }
+  const graphics = Array.isArray(report.gpu) ? report.gpu : report.gpu ? [report.gpu] : [];
+  if (graphics.some((adapter) => !adapter || typeof adapter.name !== 'string')) {
+    throw new Error('O campo da placa de vídeo no relatório está inválido.');
+  }
+  return { ...report, gpu: graphics || null };
+}
+
+function applyLocalHardwareReport(report) {
+  const cpu = matchHardwareModel(hardware.cpus, report.cpu.name);
+  const graphics = report.gpu.map((adapter) => ({
+    adapter,
+    model: matchHardwareModel(hardware.gpus, adapter.name)
+  })).filter((item) => item.model).sort((left, right) => right.model.score - left.model.score);
+  const gpu = graphics.length ? graphics[0].model : null;
+  const ramGb = Math.round(Number(report.memory.totalGb));
+  const generation = String(report.memory.generation || '').toLowerCase();
+  hardwareProfileMemoryGenerationUnknown = !hardware.ramGenerations[generation];
+  applyingHardwareProfile = true;
+  try {
+    if (cpu) byId('cpu-select').value = cpu.id;
+    if (gpu) byId('gpu-select').value = gpu.id;
+    ensureRamCapacityOption(ramGb);
+    byId('ram-select').value = String(ramGb);
+    if (hardware.ramGenerations[generation]) {
+      state.ramGeneration = generation;
+      byId('ram-generation').value = generation;
+      renderRamFrequencies(Number(report.memory.speedMhz) || undefined);
+    }
+    if (report.memory.channelEstimate === 'single' || report.memory.channelEstimate === 'dual') {
+      state.channel = report.memory.channelEstimate;
+      byId('channel-options').querySelectorAll('[data-channel]').forEach((button) => {
+        const selected = button.dataset.channel === state.channel;
+        button.classList.toggle('selected', selected);
+        button.setAttribute('aria-pressed', String(selected));
+      });
+    }
+  } finally {
+    applyingHardwareProfile = false;
+  }
+  const moduleCount = Number.isFinite(Number(report.memory.moduleCount)) ? ` · ${report.memory.moduleCount} módulo(s)` : '';
+  const generationStatus = hardware.ramGenerations[generation]
+    ? generation.toUpperCase()
+    : `geração não identificada; o cálculo mantém ${state.ramGeneration.toUpperCase()} como hipótese`;
+  const speedStatus = Number.isFinite(Number(report.memory.speedMhz)) && Number(report.memory.speedMhz) > 0
+    ? `${Number(report.memory.speedMhz)} MHz reportados`
+    : 'frequência não identificada';
+  const cpuStatus = cpu ? `${escapeHtml(cpu.name)} (correspondência sugerida)` : `${escapeHtml(report.cpu.name)} (selecione o modelo manualmente)`;
+  const gpuStatus = report.gpu.length
+    ? report.gpu.map((adapter) => {
+      const matched = matchHardwareModel(hardware.gpus, adapter.name);
+      return matched
+        ? `${escapeHtml(matched.name)} (sugestão para ${escapeHtml(adapter.name)})`
+        : `${escapeHtml(adapter.name)} (selecione o modelo manualmente)`;
+    }).join('; ')
+    : 'Não informado';
+  byId('pc-detection-result').innerHTML = `<strong>Relatório local do Windows importado</strong>
+    <ul><li>CPU: ${cpuStatus}</li><li>GPU: ${gpuStatus}</li>
+    <li>RAM: ${ramGb} GB ${escapeHtml(generationStatus)} · ${escapeHtml(speedStatus)}${moduleCount}</li>
+    <li>Canal: ${escapeHtml(report.memory.channelEstimate || 'não identificado; confirme a configuração')}</li></ul>
+    <p>As correspondências de CPU/GPU são sugestões por nome. Confirme cada seletor e a geração/canal da memória na BIOS ou no Windows.</p>`;
+  updateHardwareProfileSource('Importação local do Windows');
+  updateRamValue();
+  calculate();
+}
+
+function setupPcDetection() {
+  byId('detect-pc').addEventListener('click', () => {
+    try {
+      renderBrowserHardwareSummary();
+      trackEvent('hardware_detection', 'Leitura aproximada do navegador');
+    } catch (error) {
+      console.error('Não foi possível detectar os dados expostos pelo navegador:', error);
+      byId('pc-detection-result').textContent = `A leitura do navegador falhou: ${error.message}`;
+    }
+  });
+  byId('import-pc-report').addEventListener('click', async () => {
+    try {
+      const file = byId('hardware-import-file').files[0];
+      const source = file ? await file.text() : byId('hardware-import-json').value.trim();
+      if (!source) throw new Error('Selecione um arquivo JSON ou cole o relatório no campo.');
+      const report = parseLocalHardwareReport(JSON.parse(source));
+      applyLocalHardwareReport(report);
+      trackEvent('hardware_detection', 'Importação local do Windows');
+    } catch (error) {
+      console.error('Não foi possível importar o relatório local de hardware:', error);
+      byId('pc-detection-result').textContent = `Não foi possível importar: ${error.message}`;
+    }
+  });
+  byId('hardware-import-file').addEventListener('change', async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    try {
+      byId('hardware-import-json').value = await file.text();
+    } catch (error) {
+      console.error('Não foi possível ler o arquivo de hardware selecionado:', error);
+      byId('pc-detection-result').textContent = `Não foi possível ler o arquivo: ${error.message}`;
+    }
+  });
 }
 
 function readSetup() {
@@ -1076,7 +1273,7 @@ function readSetup() {
 function isValidSetup(setup) {
   if (!setup || typeof setup !== 'object' || !Number.isInteger(Number(setup.target)) || !hardware.targets[Number(setup.target)]) return false;
   if (!hardware.gpus.some((item) => item.id === setup.gpuId) || !hardware.cpus.some((item) => item.id === setup.cpuId)) return false;
-  if (!hardware.ramCapacities.includes(Number(setup.ramGb)) || !hardware.ramGenerations[setup.ramGeneration]) return false;
+  if (!Number.isInteger(Number(setup.ramGb)) || Number(setup.ramGb) < 1 || Number(setup.ramGb) > 1024 || !hardware.ramGenerations[setup.ramGeneration]) return false;
   if (!hardware.ramGenerations[setup.ramGeneration].frequencies.some((item) => item.mhz === Number(setup.ramMhz))) return false;
   return ['single', 'dual'].includes(setup.channel)
     && hardware.storage.some((item) => item.id === setup.storageId)
@@ -1118,6 +1315,11 @@ function applySetup(setup, options = {}) {
   state.target = Number(setup.target);
   state.channel = setup.channel;
   state.ramGeneration = setup.ramGeneration;
+  ensureRamCapacityOption(Number(setup.ramGb));
+  if (!options.scenarioMode) {
+    hardwareProfileMemoryGenerationUnknown = false;
+    updateHardwareProfileSource('Preset/link selecionado');
+  }
   byId('gpu-select').value = setup.gpuId;
   byId('cpu-select').value = setup.cpuId;
   byId('ram-select').value = String(setup.ramGb);
@@ -1209,6 +1411,9 @@ function renderHardware() {
   renderStorageOptions();
   renderTargets();
   renderConsoleReference();
+  byId('community-notices').innerHTML = hardware.communityBuild.notices
+    .map((notice) => `<li>${escapeHtml(notice)}</li>`).join('');
+  updateHardwareProfileSource('Seleção manual');
   filterHardwareOptions('cpu');
   filterHardwareOptions('gpu');
   trackHardwareSelection('gpu-select', hardwareSelectionLabel('gpu-select'));
@@ -1231,7 +1436,9 @@ function renderHardware() {
   });
   byId('ram-generation').addEventListener('change', (event) => {
     state.ramGeneration = event.target.value;
+    hardwareProfileMemoryGenerationUnknown = false;
     renderRamFrequencies();
+    markHardwareProfileEdited();
     trackHardwareSelection('ram-generation', state.ramGeneration.toUpperCase());
     calculate();
   });
@@ -1243,6 +1450,7 @@ function renderHardware() {
       item.classList.toggle('selected', item === button);
       item.setAttribute('aria-pressed', item === button ? 'true' : 'false');
     });
+    markHardwareProfileEdited();
     trackHardwareSelection('ram-channel', state.channel === 'dual' ? 'Canal duplo' : 'Canal único');
     calculate();
   });
@@ -1250,12 +1458,16 @@ function renderHardware() {
     byId(id).addEventListener('change', () => {
       updateRamValue();
       const select = byId(id);
+      markHardwareProfileEdited();
       trackHardwareSelection(id, hardwareSelectionLabel(id));
       calculate();
     }));
   byId('storage-options').addEventListener('change', (event) => {
     const choice = event.target.closest('input[name="storage"]');
-    if (choice) trackHardwareSelection('storage', hardware.storage.find((item) => item.id === choice.value).name);
+    if (choice) {
+      markHardwareProfileEdited();
+      trackHardwareSelection('storage', hardware.storage.find((item) => item.id === choice.value).name);
+    }
     calculate();
   });
   [['cpu-search', 'cpu'], ['cpu-filter', 'cpu'], ['gpu-search', 'gpu'], ['gpu-filter', 'gpu']].forEach(([id, kind]) => {
@@ -1273,6 +1485,7 @@ function renderHardware() {
     });
   });
   updateRamValue();
+  setupPcDetection();
   calculate();
 }
 
@@ -1281,7 +1494,7 @@ function calculate(options = {}) {
   const setup = options.setup || readSetup();
   const reference = options.reference || null;
   const scenario = options.scenario === undefined ? state.activeScenario : options.scenario;
-  const target = { ...hardware.targets[Number(setup.target)] };
+  const target = { ...(options.target || hardware.targets[Number(setup.target)]) };
   if (scenario === 'chaos-vram') target.vramGb *= 2;
   const gpu = reference
     ? { id: `console-gpu-${reference.name}`, name: `${reference.name} · GPU equivalente`, score: reference.gpuScore, vram: reference.vramGb }
@@ -1303,7 +1516,9 @@ function calculate(options = {}) {
   const referenceMhz = reference ? 0 : setup.ramGeneration === target.ramGeneration ? target.frequencyMhz : setup.ramGeneration === 'ddr4' ? 3200 : 5600;
   const bandwidth = reference ? reference.bandwidthGbps : Number(setup.ramMhz) * 8 * (channel === 'dual' ? 2 : 1) / 1000;
   const spaceFactor = freeSpace < hardware.requiredFreeSpace ? hardware.penalties.insufficientSpace : 1;
-  const ramCapacityFactor = Math.min(1, ramCapacity / target.ramGb);
+  const communityMinimumRamGb = reference ? 0 : hardware.communityBuild.minimumRamGb[setup.ramGeneration];
+  const belowCommunityMinimum = communityMinimumRamGb > 0 && ramCapacity < communityMinimumRamGb;
+  const ramCapacityFactor = Math.min(1, ramCapacity / target.ramGb, communityMinimumRamGb ? ramCapacity / communityMinimumRamGb : 1);
   const bandwidthRatio = bandwidth / target.bandwidthGbps;
   const channelFactor = channel === 'single' ? hardware.penalties.singleChannel : 1;
   const generationFactor = reference ? 1 : ramGeneration.score / hardware.ramGenerations[setup.ramGeneration].score;
@@ -1379,7 +1594,9 @@ function calculate(options = {}) {
     storageRatio,
     freeSpace,
     referenceMhz,
-    memoryCompatible
+    memoryCompatible,
+    communityMinimumRamGb,
+    belowCommunityMinimum
   };
   if (options.render === false) return evaluation;
 
@@ -1394,6 +1611,20 @@ function calculate(options = {}) {
   byId('fps-average').innerHTML = counterMarkup(fpsValues[1]);
   byId('fps-resolution').textContent = t(target.name);
   byId('fps-values').innerHTML = fpsValues.map((fps) => counterMarkup(fps)).join(' / ');
+  const baselineTarget = hardware.targets.find((item) => item.id === hardware.communityBuild.base30FpsTargetId);
+  const optimizedTarget = hardware.targets.find((item) => item.id === hardware.communityBuild.optimized60FpsTargetId);
+  const baselineFps = calculate({ setup, target: baselineTarget, render: false, trackSimulation: false }).fpsValues;
+  const optimizedFps = calculate({ setup, target: optimizedTarget, render: false, trackSimulation: false }).fpsValues;
+  byId('fps-30-baseline').innerHTML = baselineFps.map((fps) => counterMarkup(fps)).join(' / ');
+  byId('fps-60-projection').innerHTML = optimizedFps.map((fps) => counterMarkup(fps)).join(' / ');
+  const memoryWarnings = [];
+  if (hardwareProfileMemoryGenerationUnknown) {
+    memoryWarnings.push(`A geração da RAM não foi identificada; o cálculo assume ${ramGeneration.name} até você confirmar o seletor.`);
+  }
+  if (belowCommunityMinimum) memoryWarnings.push(`${ramGeneration.name}: ${ramCapacity} GB abaixo do mínimo proposto de ${communityMinimumRamGb} GB para a build comunitária.`);
+  if (channel === 'single') memoryWarnings.push('Canal único detectado/selecionado; dual-channel é recomendado e pode afetar a estabilidade do FPS.');
+  byId('community-memory-alert').textContent = memoryWarnings.join(' ');
+  byId('community-memory-alert').hidden = memoryWarnings.length === 0;
   byId('fps-panel').classList.toggle('fps-incompatible', !isCompatible);
   byId('summary-cpu').textContent = t(cpu.name);
   byId('summary-gpu').textContent = `${gpu.integrated ? `${t('GPU integrada')} · ` : ''}${t(gpu.name)}`;
@@ -1428,7 +1659,7 @@ function calculate(options = {}) {
   updateBottleneckHumor(evaluation);
   updateSetupCardPreview(evaluation);
   renderUpgradeEconomics(setup);
-  renderRecommendations({ gpu, cpu, ramCapacity, ramGeneration, frequency, referenceMhz, memoryCompatible, storage, storageRatio, freeSpace, target, targetStorage, factors, bottleneckLabel, isCompatible, channel, backgroundId: setup.backgroundId });
+  renderRecommendations({ gpu, cpu, ramCapacity, ramGeneration, frequency, referenceMhz, memoryCompatible, communityMinimumRamGb, belowCommunityMinimum, storage, storageRatio, freeSpace, target, targetStorage, factors, bottleneckLabel, isCompatible, channel, backgroundId: setup.backgroundId });
   window.KynosI18n.translateDom(byId('result-panel'), state.language);
   animateCounters(byId('result-panel'));
   if (options.trackSimulation !== false) {
@@ -1555,23 +1786,25 @@ function renderUpgradeEconomics(setup) {
 }
 
 function renderRecommendations(context) {
-  const { gpu, cpu, ramCapacity, ramGeneration, frequency, referenceMhz, memoryCompatible, storage, storageRatio, freeSpace, target, targetStorage, factors, bottleneckLabel, isCompatible, channel, backgroundId } = context;
+  const { gpu, cpu, ramCapacity, ramGeneration, frequency, referenceMhz, memoryCompatible, communityMinimumRamGb, belowCommunityMinimum, storage, storageRatio, freeSpace, target, targetStorage, factors, bottleneckLabel, isCompatible, channel, backgroundId } = context;
   const recommendations = [];
   if (!storage.compatible) recommendations.push('Substitua o HDD por SSD SATA ou NVMe; HDD não atende ao requisito estimado.');
   else if (freeSpace < hardware.requiredFreeSpace) recommendations.push(`Libere pelo menos ${hardware.requiredFreeSpace} GB de espaço no SSD.`);
   if (!memoryCompatible) recommendations.push(`Use ${cpu.memoryGenerations.map((generation) => generation.toUpperCase()).join(' ou ')}: a geração escolhida não é compatível com este processador.`);
   if (channel === 'single') recommendations.push('Ative o canal duplo com módulos pareados para ampliar a largura de banda e reduzir engasgos.');
-  if (ramCapacity < target.ramGb) recommendations.push(`Considere ${target.ramGb} GB de RAM ou mais para esta meta.`);
+  if (belowCommunityMinimum) recommendations.push(`A build comunitária propõe pelo menos ${communityMinimumRamGb} GB ${ramGeneration.name}; aumente a memória instalada para atingir essa referência.`);
+  else if (ramCapacity < target.ramGb) recommendations.push(`Considere ${target.ramGb} GB de RAM ou mais para esta meta.`);
   if (frequency.mhz < referenceMhz && memoryCompatible) recommendations.push(`Ative XMP/EXPO na BIOS para aproximar a memória de ${referenceMhz.toLocaleString('pt-BR')} MHz.`);
   if (gpu.integrated) recommendations.push('O gráfico integrado usa memória compartilhada; uma placa de vídeo dedicada melhora a margem de desempenho.');
   else if (gpu.vram < target.vramGb) recommendations.push(`A VRAM da placa (${gpu.vram} GB) está abaixo da referência de ${target.vramGb} GB para esta meta; reduza texturas ou considere uma GPU com mais VRAM.`);
+  if (bottleneckLabel === 'VRAM dedicada') recommendations.push('Reduza a qualidade das texturas e evite pacotes de alta resolução para aliviar a VRAM.');
   if (bottleneckLabel === 'GPU') recommendations.push('Reduza resolução e qualidade gráfica; teste DLSS ou FSR se disponíveis.');
   if (bottleneckLabel === 'CPU') recommendations.push('Feche tarefas intensivas em segundo plano ou considere um processador mais rápido.');
-  if (backgroundId === 'heavy') recommendations.push('Feche aplicativos de transmissão e processos pesados durante o jogo.');
+  if (backgroundId !== 'clean') recommendations.push('Feche overlays e aplicativos como Discord/navegador durante os testes; overlays e tarefas em segundo plano podem reduzir o FPS.');
+  recommendations.push('Mantenha os drivers da GPU atualizados e monitore temperaturas para evitar thermal throttling.');
   if (storage.compatible && storageRatio < 0.95) recommendations.push(`Considere um SSD ${targetStorage.name.replace('SSD ', '')} para acompanhar a meta selecionada.`);
   if (!isCompatible && storage.compatible && freeSpace >= hardware.requiredFreeSpace && memoryCompatible) recommendations.push('Confira se o volume selecionado é um SSD saudável e possui espaço disponível.');
-  if (recommendations.length === 0) recommendations.push('Mantenha os drivers atualizados e confirme XMP/EXPO e o canal duplo na BIOS.');
-  byId('recommendation-list').innerHTML = recommendations.slice(0, 4).map((recommendation) => `<li>${escapeHtml(recommendation)}</li>`).join('');
+  byId('recommendation-list').innerHTML = recommendations.slice(0, 6).map((recommendation) => `<li>${escapeHtml(recommendation)}</li>`).join('');
 }
 
 function updateTheme(theme, track = true) {

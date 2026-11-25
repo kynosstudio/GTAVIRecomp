@@ -54,6 +54,18 @@ As métricas dos projetos são o snapshot do tracker, não contagens ao vivo. O 
 
 Na seção **Meu PC Roda GTAVI**, a carteirinha pode ser copiada como texto para Discord/X/WhatsApp ou baixada como SVG. Os cenários Caos e presets extremos reaproveitam as pontuações locais do simulador; FSR/DLSS não recebem bônus estimado, e a ferramenta de custo-benefício não inventa preços. O radar de segurança consulta apenas o snapshot local: não visita links, não verifica disponibilidade ao vivo e não deve receber senhas ou tokens.
 
+### Build comunitária e detecção de hardware
+
+As metas de 30 FPS e 60 FPS e as listas de CPUs/GPUs em `data/hardware.json` são referências preliminares de uma build não oficial/comunitária, não requisitos da Rockstar. Nem todo modelo foi testado; TFLOPS isolados não provam compatibilidade. Intel Arc requer validação adicional. Drivers, clocks, RAM e canal, temperatura/thermal throttling e aplicativos/overlays em segundo plano alteram o FPS real. A estimativa mostra mínimo, média e 1% low para a meta escolhida e cenários comparativos de 30 FPS e de otimização para 60 FPS; não é benchmark medido nem garantia.
+
+O botão **Detectar meu PC** só lê informações que o navegador expõe após a ação do usuário (threads lógicas, RAM aproximada, resolução/DPI e renderer WebGL, que pode estar mascarado). Não identifica de forma confiável o modelo exato da CPU/GPU. Para uma leitura local opcional no Windows, baixe `scripts/detect-pc.ps1`, abra o PowerShell na pasta onde deseja salvar o relatório e execute:
+
+```powershell
+powershell -NoProfile -File .\detect-pc.ps1
+```
+
+O helper usa consultas locais `Get-CimInstance` sem privilégios de administrador, rede ou instalação de software e grava `kynos-hardware-report.json` na pasta atual. Ele coleta nomes de CPU/GPU e módulos/capacidade de RAM; o tipo de memória depende do SMBIOS e o canal é apenas inferido pela quantidade de módulos. O relatório não inclui números de série. Se o arquivo já existir, o helper não o sobrescreve; use `-OutputPath` para escolher outro caminho. Importe o JSON ou cole seu conteúdo no simulador e confirme os modelos sugeridos nos seletores. A leitura do navegador, a importação local e a seleção/ajuste manual são identificadas separadamente.
+
 Os seletores de GPU e CPU organizam os modelos por fabricante, série e disponibilidade de gráfico integrado. A busca ignora diferenças de maiúsculas, acentos, espaços e hifens, informa a quantidade encontrada e mantém uma seleção válida. O catálogo de CPUs inclui Ryzen de várias gerações, Intel Core da 6ª à 14ª geração e Core Ultra; os Intel de 11ª geração e variantes F/KF aparecem no grupo de vídeo correspondente. As pontuações e os FPS são projeções comparativas, não medições nem requisitos oficiais da Rockstar Games. GPUs Radeon RX 8000 indicadas como perfis estimados são projeções.
 
 As pontuações e as taxas de FPS são referências estimadas, não medições nem requisitos oficiais da Rockstar Games. Modelos identificados como perfil estimado são projeções que devem ser atualizadas quando houver especificações verificáveis.
