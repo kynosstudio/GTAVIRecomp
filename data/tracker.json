@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-24T22:10:46.371Z",
+  "updated": "2026-11-25T00:40:00.000Z",
   "site": {
     "title": "PortWatch VI",
     "heroImage": "assets/img/hero-miami.jpg"
@@ -15,6 +15,28 @@
     "source": "https://www.xda-developers.com/gta-6-xbox-executable-leaked-opening-door-for-pc-recompilation-projects-begin-testing/"
   },
   "news": [
+    {
+      "id": "2026-11-25-prologue-gone-fishing",
+      "date": "2026-11-25",
+      "category": "Port",
+      "title": "GTA VI builds clear Lucia's prologue and reach Jason's first mission",
+      "dek": "Private builds now play through the opening and into \"Gone Fishing\", though most still render badly and vehicles rarely work.",
+      "body": [
+        "Several private PC builds of GTA VI can now play through Lucia's prologue and carry on into Jason's first mission, \"Gone Fishing\". Until now, the furthest builds we track had only reached the prologue itself, so this is the deepest into the story anyone has reported.",
+        "It's rough. Most builds still render the world badly, and vehicles don't work most of the time: in Gone Fishing the boat often can't be steered. On some builds, the map in the pause menu opens.",
+        "We can't say yet whose builds these are. The people getting this far are working in private, and most of them appear to build on hyphennn's victory-fork, the public fork of VIctory behind the top of our board. Their own changes aren't public, so nobody else can test them.",
+        "\"Prologue cleared\" is the first step of our story track, but no score changes until we know which builds did it. If yours is one of them, open an issue on our GitHub with a link to a recording or a stream."
+      ],
+      "sources": [
+        {
+          "outlet": "GitHub",
+          "title": "victory-fork, hyphennn's public fork of VIctory",
+          "url": "https://github.com/fxceless/victory-fork"
+        }
+      ],
+      "image": null,
+      "by": "report"
+    },
     {
       "id": "2026-11-24-take-two-dmca-leonida-forks",
       "date": "2026-11-24",
