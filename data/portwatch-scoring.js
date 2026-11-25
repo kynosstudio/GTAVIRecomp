@@ -51,7 +51,9 @@
       story: clamp01(gta.story),
       render: clamp01(gta.render),
       perf: clamp01((+gta.fps || 0) / 30),
-      stability: STABILITY[gta.stability] || 0
+      stability: typeof gta.stability === 'number'
+        ? clamp01(gta.stability)
+        : STABILITY[gta.stability] || 0
     };
   }
 

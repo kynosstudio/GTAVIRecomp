@@ -40,6 +40,25 @@ test('uses quality tracks only after the project is playable', () => {
   assert.equal(complete.reached, 'complete');
 });
 
+test('scores numeric stability values from tracker snapshots', () => {
+  const result = scoring.scoreEffort({
+    gta: {
+      loads: 1,
+      boots: 1,
+      menu: 1,
+      world: 1,
+      playable: 1,
+      story: 0.5,
+      render: 0.85,
+      fps: 3,
+      stability: 0.7
+    }
+  });
+
+  assert.equal(result.score, 77.4);
+  assert.equal(result.tracks.stability, 0.7);
+});
+
 test('honors manual scores and ranks ties by stars, excluding nuked efforts', () => {
   const result = scoring.overall([
     { id: 'manual', manualScore: 75, stats: { stars: 2 } },

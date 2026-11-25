@@ -20,6 +20,11 @@ def normalized_groundwork_percent(value):
 
 
 NEWS_PT = {
+    "2026-11-24-take-two-dmca-leonida-forks": (
+        "Take-Two derruba o port da Leonida; aviso afeta 3.007 forks",
+        "Direitos autorais",
+        "A notificação DMCA cita apenas o repositório Leonida, mas o GitHub a aplicou à rede de forks do projeto, com 3.007 repositórios. Projetos sem ligação de fork com a Leonida seguem online por enquanto.",
+    ),
     "2026-11-24-new-progress-scale": (
         "Kynos RecompVI muda a escala: ser jogável vale metade; concluir o jogo, 100%",
         "Tracker",
@@ -980,12 +985,15 @@ def merge_editorial_defaults(defaults, overrides):
 
 
 def write_fallback(source, localized):
+    kynos_path = DATA / "kynostracker.json"
+    tracker_kynos = json.loads(kynos_path.read_text(encoding="utf-8")) if kynos_path.exists() else {}
     fallback = {
         "hardware": json.loads((DATA / "hardware.json").read_text(encoding="utf-8")),
         "discords": json.loads((DATA / "discords.json").read_text(encoding="utf-8")),
         "tracker": localized,
         "trackerLocalized": localized,
         "trackerRaw": source,
+        "trackerKynos": tracker_kynos,
         "portwatch": {
             "updated": source.get("updated", ""),
             "lastSyncedAt": source.get("lastSyncedAt", ""),

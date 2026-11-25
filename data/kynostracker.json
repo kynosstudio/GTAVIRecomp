@@ -1,0 +1,220 @@
+{
+  "updated": "2026-11-25T02:16:15.727Z",
+  "site": {
+    "title": "KynosRecompVI",
+    "heroImage": "assets/logo.svg"
+  },
+  "exe": {
+    "status": "",
+    "expected": "",
+    "expectedAt": "",
+    "timeAnnounced": false,
+    "releasedAt": "",
+    "by": "",
+    "note": "",
+    "source": ""
+  },
+  "news": [
+    {
+      "id": "xlaunchvi-loading-screen-team-report",
+      "date": "2026-11-24T05:07:48.307Z",
+      "category": "Comunidade BR",
+      "title": "XLaunchVI relata menus a 30 FPS sem texturas; foco em memória e shaders",
+      "dek": "A equipe informa avanço no launcher brasileiro para Xbox Series X|S; os 55% são uma estimativa editorial local, não uma medição independente.",
+      "body": [
+        "O relato local do XLaunchVI descreve menus cravados a 30 FPS, ainda sem texturas, e aponta otimização de memória e shaders como foco atual.",
+        "A equipe descreve uma camada de compatibilidade para Windows x86-64, com execução de código convidado na CPU do PC e serviços/interfaces reimplementados ou traduzidos. O backend próprio de Direct3D 12 está em desenvolvimento; Vulkan também faz parte da abordagem reportada.",
+        "Os 55% são uma estimativa editorial local atribuída ao projeto. O desempenho e a arquitetura não foram verificados de forma independente por este site."
+      ],
+      "sources": [
+        {
+          "outlet": "Discord do XLaunchVI",
+          "title": "Convite do servidor; não direciona à mensagem original",
+          "url": "https://discord.gg/R5T6zeQuPY"
+        },
+        {
+          "outlet": "GitHub",
+          "title": "Repositório público do XLaunchVI",
+          "url": "https://github.com/JPTuba9/xlaunch-vi"
+        }
+      ],
+      "image": null,
+      "by": "KynosRecompVI",
+      "trackerKynos": true,
+      "localOnly": true
+    }
+  ],
+  "efforts": [
+    {
+      "id": "xlaunchvi",
+      "name": "XLaunchVI",
+      "repo": "JPTuba9/xlaunch-vi",
+      "branch": "main",
+      "tier": "watchlist",
+      "approach": "Camada de compatibilidade nativa x86-64",
+      "target": "Xbox Series X|S (Scarlett); foco atual em GTA VI",
+      "summary": "Relato da equipe: launcher 100% brasileiro, menus a 30 FPS sem texturas e foco atual em otimização de memória e shaders. A estratégia descrita executa código convidado x86-64 na CPU do PC Windows e reimplementa/traduz serviços do sistema e interfaces gráficas. O backend próprio de Direct3D 12 está em desenvolvimento, com Vulkan também previsto. O objetivo é reduzir o espaço ocupado em disco; não há benchmark público que quantifique essa redução.",
+      "highlights": [
+        "Relato da equipe: menus cravados a 30 FPS, ainda sem texturas",
+        "Arquitetura reportada para execução de software Scarlett em PCs Windows x86-64",
+        "Backend próprio de Direct3D 12 em desenvolvimento e suporte a Vulkan reportado",
+        "Launcher 100% brasileiro; menor uso de espaço em disco é um objetivo ainda sem benchmark público"
+      ],
+      "blockers": [
+        "Foco atual em otimização de memória e shaders",
+        "Menus ainda sem texturas completas",
+        "Os 55% e os detalhes técnicos são relatos locais, não verificados independentemente"
+      ],
+      "provenOn": null,
+      "gta": {
+        "loads": 0,
+        "boots": 0,
+        "menu": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
+        "fps": 0,
+        "stability": "unknown"
+      },
+      "verification": "Relato da equipe; não verificado independentemente",
+      "claims": [],
+      "manualScore": 55,
+      "percent": 55,
+      "stage": "Menu principal a 30 FPS · sem texturas",
+      "status": "acompanhado",
+      "progressBasis": "team-report-estimate",
+      "trackerKynos": true,
+      "localOnly": true
+    },
+    {
+      "id": "vitoriabr",
+      "name": "VItoriaBr",
+      "repo": "uiliannn/VItoriaBr",
+      "branch": "main",
+      "tier": "tracked",
+      "approach": "Compatibility layer",
+      "target": "GTA VI only",
+      "summary": "Uilian's VItoriaBr, built on hyphennn's victory-fork with his own NVIDIA work and streamed live on YouTube. On stream it reaches Jason's first mission, \"Gone Fishing\", with poor rendering, up to 4 fps and few crashes.",
+      "highlights": [
+        "Reaches Jason's first mission, \"Gone Fishing\", on his live streams",
+        "Few crashes on stream",
+        "Menus, intro and saves at 30 fps on an NVIDIA RTX 5060 Ti (README)"
+      ],
+      "blockers": [
+        "Rendering is poor; shadowed areas are dark",
+        "Up to 4 fps",
+        "Its code now matches victory-fork's except for two small changes"
+      ],
+      "provenOn": null,
+      "gta": {
+        "loads": 1,
+        "boots": 1,
+        "menu": 1,
+        "world": 1,
+        "playable": 1,
+        "story": 0.1,
+        "render": 0.2,
+        "fps": 4,
+        "stability": 0.4
+      },
+      "verification": "self-reported",
+      "stats": {
+        "stars": 30,
+        "forks": 5,
+        "openIssues": 3,
+        "createdAt": "2026-11-24T10:05:17Z",
+        "pushedAt": "2026-11-25T00:37:06Z",
+        "archived": false,
+        "missing": false,
+        "commits7d": 100
+      },
+      "assessedAt": "2026-11-25",
+      "assessedBy": "manual",
+      "claims": [],
+      "readmeSha": "995aadc4207013b50c43be767270a5c71dd3bf65a8806c0f66d83181a4ca61b9",
+      "trackerKynos": true,
+      "localOnly": true
+    },
+    {
+      "id": "alpha-port",
+      "name": "Alpha-Port",
+      "repo": "dyoogo/Alpha-Port",
+      "branch": "",
+      "tier": "watchlist",
+      "approach": "Não avaliado",
+      "target": "Aguardando confirmação",
+      "summary": "Adicionado à camada local Kynos para acompanhamento. Nenhum marco próprio foi atribuído: o registro upstream o associa a uma rebrand da Leonida, e os resultados herdados não são tratados como progresso independente.",
+      "highlights": [],
+      "blockers": [
+        "Aguardando avaliação de evidências próprias do repositório"
+      ],
+      "provenOn": null,
+      "gta": {
+        "loads": 0,
+        "boots": 0,
+        "menu": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
+        "fps": 0,
+        "stability": "unknown"
+      },
+      "verification": "Ainda não avaliado",
+      "claims": [],
+      "trackerKynos": true,
+      "localOnly": true
+    },
+    {
+      "id": "victory-fork",
+      "name": "victory-fork",
+      "repo": "SaymonMaster14/victory-fork",
+      "branch": "",
+      "tier": "watchlist",
+      "approach": "Não avaliado",
+      "target": "Aguardando confirmação",
+      "summary": "Adicionado à camada local Kynos para acompanhamento. Não há métricas ou marcos de GTA VI atribuídos neste registro até que existam evidências avaliadas.",
+      "highlights": [],
+      "blockers": [
+        "Aguardando avaliação de evidências próprias do repositório"
+      ],
+      "provenOn": null,
+      "gta": {
+        "loads": 0,
+        "boots": 0,
+        "menu": 0,
+        "world": 0,
+        "playable": 0,
+        "story": 0,
+        "render": 0,
+        "fps": 0,
+        "stability": "unknown"
+      },
+      "verification": "Ainda não avaliado",
+      "claims": [],
+      "trackerKynos": true,
+      "localOnly": true
+    }
+  ],
+  "tools": [],
+  "candidates": [],
+  "flagged": [],
+  "ignored": [],
+  "changes": [],
+  "history": [],
+  "scout": {
+    "since": "",
+    "watchNames": [],
+    "queries": [],
+    "reddit": {},
+    "hn": [],
+    "x": "",
+    "lastRun": "",
+    "lastSummary": "",
+    "lastDmcaCheck": "",
+    "lastEditorRun": ""
+  },
+  "headlines": [],
+  "dmca": []
+}
