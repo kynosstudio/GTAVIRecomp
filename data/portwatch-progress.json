@@ -37,7 +37,7 @@
     { "id": "xbgtasix", "name": "Xbgtasix", "author": "ljm-233", "gta": { "loads": 0, "boots": 0, "menu": 0, "ingame": 0, "fps": 0, "stability": "unknown" } },
     { "id": "seriesx-emulator", "name": "SeriesX Emulator", "author": "anrq0", "gta": { "loads": 0, "boots": 0, "menu": 0, "ingame": 0, "fps": 0, "stability": "unknown" } },
     { "id": "gta6-compat-layer", "name": "GTA6-COMPAT-LAYER (ScarlettCompat)", "author": "SSTGxf", "gta": { "loads": 0, "boots": 0, "menu": 0, "ingame": 0, "fps": 0, "stability": "unknown" } },
-    { "id": "xlaunchvi", "name": "XLaunchVI", "author": "JPTuba9", "percent": 55, "gta": { "loads": 1, "boots": 1, "menu": 1, "ingame": 0, "fps": 1, "stability": "unknown" } },
+    { "id": "xlaunchvi", "name": "XLaunchVI", "author": "JPTuba9", "percent": 78.7, "gta": { "loads": 1, "boots": 1, "menu": 1, "world": 1, "playable": 0.8, "story": 0.6, "render": 0.9, "fps": 30, "stability": 0.7 } },
     { "id": "openscarlett-ce", "name": "OpenScarlett (Community Edition)", "author": "OpenCommunityEdition", "gta": { "loads": 0, "boots": 0, "menu": 0, "ingame": 0, "fps": 0, "stability": "unknown" } },
     { "id": "five-star-recomp", "name": "Five Star Recomp", "author": "ThatRecompDev", "gta": { "loads": 0, "boots": 0, "menu": 0, "ingame": 0, "fps": 0, "stability": "unknown" } },
     { "id": "g6recomp", "name": "G6Recomp", "author": "Kajcsi", "gta": { "loads": 0, "boots": 0, "menu": 0, "ingame": 0, "fps": 0, "stability": "unknown" } }
