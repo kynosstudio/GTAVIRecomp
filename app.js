@@ -151,12 +151,15 @@ let portwatchData = null;
 let repositoryData = [];
 let newsData = null;
 let trackerData = null;
+let trackerSnapshotData = null;
 let managedEditorial = { news: [], tracker_updates: [] };
 let notificationPreferences = null;
 let notificationItems = [];
 let notificationSnapshot = null;
 let notificationHandlersBound = false;
 let quickProjects = [];
+let quickUtilityHandlersBound = false;
+let quickUtilityInitialized = false;
 let heroCountdownTimer = null;
 let headerFreshnessTimestamp = null;
 let headerFreshnessTimer = null;
@@ -234,6 +237,7 @@ const cleanDisplayText = (value = '') => String(value)
 const safeUrl = (value = '') => /^https?:\/\//i.test(value) || /^#[\w-]+$/.test(value) ? value : '#';
 const t = (value) => window.KynosI18n.translateText(value, state.language);
 const counterAnimations = new WeakMap();
+const progressAnimations = new WeakMap();
 
 function counterMarkup(value, kind = 'integer') {
   const numeric = Number(value);
@@ -357,28 +361,40 @@ function animateProgress(root) {
   const start = () => bars.forEach((bar) => {
     const value = Number(bar.dataset.progressValue);
     if (!Number.isFinite(value)) return;
+    const previousAnimation = progressAnimations.get(bar);
+    if (previousAnimation) cancelAnimationFrame(previousAnimation);
+    const progressTrack = bar.closest('[role="progressbar"]');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion) {
       bar.style.width = `${value}%`;
+      if (progressTrack) progressTrack.setAttribute('aria-valuenow', String(value));
+      progressAnimations.delete(bar);
       return;
     }
     bar.style.width = '0%';
     const duration = 650;
     const startTime = performance.now();
     const tick = (now) => {
+      if (!bar.isConnected) {
+        progressAnimations.delete(bar);
+        return;
+      }
       const linear = Math.min(1, (now - startTime) / duration);
       const eased = 1 - ((1 - linear) ** 3);
       const current = value * eased;
       bar.style.width = `${current}%`;
+      if (progressTrack) progressTrack.setAttribute('aria-valuenow', String(current));
       root.querySelectorAll('.pw-project-marker[data-marker-progress]').forEach((marker) => {
         const markerValue = Number(marker.dataset.markerProgress);
         const crossing = Number.isFinite(markerValue) && markerValue <= current && markerValue >= current - 5;
         marker.classList.toggle('is-crossing', crossing);
         if (Number.isFinite(markerValue) && markerValue <= current) marker.classList.add('is-reached');
       });
-      if (linear < 1) requestAnimationFrame(tick);
+      if (linear < 1) progressAnimations.set(bar, requestAnimationFrame(tick));
       else {
         bar.style.width = `${value}%`;
+        if (progressTrack) progressTrack.setAttribute('aria-valuenow', String(value));
+        progressAnimations.delete(bar);
         requestAnimationFrame(() => recalculateProgressConnectors(root));
         root.querySelectorAll('.pw-project-marker[data-marker-progress]').forEach((marker) => {
           const markerValue = Number(marker.dataset.markerProgress);
@@ -387,7 +403,7 @@ function animateProgress(root) {
         });
       }
     };
-    requestAnimationFrame(tick);
+    progressAnimations.set(bar, requestAnimationFrame(tick));
   });
   const rect = root.getBoundingClientRect ? root.getBoundingClientRect() : null;
   if (rect && rect.bottom >= 0 && rect.top <= window.innerHeight) start();
@@ -855,12 +871,14 @@ function mergeTrackerPayloads(portwatch, localized, fallback, kynosLocal) {
     const xlaunch = merged.efforts[xlaunchIndex];
     merged.efforts[xlaunchIndex] = {
       ...xlaunch,
-      percent: 55,
-      stage: 'Menu principal a 30 FPS (sem texturas)',
+      percent: 78.7,
+      stage: 'Mundo inteiro renderizado à noite · Lucia em tempo real · Ray Tracing ativo · 30 FPS @ 1080p',
       progressBasis: 'team-report-estimate',
       portwatchPercent: Number.isFinite(Number(xlaunch.portwatchPercent)) ? Number(xlaunch.portwatchPercent) : 0,
       portwatchMilestonePercent: 0,
-      status: 'acompanhado'
+      status: 'acompanhado',
+      summary: 'A equipe relata mundo inteiro renderizado à noite, iluminação funcional, Lucia carregada em tempo real, sombras e Ray Tracing ativos; o prólogo roda a 30 FPS em 1080p. Novos colaboradores e testes com The Matrix Awakens aprimoram shaders 2D/3D. A release pública fica reservada à versão final, com meta mínima de 60 FPS.',
+      verification: 'Relato da equipe; não verificado independentemente.'
     };
   } else {
     merged.efforts.push({
@@ -868,14 +886,14 @@ function mergeTrackerPayloads(portwatch, localized, fallback, kynosLocal) {
       name: 'XlaunchVI',
       repo: 'JPTuba9/xlaunch-vi',
       tier: 'watchlist',
-      percent: 55,
-      stage: 'Menu principal a 30 FPS (sem texturas)',
+      percent: 78.7,
+      stage: 'Mundo inteiro renderizado à noite · Lucia em tempo real · Ray Tracing ativo · 30 FPS @ 1080p',
       progressBasis: 'team-report-estimate',
       portwatchPercent: 0,
       portwatchMilestonePercent: 0,
       status: 'acompanhado',
-      summary: 'Os menus do XLaunchVI abrem a 30 FPS sem texturas; o próximo foco é otimizar memória e shaders sem textura. O portal mantém 55% como estimativa editorial local.',
-      verification: 'Relato da equipe não verificado independentemente'
+      summary: 'A equipe relata mundo inteiro renderizado à noite, iluminação funcional, Lucia carregada em tempo real, sombras e Ray Tracing ativos; o prólogo roda a 30 FPS em 1080p. Novos colaboradores e testes com The Matrix Awakens aprimoram shaders 2D/3D. A release pública fica reservada à versão final, com meta mínima de 60 FPS.',
+      verification: 'Relato da equipe; não verificado independentemente.'
     });
   }
   merged.portwatchSource = {
@@ -2867,11 +2885,21 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
     && Array.isArray(snapshot.portwatchSource.efforts)
     ? snapshot.portwatchSource.efforts
     : projects;
-  const scoreById = new Map(scoreSourceProjects
+  const managedUpdates = new Map((snapshot && Array.isArray(snapshot.managedTrackerUpdates)
+    ? snapshot.managedTrackerUpdates
+    : []).map((update) => [update.project_id, update]));
+  const scoreInputProjects = scoreSourceProjects.map((project) => {
+    const update = managedUpdates.get(project.id);
+    return update ? { ...project, manualScore: Number(update.percent) } : project;
+  });
+  const scoreInputIds = new Set(scoreInputProjects.map((project) => project.id));
+  projects.filter((project) => project.managedProgress && !scoreInputIds.has(project.id))
+    .forEach((project) => scoreInputProjects.push(project));
+  const scoreById = new Map(scoreInputProjects
     .filter((project) => project && project.id)
     .map((project) => [project.id, window.PortWatchScoring.scoreEffort(normalizePortwatchEffort(project)).score]));
   const scoreForProject = (project) => {
-    if (project.id === 'xlaunchvi' && project.manualScore != null && Number.isFinite(Number(project.manualScore))) {
+    if (project.manualScore != null && Number.isFinite(Number(project.manualScore))) {
       return progressPercent(project.manualScore);
     }
     return scoreById.has(project.id)
@@ -2879,7 +2907,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
       : portwatchProjectProgress(project, milestones);
   };
   const rankedScores = window.PortWatchScoring.overall(
-    scoreSourceProjects.filter((project) => !isInactiveProject(project)).map(normalizePortwatchEffort)
+    scoreInputProjects.filter((project) => !isInactiveProject(project)).map(normalizePortwatchEffort)
   );
   const rankedProjects = rankedScores.ranked
     .map((item) => projects.find((project) => project.id === item.effort.id))
@@ -2942,7 +2970,9 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
     </button>`;
   }).join('');
   const avatarTrailMarkup = avatarTrailProjects.length ? `
-    <div ${escapeHtml(t('Top 10 projetos por progresso'))}">
+    <div class="pw-avatar-trail" role="group" aria-label="${escapeHtml(t('Top 10 projetos por progresso'))}">
+      <span class="pw-avatar-trail-label">${escapeHtml(t('Top 10 projetos por progresso'))}</span>
+      <div class="pw-avatar-trail-list">${avatarTrailItems}</div>
     </div>` : '';
 
   const markerCards = timelineProjects.map((project) => {
@@ -3073,7 +3103,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
           ${avatarTrailMarkup}
           ${markerCards}
           <div class="pw-progress-track" role="progressbar" aria-label="${escapeHtml(t('Progresso geral da portabilidade'))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}">
-            <span class="pw-progress-fill" style="width:${progress}%"></span>
+            <span class="pw-progress-fill" data-progress-value="${progress}" style="width:${progress}%"></span>
           </div>
           <div class="pw-milestones">${milestoneButtons}</div>
         </div>
@@ -3092,6 +3122,7 @@ function renderPortwatchProgress(data, snapshot = trackerData) {
   });
   window.KynosI18n.translateDom(section, state.language);
   animateCounters(section);
+  animateProgress(section);
   requestAnimationFrame(() => {
     recalculateProgressConnectors(section);
   });
@@ -3446,31 +3477,42 @@ function updateFakeRadar(snapshot) {
 }
 
 function setupQuickUtilities(snapshot) {
-  const setup = readSetup();
   const freeSpaceInput = byId('quick-free-space');
   const ramInput = byId('quick-ram');
-  freeSpaceInput.value = String(setup.freeSpaceGb);
-  ramInput.value = String(setup.ramGb);
-  freeSpaceInput.addEventListener('input', updateQuickReadiness);
-  ramInput.addEventListener('input', updateQuickReadiness);
+  if (!quickUtilityInitialized) {
+    const setup = readSetup();
+    freeSpaceInput.value = String(setup.freeSpaceGb);
+    ramInput.value = String(setup.ramGb);
+    quickUtilityInitialized = true;
+  }
+  const select = byId('quick-project-select');
+  const selectedProjectId = select.value === ''
+    ? ''
+    : quickProjects[Number(select.value)] && quickProjects[Number(select.value)].id;
   const efforts = snapshot && Array.isArray(snapshot.efforts) ? snapshot.efforts : [];
   quickProjects = efforts.filter((project) => project && project.name);
-  const select = byId('quick-project-select');
   select.innerHTML = `<option value="">${escapeHtml(t('Selecione um projeto acompanhado'))}</option>${quickProjects.map((project, index) =>
     `<option value="${index}">${escapeHtml(project.name)}${project.repo ? ` · ${escapeHtml(project.repo)}` : ''}</option>`).join('')}`;
-  const offlineIndex = quickProjects.findIndex((project) => isInactiveProject(project));
-  select.value = String(offlineIndex >= 0 ? offlineIndex : 0);
-  select.addEventListener('change', updateQuickProjectStatus);
-  byId('quick-safety-check').addEventListener('click', () => updateFakeRadar(snapshot));
-  byId('quick-safety-query').addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      updateFakeRadar(snapshot);
-    }
-  });
+  let selectedIndex = quickProjects.findIndex((project) => project.id === selectedProjectId);
+  if (selectedIndex < 0) selectedIndex = quickProjects.findIndex((project) => isInactiveProject(project));
+  if (selectedIndex < 0 && quickProjects.length) selectedIndex = 0;
+  select.value = selectedIndex >= 0 ? String(selectedIndex) : '';
+  if (!quickUtilityHandlersBound) {
+    freeSpaceInput.addEventListener('input', updateQuickReadiness);
+    ramInput.addEventListener('input', updateQuickReadiness);
+    select.addEventListener('change', updateQuickProjectStatus);
+    byId('quick-safety-check').addEventListener('click', () => updateFakeRadar(trackerData || snapshot));
+    byId('quick-safety-query').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        updateFakeRadar(trackerData || snapshot);
+      }
+    });
+    quickUtilityHandlersBound = true;
+  }
   updateQuickReadiness();
   updateQuickProjectStatus();
-  updateFakeRadar(snapshot);
+  updateFakeRadar(trackerData || snapshot);
 }
 
 function renderPortwatchError(error) {
@@ -4333,19 +4375,40 @@ function withManagedEditorial(snapshot) {
   });
 }
 
+function renderTrackerSnapshotViews() {
+  if (!trackerData) return;
+  renderPortalHome(trackerData);
+  renderTrackerProjects(trackerData);
+  renderNews(trackerData);
+  renderTrackerDetails(trackerData);
+  renderXlaunchPage(trackerData);
+}
+
 async function refreshManagedEditorial() {
   if (window.location.protocol === 'file:') return;
-  const response = await fetch('/api/fundraisers', { headers: { Accept: 'application/json' }, cache: 'no-store' });
-  if (!response.ok) return;
-  const payload = await response.json();
-  if (!payload || payload.source !== 'database') return;
+  const { supabase } = await import('./supabase-client.js');
+  const [newsResult, trackerResult] = await Promise.all([
+    supabase.from('published_news')
+      .select('id, category, title, summary, body, source_url, published_at, created_at')
+      .order('published_at', { ascending: false }),
+    supabase.from('published_tracker_updates')
+      .select('id, project_id, project_name, percent, milestone, summary, source_url, published_at, created_at')
+      .order('published_at', { ascending: false })
+  ]);
+  if (newsResult.error) throw newsResult.error;
+  if (trackerResult.error) throw trackerResult.error;
   managedEditorial = {
-    news: Array.isArray(payload.news) ? payload.news : [],
-    tracker_updates: Array.isArray(payload.tracker_updates) ? payload.tracker_updates : []
+    news: Array.isArray(newsResult.data) ? newsResult.data : [],
+    tracker_updates: Array.isArray(trackerResult.data) ? trackerResult.data : []
   };
-  if (trackerData) {
-    renderNews(trackerData);
-    if (notificationPreferences) renderNotificationCenter(trackerData);
+  if (trackerSnapshotData) {
+    trackerData = window.PortWatchScoring.applyPublishedTrackerUpdates(
+      trackerSnapshotData,
+      managedEditorial.tracker_updates
+    );
+    renderTrackerSnapshotViews();
+    if (notificationPreferences) setupNotificationCenter(trackerData);
+    if (quickUtilityInitialized) setupQuickUtilities(trackerData);
   }
 }
 
@@ -4855,33 +4918,7 @@ function bindAnalyticsControls() {
 
 function watchLiveViewers() {
   const pill = byId('watching-now');
-  if (!pill || window.location.protocol === 'file:') {
-    if (pill) pill.hidden = true;
-    return;
-  }
-  const refresh = async () => {
-    if (document.hidden) return;
-    try {
-      const response = await fetch('/api/live', { cache: 'no-store' });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const payload = await response.json();
-      const count = Number(payload && payload.n);
-      if (!Number.isInteger(count) || count < 1) {
-        pill.hidden = true;
-        return;
-      }
-      const locale = { pt: 'pt-BR', en: 'en-US', es: 'es-ES', zh: 'zh-CN' }[state.language] || 'pt-BR';
-      pill.textContent = `${count.toLocaleString(locale)} ${t('assistindo agora')}`;
-      pill.hidden = false;
-    } catch (error) {
-      pill.hidden = true;
-    }
-  };
-  refresh();
-  window.setInterval(refresh, 5 * 60_000);
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) refresh();
-  });
+  if (pill) pill.hidden = true;
 }
 
 function setupLogoFallback() {
@@ -4953,14 +4990,14 @@ async function init() {
       throw new Error('Os dados do portal e os fallbacks não forneceram o conjunto mínimo para inicializar.');
     }
     hardware = data.hardware;
-    trackerData = data.tracker;
+    trackerSnapshotData = data.tracker;
+    trackerData = window.PortWatchScoring.applyPublishedTrackerUpdates(
+      trackerSnapshotData,
+      managedEditorial.tracker_updates
+    );
     setupRaceControls();
     renderHardware();
-    renderPortalHome(trackerData);
-    renderTrackerProjects(trackerData);
-    renderNews(trackerData);
-    renderTrackerDetails(trackerData);
-    renderXlaunchPage(trackerData);
+    renderTrackerSnapshotViews();
     watchLiveViewers();
     setupNotificationCenter(trackerData);
     refreshManagedEditorial().catch((error) => console.warn('Conteúdo editorial gerenciado indisponível; mantendo o feed local.', error));
@@ -4995,12 +5032,12 @@ async function init() {
             kynosLocal || embedded.trackerKynos
           );
           unified.portwatchSource.source = source.source;
-          trackerData = unified;
-          renderPortalHome(trackerData);
-          renderTrackerProjects(trackerData);
-          renderNews(trackerData);
-          renderTrackerDetails(trackerData);
-          renderXlaunchPage(trackerData);
+          trackerSnapshotData = unified;
+          trackerData = window.PortWatchScoring.applyPublishedTrackerUpdates(
+            trackerSnapshotData,
+            managedEditorial.tracker_updates
+          );
+          renderTrackerSnapshotViews();
           setupNotificationCenter(trackerData);
           setupQuickUtilities(trackerData);
         } catch (error) {

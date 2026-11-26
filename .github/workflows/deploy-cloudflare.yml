@@ -17,26 +17,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build admin config
-        run: |
-          cat > admin/config.js << 'EOF'
-  // Admin Configuration for KynosRecompVI
-  // Injected at build time by GitHub Actions
-
-  window.KynosAdminConfig = {
-    supabase: {
-      url: '${{ secrets.SUPABASE_URL }}',
-      anonKey: '${{ secrets.SUPABASE_ANON_KEY }}'
-    },
-    adminUserIds: ${{ secrets.ADMIN_USER_IDS }},
-    features: {
-      enableAuditLog: true,
-      enableCommunityPosts: true,
-      enablePointsSystem: true
-    }
-  };
-  EOF
-
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:

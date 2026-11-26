@@ -16,14 +16,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#0d0a16">
     <meta name="robots" content="noindex,nofollow">
-    <meta name="description" content="Gerenciamento autenticado das vaquinhas, doações, notícias e atualizações do tracker KynosRecompVI.">
+    <meta name="description" content="Gerenciamento autenticado das vaquinhas, notícias, tracker, comunidade e anúncios do KynosRecompVI.">
     <title>Gerenciamento — KynosRecompVI</title>
     <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="../styles.css">
     <link rel="stylesheet" href="styles.css">
-    <script src="config.js" defer></script>
     <script src="../site-sidebar.js" defer></script>
-    <script src="admin.js" defer></script>
+    <script type="module" src="admin.js"></script>
   </head>
   <body class="sidebar-collapsed" data-site-base="../">
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T57BH4Q9" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -31,7 +30,7 @@
     <div class="site-layout">
       <main class="admin-page">
         <header class="admin-heading">
-          <div><span class="admin-kicker">ÁREA RESTRITA · OPERAÇÃO SEGURA</span><h1>Gerenciar o portal.</h1><p>Autenticação direta com Supabase Auth. Allowlist de operadores via ADMIN_USER_IDS no admin.js. Executa 100% no navegador (GitHub Pages compatível).</p></div>
+          <div><span class="admin-kicker">ÁREA RESTRITA · OPERAÇÃO SEGURA</span><h1>Gerenciar o portal.</h1><p>Login e gravações usam o Supabase diretamente. O banco valida administradores por RLS; nenhuma chave privilegiada é enviada ao navegador.</p></div>
           <p class="admin-mode" id="admin-mode" role="status" aria-live="polite">Verificando sessão…</p>
         </header>
 
@@ -42,11 +41,14 @@
             <label class="admin-field">Senha<input name="password" type="password" autocomplete="current-password" required maxlength="1024"></label>
             <button class="button admin-primary" type="submit">Entrar</button>
           </form>
-          <p id="login-status" class="admin-status" role="status" aria-live="polite">Use credenciais de um operador autorizado (UID na allowlist ADMIN_USER_IDS).</p>
+          <p id="login-status" class="admin-status" role="status" aria-live="polite">Use uma conta Supabase Auth cadastrada na tabela admin_users.</p>
           <button type="button" class="admin-logout" id="logout-button" hidden>Sair da sessão</button>
         </section>
 
         <div class="admin-workspace" id="admin-workspace" hidden>
+          <div class="admin-workspace-content">
+          <section class="admin-page-section" id="admin-section-fundraisers" aria-labelledby="fundraisers-section-title">
+          <header class="admin-section-heading"><span class="admin-kicker">FINANCIAMENTO</span><h2 id="fundraisers-section-title">Vaquinhas e doações</h2></header>
           <section class="admin-panel" aria-labelledby="campaign-admin-title">
             <div class="admin-panel-heading"><div><span class="admin-kicker">CAMPANHAS</span><h2 id="campaign-admin-title">Criar ou editar vaquinha</h2></div><button type="button" class="admin-secondary" id="new-campaign">Nova vaquinha</button></div>
             <label class="admin-field">Editar campanha existente<select id="campaign-edit-select"><option value="">Nova campanha</option></select></label>
@@ -66,7 +68,7 @@
               <label class="admin-field">Percentual XLaunchVI<input name="xlaunch_percent" type="number" min="0" max="100" step="1"></label>
               <label class="admin-field">Percentual manutenção Kynos<input name="kynos_maintenance_percent" type="number" min="0" max="100" step="1"></label>
               <label class="admin-field">Status<select name="status"><option value="draft">Rascunho</option><option value="active">Ativa</option><option value="paused">Pausada</option><option value="completed">Concluída</option><option value="archived">Arquivada</option></select></label>
-              <p class="admin-hint admin-wide">Para ativar: informe ambos os percentuais somando 100, confira chave PIX, meta e QR real. Alterações geram registro de auditoria.</p>
+              <p class="admin-hint admin-wide">Para ativar: informe ambos os percentuais somando 100 e confira a chave PIX, a meta e o QR real.</p>
               <button class="button admin-primary admin-wide" type="submit">Salvar campanha</button>
             </form>
             <p class="admin-status" id="campaign-status" role="status" aria-live="polite"></p>
@@ -87,7 +89,10 @@
             <div class="admin-record-list"><h3>Registros recentes · até 100</h3><div id="donation-records"></div></div>
             <p class="admin-status" id="donation-status" role="status" aria-live="polite"></p>
           </section>
+          </section>
 
+          <section class="admin-page-section" id="admin-section-news-trackers" aria-labelledby="news-trackers-section-title">
+          <header class="admin-section-heading"><span class="admin-kicker">PUBLICAÇÃO E PROGRESSO</span><h2 id="news-trackers-section-title">Notícias &amp; trackers</h2></header>
           <section class="admin-panel" aria-labelledby="news-admin-title">
             <div class="admin-panel-heading"><div><span class="admin-kicker">NOTÍCIAS E CENTRAL DE AVISOS</span><h2 id="news-admin-title">Publicar notícia</h2></div><button type="button" class="admin-secondary" id="new-news">Nova notícia</button></div>
             <label class="admin-field">Editar notícia existente<select id="news-edit-select"><option value="">Nova notícia</option></select></label>
@@ -123,6 +128,83 @@
             <div class="admin-record-list"><h3>Atualizações recentes</h3><div id="tracker-records"></div></div>
             <p class="admin-status" id="tracker-status" role="status" aria-live="polite"></p>
           </section>
+
+          </section>
+          <section class="admin-page-section" id="admin-section-community" aria-labelledby="community-section-title">
+          <header class="admin-section-heading"><span class="admin-kicker">FEED</span><h2 id="community-section-title">Comunidade &amp; anúncios</h2></header>
+          <section class="admin-panel" aria-labelledby="community-admin-title">
+            <div class="admin-panel-heading">
+              <div><span class="admin-kicker">COMUNIDADE E ANÚNCIOS</span><h2 id="community-admin-title">Moderação do feed</h2></div>
+            </div>
+            <p class="admin-hint">Posts com mídia aguardam aprovação antes de aparecer no feed. Anúncios só podem ser publicados depois de registrar pagamento ou isenção.</p>
+            <form id="community-post-form" class="admin-form admin-grid">
+              <input name="id" type="hidden">
+              <label class="admin-field">Nick do autor<input name="author_alias" required minlength="1" maxlength="60"></label>
+              <label class="admin-field">Título (opcional)<input name="headline" maxlength="120"></label>
+              <label class="admin-field admin-wide">Mensagem<textarea name="body" rows="4" maxlength="3000"></textarea></label>
+              <label class="admin-field admin-wide">URL de mídia (opcional)<input name="media_url" type="url" maxlength="2048"></label>
+              <label class="admin-field">Tipo de mídia<select name="media_type"><option value="">Sem mídia</option><option value="image">Imagem</option><option value="video">Vídeo</option></select></label>
+              <label class="admin-field">Link do post<input name="link_url" type="url" maxlength="500" placeholder="https://..."></label>
+              <label class="admin-field">Status<select name="status"><option value="pending">Em análise</option><option value="approved">Publicado</option><option value="rejected">Rejeitado</option><option value="archived">Arquivado</option></select></label>
+              <label class="admin-check"><input name="is_sponsored" type="checkbox"> Publicar como patrocinado</label>
+              <button class="button admin-primary admin-wide" type="submit">Salvar edição do post</button>
+              <button class="admin-secondary admin-wide" id="new-community-post" type="button">Limpar editor</button>
+            </form>
+            <p class="admin-status" id="community-post-status" role="status" aria-live="polite"></p>
+            <div class="admin-record-list">
+              <h3>Posts enviados · até 100</h3>
+              <div id="community-post-records"></div>
+            </div>
+            <div class="admin-record-list">
+              <h3>Denúncias de usuários · até 100</h3>
+              <div id="community-report-records"></div>
+            </div>
+            <div class="admin-record-list">
+              <h3>Solicitações de anúncios · até 100</h3>
+              <label class="admin-field">Pagamento a registrar
+                <select id="community-ad-payment">
+                  <option value="quote_requested">Orçamento solicitado</option>
+                  <option value="paid">Pago</option>
+                  <option value="waived">Isento</option>
+                  <option value="refunded">Reembolsado</option>
+                </select>
+              </label>
+              <div id="community-ad-records"></div>
+            </div>
+            <p class="admin-status" id="community-status" role="status" aria-live="polite"></p>
+          </section>
+          </section>
+
+          <section class="admin-page-section" id="admin-section-notifications" aria-labelledby="notifications-section-title">
+          <header class="admin-section-heading"><span class="admin-kicker">COMUNICAÇÃO</span><h2 id="notifications-section-title">Notificações da comunidade</h2></header>
+          <section class="admin-panel" aria-labelledby="community-notifications-title">
+            <div class="admin-panel-heading">
+              <div><span class="admin-kicker">COMUNIDADE</span><h2 id="community-notifications-title">Avisos e notificações</h2></div>
+              <button type="button" class="admin-secondary" id="new-community-notification">Novo aviso</button>
+            </div>
+            <form id="community-notification-form" class="admin-form admin-grid">
+              <input name="id" type="hidden">
+              <label class="admin-field admin-wide">Título<input name="title" required minlength="3" maxlength="120"></label>
+              <label class="admin-field admin-wide">Mensagem<textarea name="body" rows="4" required minlength="1" maxlength="1200"></textarea></label>
+              <label class="admin-field">Status<select name="status"><option value="draft">Rascunho</option><option value="published">Publicado</option><option value="archived">Arquivado</option></select></label>
+              <label class="admin-field">Expira em (opcional)<input name="expires_at" type="datetime-local"></label>
+              <button class="button admin-primary admin-wide" type="submit">Salvar aviso</button>
+            </form>
+            <div class="admin-record-list">
+              <h3>Avisos existentes</h3>
+              <div id="community-notification-records"></div>
+            </div>
+            <p class="admin-status" id="community-notification-status" role="status" aria-live="polite"></p>
+          </section>
+          </section>
+          </div>
+          <nav class="admin-section-nav" aria-label="Seções do painel do proprietário">
+            <span class="admin-kicker">PAINEL DO DONO</span>
+            <a href="#admin-section-community">Comunidade &amp; anúncios</a>
+            <a href="#admin-section-notifications">Notificações da comunidade</a>
+            <a href="#admin-section-fundraisers">Vaquinhas</a>
+            <a href="#admin-section-news-trackers">Notícias &amp; trackers</a>
+          </nav>
         </div>
       </main>
       <footer class="site-footer"><span>KynosRecompVI · gerenciamento</span><a href="../index.html">Voltar ao início ↗</a></footer>

@@ -21,38 +21,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-        working-directory: ./Main
-
-      - name: Build admin config
-        run: |
-          cat > admin/config.js << 'EOF'
-  // Admin Configuration for KynosRecompVI
-  // Injected at build time by GitHub Actions
-  // DO NOT EDIT MANUALLY - changes will be overwritten on next deploy
-
-  window.KynosAdminConfig = {
-    supabase: {
-      url: '${{ secrets.SUPABASE_URL }}',
-      anonKey: '${{ secrets.SUPABASE_ANON_KEY }}'
-    },
-    adminUserIds: ${{ secrets.ADMIN_USER_IDS }},
-    features: {
-      enableAuditLog: true,
-      enableCommunityPosts: true,
-      enablePointsSystem: true
-    }
-  };
-  EOF
-        working-directory: ./
-
       - name: Setup Pages
         uses: actions/configure-pages@v4
 

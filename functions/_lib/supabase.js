@@ -30,10 +30,36 @@ export function getSupabaseConfig(env) {
 }
 
 export async function readJsonBody(request, maximumBytes) {
-  const raw = await request.text();
-  if (new TextEncoder().encode(raw).length > (maximumBytes || 65536)) {
+  const maximum = maximumBytes || 65536;
+  const declaredLength = Number(request.headers.get('Content-Length'));
+  if (Number.isFinite(declaredLength) && declaredLength > maximum) {
     return { error: jsonResponse({ error: 'Request body is too large.' }, 413) };
   }
+  if (!request.body) return { error: jsonResponse({ error: 'Request body is empty.' }, 400) };
+  const reader = request.body.getReader();
+  const chunks = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > maximum) {
+        await reader.cancel();
+        return { error: jsonResponse({ error: 'Request body is too large.' }, 413) };
+      }
+      chunks.push(value);
+    }
+  } catch (error) {
+    return { error: jsonResponse({ error: 'Could not read request body.' }, 400) };
+  }
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  chunks.forEach((chunk) => {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  });
+  const raw = new TextDecoder().decode(bytes);
   try {
     return { value: JSON.parse(raw) };
   } catch (error) {

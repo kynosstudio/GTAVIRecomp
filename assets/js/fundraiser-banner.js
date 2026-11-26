@@ -32,6 +32,13 @@
     return `R$ ${whole},${String(cents % 100n).padStart(2, '0')}`;
   }
 
+  function rowTotalCents(row) {
+    if (/^\d+$/.test(String(row.total_cents == null ? '' : row.total_cents))) {
+      return BigInt(row.total_cents);
+    }
+    return toCents(row.total_amount);
+  }
+
   function appendEmptyRanking(message) {
     donorList.replaceChildren();
     const item = document.createElement('li');
@@ -42,10 +49,10 @@
 
   function renderTopDonors(rows, campaignId) {
     const ranked = (Array.isArray(rows) ? rows : [])
-      .filter((row) => row.campaign_id === campaignId && toCents(row.total_amount) !== null)
+      .filter((row) => row.campaign_id === campaignId && rowTotalCents(row) !== null)
       .sort((left, right) => {
-        const leftCents = toCents(left.total_amount);
-        const rightCents = toCents(right.total_amount);
+        const leftCents = rowTotalCents(left);
+        const rightCents = rowTotalCents(right);
         return rightCents > leftCents ? 1 : rightCents < leftCents ? -1 : 0;
       })
       .slice(0, 3);
@@ -65,7 +72,7 @@
       name.textContent = String(row.donor_alias || 'Apoiador anônimo');
       const amount = document.createElement('span');
       amount.className = 'br-support-donor-amount';
-      amount.textContent = formatCurrency(toCents(row.total_amount));
+      amount.textContent = formatCurrency(rowTotalCents(row));
       item.append(position, name, amount);
       donorList.append(item);
     });
@@ -75,14 +82,15 @@
   appendEmptyRanking('O ranking aparece aqui quando houver doações confirmadas.');
   if (window.location.protocol === 'file:') return;
 
-  fetch('api/fundraisers', { headers: { Accept: 'application/json' }, cache: 'no-store' })
-    .then((response) => response.ok ? response.json() : null)
-    .then((payload) => {
-      if (!payload || payload.source !== 'database' || !Array.isArray(payload.campaigns)) {
-        donorMode.textContent = 'Modo local · ranking indisponível';
-        return;
-      }
-      const campaign = payload.campaigns.find((item) => item.slug === 'xlaunchvi');
+  import('../../supabase-client.js')
+    .then(async ({ supabase }) => {
+      const [campaignsResult, leaderboardResult] = await Promise.all([
+        supabase.from('public_campaigns').select('*'),
+        supabase.from('donor_leaderboard').select('*')
+      ]);
+      if (campaignsResult.error) throw campaignsResult.error;
+      if (leaderboardResult.error) throw leaderboardResult.error;
+      const campaign = (campaignsResult.data || []).find((item) => item.slug === 'xlaunchvi');
       if (!campaign) {
         donorMode.textContent = 'Banco conectado · campanha sem ranking publicado';
         appendEmptyRanking('Ainda não há doações confirmadas para esta campanha.');
@@ -112,7 +120,7 @@
         image.src = qr;
         image.alt = `QR Code PIX da campanha ${campaign.title || 'XLaunchVI'}`;
       }
-      renderTopDonors(payload.leaderboard, campaign.id);
+      renderTopDonors(leaderboardResult.data, campaign.id);
       donorMode.textContent = 'Banco conectado · valores confirmados';
     })
     .catch((error) => {

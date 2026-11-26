@@ -33,61 +33,79 @@
             <h1>Comunidade <span>KynosRecompVI</span></h1>
             <p>Compartilhe conquistas, discuta progresso, apoie projetos. Posts com imagem/vídeo passam por análise antes de aparecer no feed.</p>
           </div>
-          <div class="comunidade-header-actions" role="group" aria-label="Ações do feed">
-            <button class="button comunidade-primary" id="composer-open" type="button" aria-expanded="false" aria-controls="composer-panel">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-              <span>Enviar post</span>
-            </button>
+          <div class="comunidade-header-actions">
             <button class="button comunidade-secondary" id="profile-open" type="button" aria-expanded="false" aria-controls="profile-panel">
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M12 14c-4 0-7 2-7 4v4h14v-4c0-2-3-4-7-4" /></svg>
-              <span>Perfil / Nick</span>
-            </button>
-            <button class="button comunidade-secondary" id="advertise-open" type="button" aria-expanded="false" aria-controls="advertise-panel">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18v18H3Zm1 1v16h16V4H4Z" /><path d="M9 9h6M9 13h4M9 17h2" /></svg>
-              <span>Anunciar no site</span>
+              <span>Minha página / Perfil</span>
             </button>
           </div>
         </header>
 
-        <!-- Composer Panel (hidden by default) -->
-        <section class="comunidade-panel" id="composer-panel" hidden aria-labelledby="composer-title">
+        <div class="community-main-layout">
+          <div class="community-stream">
+        <section class="comunidade-composer-card" id="composer-panel" aria-labelledby="composer-title">
           <div class="comunidade-panel-header">
-            <h2 id="composer-title">Novo post</h2>
-            <button class="panel-close" type="button" aria-label="Fechar painel">×</button>
+            <div>
+              <span class="comunidade-kicker">COMPARTILHE COM A COMUNIDADE</span>
+              <h2 id="composer-title">O que você quer publicar?</h2>
+            </div>
           </div>
           <form id="composer-form" class="comunidade-form" enctype="multipart/form-data">
+            <p class="composer-byline">Postando como <strong id="composer-author">Visitante</strong> · <button type="button" class="text-button" id="profile-edit-open">Editar perfil</button></p>
             <div class="form-group">
-              <label for="composer-nick">Seu nick <span class="required" aria-hidden="true">*</span></label>
-              <input type="text" id="composer-nick" name="nick" maxlength="30" required autocomplete="username" placeholder="Ex.: GamerBR2026">
-              <small class="form-hint">Salvo localmente para próximos posts. Mínimo 2 caracteres.</small>
-            </div>
-            <div class="form-group">
-              <label for="composer-text">Legenda (opcional)</label>
-              <textarea id="composer-text" name="text" maxlength="2000" rows="4" placeholder="O que você quer compartilhar?"></textarea>
-              <small class="form-hint">Máximo 2000 caracteres. HTML será sanitizado.</small>
-            </div>
-            <div class="form-group">
-              <label for="composer-media">Imagem ou vídeo (opcional)</label>
-              <input type="file" id="composer-media" name="media" accept="image/*,video/*" aria-describedby="media-hint">
-              <small id="media-hint" class="form-hint">PNG, JPG, WebP, MP4, WebM até 50MB. Posts com mídia entram em <strong>análise (pending)</strong> antes de aparecer no feed.</small>
-            </div>
-            <div class="form-group">
-              <label for="composer-link">Link externo (opcional)</label>
-              <div class="link-input-row">
-                <input type="url" id="composer-link" name="link" maxlength="500" placeholder="https://..." aria-describedby="link-preview">
-                <button type="button" class="button comunidade-tertiary" id="composer-link-preview">Pré-visualizar</button>
-              </div>
+              <label class="visually-hidden" for="composer-text">Mensagem</label>
+              <textarea id="composer-text" name="text" maxlength="3000" rows="3" placeholder="O que está acontecendo? Use @menções e #hashtags…"></textarea>
+              <small class="form-hint">Enter para enviar · Shift+Enter para pular linha · links HTTPS recebem prévia quando disponível.</small>
               <div id="link-preview" class="link-preview" hidden aria-live="polite"></div>
             </div>
-            <div class="form-group checkbox-group">
-              <label class="checkbox-label">
-                <input type="checkbox" id="composer-sponsored" name="is_sponsored" value="1">
-                <span>Marcar como anúncio/patrocinado (requer aprovação da equipe)</span>
-              </label>
+            <input class="visually-hidden" type="file" id="composer-media" name="media" accept="image/*,video/*" aria-label="Anexar imagem ou vídeo">
+            <div id="composer-media-preview" class="composer-media-preview" hidden aria-live="polite"></div>
+            <div class="composer-tools" aria-label="Ferramentas da publicação">
+              <button class="button comunidade-tertiary" id="media-open" type="button" aria-controls="composer-media">＋ Mídia</button>
+              <button class="button comunidade-tertiary" id="emoji-toggle" type="button" aria-expanded="false" aria-controls="emoji-picker">☺ Emoji</button>
+              <button class="button comunidade-tertiary" id="gif-toggle" type="button" aria-expanded="false" aria-controls="gif-picker">GIF</button>
+              <button class="button comunidade-tertiary" id="poll-toggle" type="button" aria-expanded="false" aria-controls="poll-editor">▤ Enquete</button>
+            </div>
+            <section class="composer-tool-panel" id="emoji-picker" hidden aria-label="Seletor de emojis">
+              <label for="emoji-search">Buscar emoji</label>
+              <input id="emoji-search" type="search" maxlength="40" placeholder="Buscar por nome…">
+              <nav class="emoji-categories" aria-label="Categorias de emoji"></nav>
+              <div class="emoji-grid" id="emoji-grid"></div>
+            </section>
+            <section class="composer-tool-panel" id="gif-picker" hidden aria-label="Busca de GIF">
+              <label for="gif-query">Buscar GIF</label>
+              <div class="gif-search-row">
+                <input id="gif-query" type="search" maxlength="80" placeholder="Ex.: comemoração">
+                <button class="button comunidade-secondary" id="gif-search" type="button">Buscar</button>
+              </div>
+              <p id="gif-status" class="form-status" role="status" aria-live="polite">A busca usa uma chave GIPHY configurada pelo administrador.</p>
+              <div id="gif-results" class="gif-results"></div>
+            </section>
+            <section class="composer-tool-panel poll-editor" id="poll-editor" hidden aria-label="Criar enquete">
+              <label for="poll-question">Pergunta da enquete</label>
+              <input id="poll-question" type="text" maxlength="180" placeholder="Faça uma pergunta">
+              <div id="poll-options" class="poll-options">
+                <input type="text" maxlength="80" placeholder="Opção 1" aria-label="Opção 1">
+                <input type="text" maxlength="80" placeholder="Opção 2" aria-label="Opção 2">
+              </div>
+              <div class="poll-editor-actions">
+                <button class="button comunidade-tertiary" id="poll-add-option" type="button">Adicionar opção</button>
+                <button class="button comunidade-tertiary" id="poll-remove" type="button">Remover enquete</button>
+              </div>
+            </section>
+            <small id="media-hint" class="form-hint">PNG, JPG, WebP, MP4, WebM até 50 MB. Mídia enviada entra em análise antes de aparecer no feed.</small>
+            <div class="composer-promo">
+              <div>
+                <strong>Quer divulgar um projeto ou negócio?</strong>
+                <span>Solicite uma publicação patrocinada e acompanhe a análise.</span>
+              </div>
+              <button class="button comunidade-secondary" id="advertise-open" type="button" aria-expanded="false" aria-controls="advertise-panel">
+                Anunciar / Impulsionar (PIX)
+              </button>
             </div>
             <div class="composer-actions">
-              <button type="button" class="button comunidade-secondary" id="composer-cancel">Cancelar</button>
-              <button type="submit" class="button comunidade-primary">Enviar post</button>
+              <span class="composer-character-count" id="composer-character-count">0 / 3000</span>
+              <button type="submit" class="button comunidade-primary">Enviar</button>
             </div>
             <div id="composer-status" class="form-status" role="status" aria-live="polite"></div>
           </form>
@@ -103,30 +121,37 @@
             <div class="form-group">
               <label for="profile-nick">Nick atual</label>
               <input type="text" id="profile-nick" name="nick" maxlength="30" autocomplete="username" placeholder="Seu nick">
-              <small class="form-hint">O nick é salvo no navegador (localStorage) e usado automaticamente no compositor.</small>
+              <small class="form-hint">O nick é salvo neste navegador e usado automaticamente no compositor.</small>
             </div>
             <div class="form-group">
-              <label for="profile-avatar-url">URL do avatar (opcional)</label>
-              <input type="url" id="profile-avatar-url" name="avatar_url" maxlength="500" placeholder="https://...">
-              <small class="form-hint">Imagem exibida ao lado dos seus posts. Use HTTPS.</small>
-            </div>
-            <div class="form-group">
-              <label for="profile-bio">Bio (opcional)</label>
-              <textarea id="profile-bio" name="bio" maxlength="300" rows="3" placeholder="Conte algo sobre você..."></textarea>
-            </div>
-            <div class="form-group">
-              <fieldset>
-                <legend>Preferências</legend>
-                <label class="checkbox-label"><input type="checkbox" id="profile-notify-replies" name="notify_replies" value="1"> Notificar respostas aos meus posts</label>
-                <label class="checkbox-label"><input type="checkbox" id="profile-show-email" name="show_email" value="1"> Mostrar e-mail no perfil (não recomendado)</label>
-              </fieldset>
+              <label for="profile-avatar-style">Estilo do avatar</label>
+              <select id="profile-avatar-style" name="avatarStyle">
+                <option value="lorelei">Lorelei</option>
+                <option value="bottts">Bottts</option>
+                <option value="thumbs">Thumbs</option>
+                <option value="pixel-art">Pixel art</option>
+              </select>
             </div>
             <div class="profile-actions">
               <button type="submit" class="button comunidade-primary">Salvar perfil</button>
-              <button type="button" class="button comunidade-tertiary" id="profile-clear">Limpar dados locais</button>
+              <button type="button" class="button comunidade-tertiary" id="profile-clear">Apagar nick local</button>
             </div>
             <div id="profile-status" class="form-status" role="status" aria-live="polite"></div>
           </form>
+          <section class="profile-posts" aria-labelledby="profile-posts-title">
+            <h3 id="profile-posts-title">Minhas postagens</h3>
+            <p class="form-hint">Acesso protegido por uma chave aleatória salva neste navegador. Não limpe os dados do site nem compartilhe a chave; sem ela, não será possível editar ou apagar estes posts.</p>
+            <div id="my-posts-status" class="form-status" role="status" aria-live="polite"></div>
+            <div id="my-posts-list" class="profile-post-list"></div>
+          </section>
+          <section class="profile-posts" aria-labelledby="mentions-title">
+            <h3 id="mentions-title">Menções para você</h3>
+            <div id="mention-notifications" class="profile-post-list"><p class="form-hint">Configure um nick para acompanhar menções.</p></div>
+          </section>
+          <section class="profile-posts" aria-labelledby="blocked-title">
+            <h3 id="blocked-title">Usuários bloqueados neste navegador</h3>
+            <div id="blocked-users" class="blocked-users"></div>
+          </section>
         </section>
 
         <!-- Advertise Panel -->
@@ -136,15 +161,29 @@
             <button class="panel-close" type="button" aria-label="Fechar painel">×</button>
           </div>
           <div class="advertise-info">
-            <h3>Como funciona</h3>
+            <h3>Pagamento PIX e análise</h3>
+            <div class="community-pix">
+              <p>Chave PIX (e-mail)</p>
+              <div class="community-pix-key">
+                <code id="community-pix-key">kynos.studio@gmail.com</code>
+                <button class="button comunidade-tertiary" id="copy-pix-key" type="button">Copiar PIX</button>
+              </div>
+              <ol>
+                <li>Peça a confirmação do valor e do período pelo e-mail de contato antes de pagar.</li>
+                <li>Use a chave acima no app do seu banco e confira o nome do favorecido antes de concluir.</li>
+                <li>Envie a solicitação abaixo com o identificador da transação. A equipe confere o pagamento e aprova o anúncio manualmente.</li>
+              </ol>
+              <p class="form-hint">Não há um QR PIX estático cadastrado no site; não pague se os dados do favorecido não corresponderem ao contato oficial.</p>
+              <p class="form-hint">Não envie senha, CPF completo ou dados bancários. Solicitação e referência ficam visíveis apenas à equipe de moderação.</p>
+              <div id="pix-copy-status" class="form-status" role="status" aria-live="polite"></div>
+            </div>
             <ul>
               <li>Seu anúncio aparece no feed da comunidade marcado como <strong>Patrocinado</strong></li>
               <li>Inclui título, descrição, imagem/vídeo opcional e link de destino</li>
               <li>Passa por análise da equipe antes de ir ao ar</li>
               <li>Duração padrão: 7 dias (renovável)</li>
             </ul>
-            <p class="advertise-contact">Para valores, formatos e contratação, entre em contato:</p>
-            <a class="button comunidade-primary" href="mailto:kynos.studio@gmail.com?subject=An%C3%BAncio%20KynosRecompVI%20-%20Feed%20Comunidade">Solicitar orçamento →</a>
+            <p class="advertise-contact">A solicitação e o identificador PIX serão encaminhados ao painel para análise. O pagamento é confirmado manualmente.</p>
           </div>
           <form id="advertise-form" class="comunidade-form" enctype="multipart/form-data">
             <div class="form-group">
@@ -176,6 +215,11 @@
               <label for="advertise-days">Duração (dias)</label>
               <input type="number" id="advertise-days" name="days" min="1" max="90" value="7">
             </div>
+            <div class="form-group">
+              <label for="advertise-payment-reference">Identificador da transação PIX (opcional)</label>
+              <input type="text" id="advertise-payment-reference" name="payment_reference" maxlength="160" autocomplete="off" placeholder="Ex.: ID End-to-End">
+              <small class="form-hint">Não cole comprovantes com dados pessoais. O identificador será encaminhado à equipe para conferência.</small>
+            </div>
             <div class="advertise-actions">
               <button type="button" class="button comunidade-secondary" id="advertise-cancel">Cancelar</button>
               <button type="submit" class="button comunidade-primary">Enviar solicitação</button>
@@ -186,6 +230,15 @@
 
         <!-- Feed -->
         <section class="comunidade-feed" aria-labelledby="feed-title">
+          <section id="community-notifications" class="community-notifications" aria-label="Avisos da comunidade" hidden></section>
+          <div class="community-feed-toolbar">
+            <span>Canal <strong id="active-channel-label">Tudo</strong></span>
+            <span id="feed-filter-status" role="status" aria-live="polite">Exibindo todos os posts.</span>
+            <label class="feed-search">
+              <span class="visually-hidden">Buscar posts por texto, autor ou hashtag</span>
+              <input id="feed-search" type="search" maxlength="100" placeholder="Buscar posts, @nick ou #tag">
+            </label>
+          </div>
           <h2 id="feed-title" class="visually-hidden">Feed da comunidade</h2>
           <div id="feed-loading" class="feed-loading" role="status" aria-live="polite">
             <svg class="spinner" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" /></svg>
@@ -194,17 +247,109 @@
           <div id="feed-empty" class="feed-empty" hidden>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.5-9-9.2C1 5.2 6.8 2.4 12 7c5.2-4.6 11-1.8 9 3.8C19 15.5 12 20 12 20Z" /><path d="M12 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" /></svg>
             <p>Nenhum post publicado ainda.</p>
-            <button class="button comunidade-primary" id="empty-compose">Seja o primeiro a postar</button>
+            <button class="button comunidade-primary" id="empty-compose">Escreva o primeiro post</button>
           </div>
+          <p id="feed-filter-empty" class="feed-filter-empty" role="status" hidden></p>
           <div id="feed-list" class="feed-list" role="feed" aria-live="polite"></div>
           <div id="feed-pagination" class="feed-pagination" hidden>
             <button class="button comunidade-secondary" id="feed-load-more" type="button">Carregar mais</button>
           </div>
         </section>
+          </div>
+
+          <aside class="community-side-rail" aria-label="Canais e informações da comunidade">
+            <section class="community-side-card community-channels-card">
+              <div class="community-side-kicker"><span>ESPAÇOS DA COMUNIDADE</span><span class="community-live-dot">ATIVO</span></div>
+              <h2>Canais</h2>
+              <p class="community-side-hint">Filtre o feed por assunto.</p>
+              <nav class="community-channel-list" aria-label="Filtrar posts por canal">
+                <button class="community-channel is-active" type="button" data-feed-filter="all" aria-pressed="true">
+                  <span class="community-channel-mark" aria-hidden="true">#</span><span>Tudo</span>
+                </button>
+                <button class="community-channel" type="button" data-feed-filter="media" aria-pressed="false">
+                  <span class="community-channel-mark" aria-hidden="true">▧</span><span>Mídia</span>
+                </button>
+                <button class="community-channel" type="button" data-feed-filter="links" aria-pressed="false">
+                  <span class="community-channel-mark" aria-hidden="true">↗</span><span>Links</span>
+                </button>
+                <button class="community-channel" type="button" data-feed-filter="sponsored" aria-pressed="false">
+                  <span class="community-channel-mark" aria-hidden="true">✦</span><span>Patrocinados</span>
+                </button>
+              </nav>
+              <h3 class="community-side-subtitle">Trending Topics</h3>
+              <div id="trending-topics" class="trending-topics"><p class="form-hint">As hashtags mais usadas aparecem aqui.</p></div>
+            </section>
+            <section class="community-side-card community-tools-card">
+              <span class="community-side-kicker">RECURSOS OPCIONAIS</span>
+              <h2>Comunidade ao vivo</h2>
+              <button class="button comunidade-secondary push-enable" id="push-enable" type="button">Ativar notificações</button>
+              <p id="push-status" class="form-hint" role="status" aria-live="polite">Notificações exigem permissão do navegador e configuração de VAPID no servidor.</p>
+            </section>
+            <section class="community-side-card community-tools-card weather-widget" aria-labelledby="weather-title">
+              <span class="community-side-kicker">CLIMA</span>
+              <h2 id="weather-title">Clima local</h2>
+              <form id="weather-form" class="widget-search-row">
+                <label class="visually-hidden" for="weather-city">Cidade para consultar o clima</label>
+                <input id="weather-city" type="search" maxlength="80" value="São Paulo" placeholder="Cidade">
+                <button class="button comunidade-secondary" type="submit">Ver</button>
+              </form>
+              <p id="weather-result" class="widget-result" role="status" aria-live="polite">Consulta opcional; a chave OpenWeatherMap é configurada pelo administrador.</p>
+            </section>
+            <details class="community-side-card ticker-widget">
+              <summary><span class="community-side-kicker">CONSULTA OPCIONAL</span><strong>Cotação de ações</strong></summary>
+              <form id="ticker-form" class="widget-search-row">
+                <label class="visually-hidden" for="ticker-symbol">Símbolo da ação</label>
+                <input id="ticker-symbol" type="text" maxlength="12" value="AAPL" autocomplete="off">
+                <button class="button comunidade-secondary" type="submit">Consultar</button>
+              </form>
+              <p id="ticker-result" class="widget-result" role="status" aria-live="polite">A consulta só é feita ao solicitar; configure uma chave restrita da API Ninjas.</p>
+            </details>
+            <section class="community-side-card community-guide-card">
+              <div class="community-guild-mark" aria-hidden="true">K</div>
+              <span class="community-side-kicker">KYNOS SISTEMAS</span>
+              <h2>Um espaço para compartilhar progresso.</h2>
+              <p>Posts de texto aparecem no feed. Imagens e vídeos passam por análise antes da publicação.</p>
+              <div class="community-guide-tags"><span>Texto · publicação direta</span><span>Mídia · em análise</span></div>
+            </section>
+          </aside>
+        </div>
       </main>
       <footer class="site-footer"><a class="footer-brand" href="../index.html#home" data-page-link="home"><span class="brand-mark">K</span> Kynos<b>RecompVI</b></a><span>Projeto de fãs · Não afiliado à Rockstar Games</span><a class="studio-credit" href="https://github.com/kynosstudio?tab=repositories" target="_blank" rel="noreferrer">DESENVOLVIDO POR KYNOS STUDIOS ↗</a></footer>
     </div>
+    <dialog class="community-dialog" id="community-report-dialog" aria-labelledby="community-report-title">
+      <form method="dialog" id="community-report-form">
+        <h2 id="community-report-title">Denunciar publicação</h2>
+        <label for="report-reason">Motivo</label>
+        <select id="report-reason" required>
+          <option value="spam">Spam ou publicidade enganosa</option>
+          <option value="harassment">Assédio ou abuso</option>
+          <option value="copyright">Conteúdo protegido</option>
+          <option value="unsafe">Conteúdo inseguro</option>
+          <option value="other">Outro motivo</option>
+        </select>
+        <label for="report-details">Detalhes (opcional)</label>
+        <textarea id="report-details" maxlength="1000" rows="4"></textarea>
+        <p id="report-status" class="form-status" role="status" aria-live="polite"></p>
+        <div class="dialog-actions">
+          <button class="button comunidade-tertiary" id="report-cancel" type="button">Cancelar</button>
+          <button class="button comunidade-primary" id="report-submit" type="submit">Enviar denúncia</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog class="community-dialog profile-dialog" id="community-profile-dialog" aria-labelledby="community-profile-title">
+      <div class="profile-dialog-header">
+        <img id="community-profile-avatar" alt="" width="72" height="72">
+        <div>
+          <span class="community-side-kicker">PERFIL DA COMUNIDADE</span>
+          <h2 id="community-profile-title"></h2>
+          <div id="community-profile-badges" class="profile-badges"></div>
+          <p id="community-profile-bio" class="profile-bio"></p>
+        </div>
+        <button class="panel-close" id="profile-dialog-close" type="button" aria-label="Fechar perfil">×</button>
+      </div>
+      <div id="community-profile-posts" class="profile-post-list"></div>
+    </dialog>
     <script src="../site-sidebar.js"></script>
-    <script src="comunidade.js"></script>
+    <script type="module" src="comunidade.js"></script>
   </body>
 </html>
