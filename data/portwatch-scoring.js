@@ -94,6 +94,58 @@
     };
   }
 
+  function applyPublishedTrackerUpdates(snapshot, updates) {
+    const base = snapshot && typeof snapshot === 'object' ? snapshot : {};
+    const efforts = Array.isArray(base.efforts) ? base.efforts.map((effort) => ({ ...effort })) : [];
+    const latestByProject = new Map();
+    (Array.isArray(updates) ? updates : []).forEach((update) => {
+      if (!update || typeof update.project_id !== 'string' || !update.project_id.trim()
+        || update.percent === null || update.percent === undefined || String(update.percent).trim() === '') return;
+      const projectId = update.project_id.trim();
+      const percent = Number(update.percent);
+      if (!Number.isFinite(percent) || percent < 0 || percent > 100) return;
+      const timestamp = Date.parse(update.published_at || update.created_at || '');
+      const current = latestByProject.get(projectId);
+      if (!current || (Number.isFinite(timestamp) && timestamp > current.timestamp)) {
+        latestByProject.set(projectId, {
+          update,
+          timestamp: Number.isFinite(timestamp) ? timestamp : 0
+        });
+      }
+    });
+
+    latestByProject.forEach(({ update }) => {
+      const percent = Number(update.percent);
+      const projectId = update.project_id.trim();
+      const index = efforts.findIndex((effort) => effort && effort.id === projectId);
+      const existing = index >= 0 ? efforts[index] : {};
+      const project = {
+        ...existing,
+        id: projectId,
+        name: update.project_name || existing.name || projectId,
+        percent,
+        manualScore: percent,
+        stage: update.milestone || existing.stage,
+        status: existing.status || 'acompanhado',
+        managedProgress: {
+          percent,
+          milestone: update.milestone || '',
+          summary: update.summary || '',
+          sourceUrl: update.source_url || '',
+          publishedAt: update.published_at || update.created_at || ''
+        }
+      };
+      if (index >= 0) efforts[index] = project;
+      else efforts.push(project);
+    });
+
+    return {
+      ...base,
+      efforts,
+      managedTrackerUpdates: [...latestByProject.values()].map(({ update }) => update)
+    };
+  }
+
   const byStars = (left, right) => (right.stats && right.stats.stars || 0) - (left.stats && left.stats.stars || 0);
   const isPrivateBuild = (effort) => !(typeof effort.repo === 'string' && effort.repo.includes('/'));
 
@@ -117,5 +169,18 @@
     };
   }
 
-  return { MILESTONES, TRACKS, GROUNDWORK, STABILITY, ladderValue, groundworkFraction, trackValues, scoreEffort, byStars, isPrivateBuild, overall };
+  return {
+    MILESTONES,
+    TRACKS,
+    GROUNDWORK,
+    STABILITY,
+    ladderValue,
+    groundworkFraction,
+    trackValues,
+    scoreEffort,
+    applyPublishedTrackerUpdates,
+    byStars,
+    isPrivateBuild,
+    overall
+  };
 }));

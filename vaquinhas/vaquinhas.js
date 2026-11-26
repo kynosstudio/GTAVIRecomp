@@ -221,17 +221,21 @@
   async function loadData() {
     if (window.location.protocol !== 'file:') {
       try {
-        const response = await fetch('../api/fundraisers', { headers: { Accept: 'application/json' }, cache: 'no-store' });
-        if (response.ok) {
-          const payload = await response.json();
-          if (payload && payload.source === 'database' && Array.isArray(payload.campaigns) && Array.isArray(payload.leaderboard)) {
-            return {
-              campaigns: payload.campaigns,
-              leaderboard: payload.leaderboard,
-              campaign_totals: Array.isArray(payload.campaign_totals) ? payload.campaign_totals : [],
-              source: 'database'
-            };
-          }
+        const { supabase } = await import('../supabase-client.js');
+        const [campaignsResult, leaderboardResult, totalsResult] = await Promise.all([
+          supabase.from('public_campaigns').select('*').order('updated_at', { ascending: false }),
+          supabase.from('donor_leaderboard').select('*'),
+          supabase.rpc('public_campaign_totals')
+        ]);
+        const failed = [campaignsResult.error, leaderboardResult.error, totalsResult.error].find(Boolean);
+        if (failed) throw failed;
+        if (Array.isArray(campaignsResult.data) && Array.isArray(leaderboardResult.data)) {
+          return {
+            campaigns: campaignsResult.data,
+            leaderboard: leaderboardResult.data,
+            campaign_totals: Array.isArray(totalsResult.data) ? totalsResult.data : [],
+            source: 'database'
+          };
         }
       } catch (error) {
         console.warn('Banco de vaquinhas indisponível; usando dados locais de demonstração.', error);

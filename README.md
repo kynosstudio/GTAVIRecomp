@@ -1,7 +1,7 @@
 
 # KynosRecompVI
 
-Portal estático responsivo, sem banco de dados ou dependências. Notícias, corrida dos projetos e monitoramento do tracker são o foco; o simulador de hardware fica na seção **Meu PC Roda GTAVI**. Abra em um servidor local ou diretamente via `file://`.
+Portal estático responsivo, compatível com GitHub Pages, com dados editoriais locais e integração direta ao Supabase pelo cliente ESM `supabase-js`. Notícias, corrida dos projetos e monitoramento do tracker são o foco; o simulador de hardware fica na seção **Meu PC Roda GTAVI**. A Comunidade, as vaquinhas e o gerenciamento usam a chave publishable e políticas RLS; não dependem de Cloudflare Pages Functions.
 
 ## Marca e identidade visual
 
@@ -29,7 +29,7 @@ O gerador aplica traduções disponíveis, mantém os textos editoriais locais e
 
 O progresso segue a escala PortWatch: preparação técnica até 10%, executável (10%), primeiro quadro (20%), menus (30%), mundo (40%) e jogável (50%); história, renderização, desempenho e estabilidade preenchem o restante até 100%. Builds privadas entram nas métricas gerais, mas ficam fora da corrida pública; watchlist e projetos fora do ar são apresentados separadamente. `data/portwatch-scoring.js` é o motor compartilhado entre a página e os testes.
 
-Os valores locais de `XlaunchVI` (**55%**, menus a 30 FPS sem texturas) e `CGBJ` (**75%**, cut-scenes a 4 FPS) são overrides explícitos em `editorial.effortOverrides`; o gerador os grava como `manualScore`. Eles não são recalculados a partir de campos antigos nem substituídos pela sincronização automática. Relatos editoriais e entradas locais ausentes do snapshot são preservados em `editorial.teams.xlaunchvi` e `editorial.manualEfforts`. Esses percentuais não são medições oficiais nem marcos publicados no GitHub.
+O valor local atual de `XLaunchVI` (**78,7%**) é uma estimativa editorial baseada em relatos da equipe: mundo renderizado à noite, Lucia em tempo real, Ray Tracing ativo e prólogo a 30 FPS/1080p. A release pública permanece planejada somente para a versão final, com meta mínima de 60 FPS. O percentual não é medição oficial nem marco publicado no GitHub. `CGBJ` (**75%**, cut-scenes a 4 FPS) permanece como override editorial. Os overrides em `editorial.effortOverrides` são preservados pelo gerador e não são recalculados a partir de campos antigos nem substituídos pela sincronização automática.
 
 O painel **Progresso geral** calcula o líder e a média do top 3 com os esforços do snapshot bruto (`tracker.json`) e a fórmula PortWatch. Overrides editoriais continuam preservados nos dados e nas áreas locais dos projetos, mas não substituem o cálculo geral nem elevam o placar oficial por causa de percentuais da escala anterior.
 
@@ -75,6 +75,27 @@ Os arquivos usam JSON padrão, sem comentários dentro do próprio JSON, para ma
 ## Idiomas
 
 O seletor no cabeçalho oferece Português do Brasil (padrão), Inglês, Espanhol e Chinês simplificado. A escolha é salva em `localStorage`; os textos da interface ficam em `i18n.js`. Nomes próprios de projetos e modelos de hardware são preservados.
+
+## Feed da Comunidade e Supabase
+
+A página `comunidade/index.html` oferece posts de texto, mídia e links, reações, comentários e a área **Minhas postagens**, sem exigir login para visitantes. O nick e a chave aleatória de propriedade ficam no `localStorage`; somente o SHA-256 dessa chave é armazenado no banco. Apagar os dados do navegador remove o acesso para editar/excluir os próprios posts. Textos do feed e comentários são inseridos no DOM como texto, nunca interpretados como HTML.
+
+Posts com imagem/vídeo entram como `pending`; posts de texto são publicados automaticamente. Links são extraídos da mensagem e a prévia é tentada no navegador; se o domínio bloquear CORS, o post mantém o link sem prévia. O fluxo de anúncio/impulsionamento fica dentro do compositor, mostra a chave PIX e envia a solicitação para análise. Reações anônimas usam um identificador local e não representam identidade verificada.
+
+### Banco, Storage e implantação
+
+1. Aplique `supabase/migrations/20241125000000_initial_schema.sql`, `20241125000001_admin_browser_permissions.sql`, `20241125000002_community_feed.sql`, `20261125213907_static_supabase_direct_access.sql`, `20261125215259_community_permissions_and_payment_reference.sql` e `20261125225100_community_owner_posts_and_notifications.sql`, nesta ordem. As migrations são idempotentes; o schema consolidado está em `database/schema.sql`.
+2. Crie a conta do operador no Supabase Auth e confirme o e-mail. Copie o UUID do usuário e cadastre-o no SQL Editor:
+   ```sql
+   insert into public.admin_users (user_id)
+   values ('SEU-UUID-DO-SUPABASE-AUTH')
+   on conflict (user_id) do nothing;
+   ```
+3. Configure no Supabase Auth a URL do site hospedado no GitHub Pages e os redirect URLs correspondentes. A chave publishable e a URL do projeto já estão configuradas em `supabase-client.js`; são dados públicos e não concedem privilégios de administrador.
+4. As migrations aplicam RLS/grants, as RPCs de propriedade com capabilities aleatórias, `community_notifications` e sua view pública, além do bucket `community-media` (50 MB, JPG/PNG/WebP/MP4/WebM). Apenas `is_admin()` permite editar/moderar posts, anúncios e avisos. **Como o bucket é público, uploads pendentes podem ser acessados por quem obtiver seu URL**; limite quotas e considere CAPTCHA/limitação externa antes de abrir o envio geral.
+5. Publique a pasta como site estático. Nenhuma variável de servidor, `service_role`, Cloudflare Pages Functions ou backend próprio é necessário. O painel autentica por Supabase Auth, valida o membro em `admin_users` e todas as mutações são novamente protegidas por RLS/RPC no banco.
+
+O painel do dono tem navegação por seções para comunidade/anúncios, notificações, vaquinhas e notícias/trackers. Edições feitas pelo autor retornam para análise. Apagar um post de mídia remove o registro e comentários, mas não apaga o arquivo público do Storage pelo acesso anônimo; a equipe pode removê-lo pelo painel/Storage.
 
 ## Simulador: tema, presets e compartilhamento
 

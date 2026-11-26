@@ -3376,7 +3376,10 @@ html[data-theme="light"] .br-support-pix-key { color: #315b3b; border-color: #d9
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: -8px;
+  gap: 0;
+  margin-left: 0;
+}
+#portwatch-progress .pw-panel .pw-avatar-trail-item + .pw-avatar-trail-item {
   margin-left: -8px;
 }
 #portwatch-progress .pw-panel .pw-avatar-trail-item {

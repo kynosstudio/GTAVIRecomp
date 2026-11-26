@@ -73,6 +73,45 @@ test('honors manual scores and ranks ties by stars, excluding nuked efforts', ()
   assert.equal(result.ranked.length, 3);
 });
 
+test('applies the newest published tracker value without mutating the local snapshot', () => {
+  const snapshot = {
+    efforts: [{ id: 'xlaunchvi', name: 'XLaunchVI', manualScore: 78.7, summary: 'Snapshot local' }]
+  };
+  const result = scoring.applyPublishedTrackerUpdates(snapshot, [
+    {
+      project_id: 'xlaunchvi',
+      project_name: 'XLaunchVI',
+      percent: 62,
+      milestone: 'Shaders',
+      summary: 'Valor antigo',
+      published_at: '2026-01-01T10:00:00Z'
+    },
+    {
+      project_id: 'xlaunchvi',
+      project_name: 'XLaunchVI',
+      percent: 83.5,
+      milestone: 'Otimização',
+      summary: 'Valor mais recente',
+      published_at: '2026-01-02T10:00:00Z'
+    },
+    {
+      project_id: 'novo-projeto',
+      project_name: 'Novo projeto',
+      percent: 45,
+      milestone: 'Mundo',
+      summary: 'Projeto publicado',
+      published_at: '2026-01-02T09:00:00Z'
+    },
+    { project_id: 'inválido', percent: null, published_at: '2026-01-03T10:00:00Z' }
+  ]);
+
+  assert.equal(result.efforts.find(({ id }) => id === 'xlaunchvi').manualScore, 83.5);
+  assert.equal(result.efforts.find(({ id }) => id === 'xlaunchvi').summary, 'Snapshot local');
+  assert.equal(result.efforts.find(({ id }) => id === 'novo-projeto').percent, 45);
+  assert.equal(result.efforts.some(({ id }) => id === 'inválido'), false);
+  assert.equal(snapshot.efforts[0].manualScore, 78.7);
+});
+
 test('distinguishes public repositories from private builds', () => {
   assert.equal(scoring.isPrivateBuild({ repo: null }), true);
   assert.equal(scoring.isPrivateBuild({ repo: 'owner/project' }), false);

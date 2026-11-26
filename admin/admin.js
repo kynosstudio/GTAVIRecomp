@@ -1,16 +1,12 @@
+import { SUPABASE_URL, supabase } from '../supabase-client.js';
+
 (function () {
   'use strict';
 
-  // Load configuration from config.js (injected at build time or loaded at runtime)
-  const config = window.KynosAdminConfig || {};
-  const SUPABASE_URL = config.supabase?.url || 'https://fefvytprogasugctxdom.supabase.co';
-  const SUPABASE_ANON_KEY = config.supabase?.anonKey || 'sb_publishable_xhdlCMR97qQGNiIXtx1s2g_-V9jVpPy';
-  const ADMIN_USER_IDS = config.adminUserIds || [];
-
-  const SESSION_STORAGE_KEY = 'kynos_admin_session';
-  const SESSION_EXPIRY_KEY = 'kynos_admin_session_expiry';
-
-  const data = { campaigns: [], donations: [], news: [], tracker: [] };
+  const data = {
+    campaigns: [], donations: [], news: [], tracker: [],
+    communityPosts: [], communityReports: [], communityAds: [], communityNotifications: []
+  };
   const loginForm = document.getElementById('login-form');
   const loginStatus = document.getElementById('login-status');
   const adminMode = document.getElementById('admin-mode');
@@ -19,8 +15,7 @@
   const campaignSelect = document.getElementById('campaign-edit-select');
   const newsSelect = document.getElementById('news-edit-select');
   const trackerSelect = document.getElementById('tracker-edit-select');
-
-  let supabase = null;
+  let currentUserId = null;
 
   function setStatus(id, message, isError) {
     const node = document.getElementById(id);
@@ -28,85 +23,31 @@
     node.classList.toggle('is-error', Boolean(isError));
   }
 
-  async function loadSupabase() {
-    if (supabase) return supabase;
-
-    // Load @supabase/supabase-js from CDN
-    await new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js';
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error('Failed to load Supabase SDK'));
-      document.head.appendChild(script);
-    });
-
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: {
-        persistSession: false, // We handle session storage manually
-        autoRefreshToken: true,
-        detectSessionInUrl: false
-      }
-    });
-    return supabase;
+  async function requireQuery(query) {
+    const { data: result, error } = await query;
+    if (error) throw error;
+    return result;
   }
 
-  function getStoredSession() {
+  function publicMediaUrl(path) {
+    return path
+      ? supabase.storage.from('community-media').getPublicUrl(path).data.publicUrl
+      : null;
+  }
+
+  function communityObjectPath(record) {
+    if (record.media_path) return record.media_path;
+    if (!record.media_url) return null;
     try {
-      const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
-      const expiry = sessionStorage.getItem(SESSION_EXPIRY_KEY);
-      if (token && expiry && Date.now() < parseInt(expiry, 10)) {
-        return token;
-      }
-    } catch (e) {
-      // Ignore storage errors
+      const url = new URL(record.media_url);
+      const projectOrigin = new URL(SUPABASE_URL).origin;
+      const prefix = '/storage/v1/object/public/community-media/';
+      if (url.origin !== projectOrigin || !url.pathname.startsWith(prefix)) return null;
+      const path = decodeURIComponent(url.pathname.slice(prefix.length));
+      return /^[0-9a-f-]{36}\.(jpg|png|webp|mp4|webm)$/i.test(path) ? path : null;
+    } catch (error) {
+      return null;
     }
-    return null;
-  }
-
-  function storeSession(token, expiresIn) {
-    try {
-      sessionStorage.setItem(SESSION_STORAGE_KEY, token);
-      sessionStorage.setItem(SESSION_EXPIRY_KEY, String(Date.now() + expiresIn * 1000));
-    } catch (e) {
-      // Ignore storage errors
-    }
-  }
-
-  function clearSession() {
-    try {
-      sessionStorage.removeItem(SESSION_STORAGE_KEY);
-      sessionStorage.removeItem(SESSION_EXPIRY_KEY);
-    } catch (e) {
-      // Ignore storage errors
-    }
-  }
-
-  function isAuthorized(user) {
-    if (!user || !user.id) return false;
-    // Check client-side allowlist (ADMIN_USER_IDS)
-    // Note: The database also enforces this via public.is_admin() which checks public.admins table
-    return ADMIN_USER_IDS.length === 0 || ADMIN_USER_IDS.includes(user.id.toLowerCase());
-  }
-
-  async function supabaseRequest(fn) {
-    const token = getStoredSession();
-    if (!token) throw new Error('No active session');
-
-    const client = await loadSupabase();
-    // Set the auth token for this request
-    const { data, error } = await client.auth.getUser(token);
-    if (error || !data.user) {
-      clearSession();
-      throw new Error('Session expired. Please sign in again.');
-    }
-
-    // Verify user is still authorized
-    if (!isAuthorized(data.user)) {
-      clearSession();
-      throw new Error('User no longer authorized.');
-    }
-
-    return fn(client, data.user);
   }
 
   function field(form, name) {
@@ -123,6 +64,13 @@
     if (!input) return;
     if (input.type === 'checkbox') input.checked = Boolean(value);
     else input.value = value === null || value === undefined ? '' : String(value);
+  }
+
+  function localDateTime(value) {
+    if (!value) return '';
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return '';
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   }
 
   function resetForm(name) {
@@ -146,6 +94,11 @@
     } else if (name === 'tracker') {
       setField(form, 'status', 'draft');
       trackerSelect.value = '';
+    } else if (name === 'community-post') {
+      setField(form, 'status', 'pending');
+      setField(form, 'is_sponsored', false);
+    } else if (name === 'community-notification') {
+      setField(form, 'status', 'draft');
     }
   }
 
@@ -209,6 +162,78 @@
     actions.append(button);
   }
 
+  function linkButton(actions, label, url) {
+    if (!url) return;
+    let safeUrl;
+    try {
+      safeUrl = new URL(url, window.location.href);
+    } catch (error) {
+      return;
+    }
+    if (safeUrl.protocol !== 'https:' || safeUrl.username || safeUrl.password) return;
+    const link = document.createElement('a');
+    link.href = safeUrl.href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = label;
+    actions.append(link);
+  }
+
+  async function runCommunityAction(entity, record, action) {
+    setStatus('community-status', 'Salvando moderação…', false);
+    try {
+      let cleanupWarning = '';
+      if (entity === 'ad' && action === 'delete') {
+        const linkedPost = data.communityPosts.find((post) => post.id === record.post_id);
+        if (linkedPost) {
+          await requireQuery(supabase.from('community_posts').delete().eq('id', linkedPost.id));
+        }
+        await requireQuery(supabase.from('community_ads').delete().eq('id', record.id));
+        const paths = [communityObjectPath(record), linkedPost && communityObjectPath(linkedPost)].filter(Boolean);
+        if (paths.length) {
+          const { error } = await supabase.storage.from('community-media').remove(Array.from(new Set(paths)));
+          if (error) cleanupWarning = `Anúncio excluído; não foi possível apagar a mídia (${error.message}).`;
+        }
+        setStatus('community-status', cleanupWarning || 'Anúncio excluído.', Boolean(cleanupWarning));
+        await refreshDashboard();
+        return;
+      }
+      const request = entity === 'post'
+        ? supabase.rpc('admin_moderate_community_post', {
+          p_post_id: record.id,
+          p_action: action
+        })
+        : supabase.rpc('admin_review_community_ad', {
+          p_ad_id: record.id,
+          p_action: action,
+          p_payment_status: document.getElementById('community-ad-payment').value
+        });
+      await requireQuery(request);
+      if (entity === 'post' && action === 'delete') {
+        const path = communityObjectPath(record);
+        if (path) {
+          const { error } = await supabase.storage.from('community-media').remove([path]);
+          if (error) cleanupWarning = `Post excluído; não foi possível apagar a mídia (${error.message}).`;
+        }
+      }
+      setStatus('community-status', cleanupWarning || 'Moderação salva.', Boolean(cleanupWarning));
+      await refreshDashboard();
+    } catch (error) {
+      setStatus('community-status', error.message, true);
+    }
+  }
+
+  async function updateCommunityReport(report, status) {
+    setStatus('community-status', 'Atualizando denúncia…', false);
+    try {
+      await requireQuery(supabase.from('community_reports').update({ status }).eq('id', report.id));
+      setStatus('community-status', 'Status da denúncia atualizado.', false);
+      await refreshDashboard();
+    } catch (error) {
+      setStatus('community-status', error.message, true);
+    }
+  }
+
   function renderLists() {
     createOptions(campaignSelect, data.campaigns, (item) => `${item.title} · ${item.status}`, true);
     createOptions(newsSelect, data.news, (item) => `${item.title} · ${item.status}`, true);
@@ -254,75 +279,107 @@
         document.getElementById('tracker-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
       }));
 
+    renderRecords('community-post-records', data.communityPosts,
+      (item) => `${item.is_sponsored ? 'Patrocinado · ' : ''}${item.headline || item.author_alias || 'Post da comunidade'}`,
+      (item) => `${item.status} · ${item.media_type || 'sem mídia'} · ${item.created_at ? new Date(item.created_at).toLocaleString('pt-BR') : 'data não informada'}`,
+      (item, actions) => {
+        if (item.media_url) linkButton(actions, 'Ver mídia', item.media_url);
+        editButton(actions, 'Editar', () => {
+          fillForm('community-post', item);
+          document.getElementById('community-post-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+        if (item.status !== 'approved' && item.status !== 'published') {
+          editButton(actions, 'Aprovar', () => runCommunityAction('post', item, 'approve'));
+        }
+        if (item.status === 'approved' || item.status === 'published' || item.status === 'pending') {
+          editButton(actions, 'Rejeitar', () => runCommunityAction('post', item, 'reject'));
+        }
+        editButton(actions, 'Excluir', () => {
+          if (window.confirm('Excluir permanentemente este post e seus comentários?')) {
+            runCommunityAction('post', item, 'delete');
+          }
+        });
+      });
+
+    renderRecords('community-report-records', data.communityReports,
+      (item) => `${item.reason} · ${item.post_id ? 'post' : 'comentário'}`,
+      (item) => `${item.status} · ${item.details || 'sem detalhes'} · ${item.created_at ? new Date(item.created_at).toLocaleString('pt-BR') : 'data não informada'}`,
+      (item, actions) => {
+        const post = item.post_id && data.communityPosts.find((record) => record.id === item.post_id);
+        if (post) editButton(actions, 'Ver post', () => {
+          fillForm('community-post', post);
+          document.getElementById('community-post-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+        if (item.status === 'pending') {
+          editButton(actions, 'Marcar revisada', () => updateCommunityReport(item, 'reviewed'));
+          editButton(actions, 'Dispensar', () => updateCommunityReport(item, 'dismissed'));
+          editButton(actions, 'Ação tomada', () => updateCommunityReport(item, 'actioned'));
+        }
+      });
+
+    renderRecords('community-ad-records', data.communityAds,
+      (item) => `${item.title} · ${item.advertiser_name}`,
+      (item) => `${item.status} · pagamento: ${item.payment_status} · ${item.contact_email}${item.payment_reference ? ` · referência PIX: ${item.payment_reference}` : ' · sem referência PIX'}`,
+      (item, actions) => {
+        if (item.media_url) linkButton(actions, 'Ver mídia', item.media_url);
+        if (item.status === 'pending') {
+          editButton(actions, 'Aprovar', () => runCommunityAction('ad', item, 'approve'));
+          editButton(actions, 'Rejeitar', () => runCommunityAction('ad', item, 'reject'));
+        }
+        editButton(actions, 'Excluir anúncio', () => {
+          if (window.confirm('Excluir esta solicitação e, se existir, sua publicação patrocinada?')) {
+            runCommunityAction('ad', item, 'delete');
+          }
+        });
+      });
+
+    renderRecords('community-notification-records', data.communityNotifications,
+      (item) => item.title,
+      (item) => `${item.status} · ${item.expires_at ? `expira ${new Date(item.expires_at).toLocaleString('pt-BR')}` : 'sem expiração'}`,
+      (item, actions) => {
+        editButton(actions, 'Editar', () => {
+          fillForm('community-notification', Object.assign({}, item, {
+            expires_at: localDateTime(item.expires_at)
+          }));
+          document.getElementById('community-notification-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+        editButton(actions, 'Excluir', () => {
+          if (window.confirm('Excluir este aviso da Comunidade?')) {
+            deleteCommunityNotification(item);
+          }
+        });
+      });
+
     if (!data.campaigns.length) setStatus('donation-status', 'Cadastre uma campanha antes de registrar doações.', false);
   }
 
   async function refreshDashboard() {
     try {
-      await supabaseRequest(async (client, user) => {
-        // Fetch campaigns using the public view (readable by anon/authenticated)
-        const { data: campaigns, error: campaignsError } = await client
-          .from('public_campaigns')
-          .select('*')
-          .order('updated_at', { ascending: false });
-        if (campaignsError) throw campaignsError;
-
-        // Fetch donations using the public view (readable by anon/authenticated)
-        const { data: donations, error: donationsError } = await client
-          .from('donor_leaderboard')
-          .select('*');
-        if (donationsError) throw donationsError;
-
-        // Fetch news using the public view
-        const { data: news, error: newsError } = await client
-          .from('published_news')
-          .select('*')
-          .order('published_at', { ascending: false });
-        if (newsError) throw newsError;
-
-        // Fetch tracker updates using the public view
-        const { data: tracker, error: trackerError } = await client
-          .from('published_tracker_updates')
-          .select('*')
-          .order('published_at', { ascending: false });
-        if (trackerError) throw trackerError;
-
-        // Also fetch all campaigns (including drafts) for admin editing
-        // This requires the user to be authenticated and authorized
-        const { data: allCampaigns, error: allCampaignsError } = await client
-          .from('campaigns')
-          .select('id,slug,title,summary,description,goal_amount,banner_url,color_start,color_end,gradient_angle,pix_key,qr_code_url,xlaunch_percent,kynos_maintenance_percent,status,is_active,created_at,updated_at')
-          .order('updated_at', { ascending: false });
-        if (allCampaignsError) throw allCampaignsError;
-
-        // Fetch all donations for admin (including pending)
-        const { data: allDonations, error: allDonationsError } = await client
-          .from('donations')
-          .select('id,campaign_id,amount,donor_alias,message,status,show_in_ranking,created_at,confirmed_at')
-          .order('created_at', { ascending: false })
-          .limit(100);
-        if (allDonationsError) throw allDonationsError;
-
-        // Fetch all news for admin
-        const { data: allNews, error: allNewsError } = await client
-          .from('news_posts')
-          .select('id,slug,category,title,summary,body,source_url,status,published_at,created_at,updated_at')
-          .order('created_at', { ascending: false });
-        if (allNewsError) throw allNewsError;
-
-        // Fetch all tracker updates for admin
-        const { data: allTracker, error: allTrackerError } = await client
-          .from('tracker_updates')
-          .select('id,project_id,project_name,percent,milestone,summary,source_url,status,published_at,created_at,updated_at')
-          .order('created_at', { ascending: false });
-        if (allTrackerError) throw allTrackerError;
-
-        data.campaigns = allCampaigns || [];
-        data.donations = allDonations || [];
-        data.news = allNews || [];
-        data.tracker = allTracker || [];
-        renderLists();
-      });
+      const [campaigns, donations, news, tracker, communityPosts, communityReports, communityAds, communityNotifications] = await Promise.all([
+        requireQuery(supabase.from('campaigns').select('*').order('updated_at', { ascending: false }).limit(100)),
+        requireQuery(supabase.from('donations').select('*').order('created_at', { ascending: false }).limit(100)),
+        requireQuery(supabase.from('news_posts').select('*').order('created_at', { ascending: false }).limit(100)),
+        requireQuery(supabase.from('tracker_updates').select('*').order('created_at', { ascending: false }).limit(100)),
+        requireQuery(supabase.from('community_posts').select('*').order('created_at', { ascending: false }).limit(100)),
+        requireQuery(supabase.from('community_reports').select('*').order('created_at', { ascending: false }).limit(100)),
+        requireQuery(supabase.from('community_ads').select('*').order('created_at', { ascending: false }).limit(100)),
+        requireQuery(supabase.from('community_notifications').select('*').order('created_at', { ascending: false }).limit(100))
+      ]);
+      data.campaigns = campaigns || [];
+      data.donations = donations || [];
+      data.news = news || [];
+      data.tracker = tracker || [];
+      data.communityPosts = (communityPosts || []).map((post) => ({
+        ...post,
+        media_url: post.media_url || publicMediaUrl(post.media_path)
+      }));
+      data.communityReports = communityReports || [];
+      data.communityAds = (communityAds || []).map((ad) => ({
+        ...ad,
+        media_url: publicMediaUrl(ad.media_path)
+      }));
+      data.communityNotifications = communityNotifications || [];
+      renderLists();
     } catch (error) {
       setStatus('campaign-status', error.message, true);
       throw error;
@@ -377,44 +434,135 @@
     };
   }
 
-  async function mutateCampaign(payload, user) {
-    const client = await loadSupabase();
-    const { data, error } = await client.rpc('admin_upsert_campaign', {
-      p_payload: payload,
-      p_actor: user.id
-    });
-    if (error) throw error;
-    return data;
+  function httpsField(value, label) {
+    if (!value) return null;
+    let url;
+    try {
+      url = new URL(value);
+    } catch (error) {
+      throw new Error(`${label} precisa ser um endereço HTTPS válido.`);
+    }
+    if (url.protocol !== 'https:' || url.username || url.password) {
+      throw new Error(`${label} precisa usar HTTPS e não pode incluir credenciais.`);
+    }
+    return url.href;
   }
 
-  async function mutateDonation(payload, user) {
-    const client = await loadSupabase();
-    const { data, error } = await client.rpc('admin_record_donation', {
-      p_payload: payload,
-      p_actor: user.id
-    });
-    if (error) throw error;
-    return data;
+  function communityPostPayload(form) {
+    const mediaUrl = httpsField(fieldValue(form, 'media_url'), 'A mídia');
+    const mediaType = fieldValue(form, 'media_type') || null;
+    const linkUrl = httpsField(fieldValue(form, 'link_url'), 'O link');
+    const body = fieldValue(form, 'body');
+    if (Boolean(mediaUrl) !== Boolean(mediaType)) {
+      throw new Error('Informe tanto a URL quanto o tipo de mídia, ou deixe ambos vazios.');
+    }
+    if (!body && !mediaUrl && !linkUrl) {
+      throw new Error('O post precisa ter texto, link ou mídia.');
+    }
+    const id = fieldValue(form, 'id') || null;
+    const existing = id ? data.communityPosts.find((post) => post.id === id) : null;
+    return {
+      id,
+      author_alias: fieldValue(form, 'author_alias'),
+      headline: fieldValue(form, 'headline') || null,
+      body,
+      media_url: mediaUrl,
+      media_path: null,
+      media_type: mediaType,
+      link_url: linkUrl,
+      link_preview: existing && existing.link_url === linkUrl ? (existing.link_preview || {}) : {},
+      status: fieldValue(form, 'status'),
+      is_sponsored: field(form, 'is_sponsored').checked,
+      updated_at: new Date().toISOString()
+    };
   }
 
-  async function mutateNews(payload, user) {
-    const client = await loadSupabase();
-    const { data, error } = await client.rpc('admin_upsert_news', {
-      p_payload: payload,
-      p_actor: user.id
-    });
-    if (error) throw error;
-    return data;
+  function communityNotificationPayload(form) {
+    const status = fieldValue(form, 'status');
+    const id = fieldValue(form, 'id') || null;
+    const existing = id ? data.communityNotifications.find((item) => item.id === id) : null;
+    const expiration = fieldValue(form, 'expires_at');
+    const expiresAt = expiration ? new Date(expiration) : null;
+    if (expiresAt && !Number.isFinite(expiresAt.getTime())) {
+      throw new Error('A data de expiração não é válida.');
+    }
+    return {
+      id,
+      title: fieldValue(form, 'title'),
+      body: fieldValue(form, 'body'),
+      status,
+      published_at: status === 'published'
+        ? (existing && existing.published_at ? existing.published_at : new Date().toISOString())
+        : null,
+      expires_at: expiresAt ? expiresAt.toISOString() : null,
+      created_by: currentUserId,
+      updated_at: new Date().toISOString()
+    };
   }
 
-  async function mutateTracker(payload, user) {
-    const client = await loadSupabase();
-    const { data, error } = await client.rpc('admin_upsert_tracker_update', {
-      p_payload: payload,
-      p_actor: user.id
+  async function mutateCampaign(payload) {
+    const record = Object.assign({}, payload, {
+      is_active: payload.status === 'active',
+      updated_at: new Date().toISOString()
     });
-    if (error) throw error;
-    return data;
+    if (!record.id) delete record.id;
+    return requireQuery(supabase.from('campaigns').upsert(record, { onConflict: 'slug' }));
+  }
+
+  async function mutateDonation(payload) {
+    const record = Object.assign({}, payload, { created_by: currentUserId });
+    if (!record.id) delete record.id;
+    if (record.status === 'confirmed') {
+      record.confirmed_by = currentUserId;
+      record.confirmed_at = new Date().toISOString();
+    } else {
+      record.confirmed_by = null;
+      record.confirmed_at = null;
+    }
+    return requireQuery(supabase.from('donations').upsert(record));
+  }
+
+  async function mutateNews(payload) {
+    const record = Object.assign({}, payload, {
+      created_by: currentUserId,
+      published_at: payload.status === 'published' ? new Date().toISOString() : null,
+      updated_at: new Date().toISOString()
+    });
+    if (!record.id) delete record.id;
+    return requireQuery(supabase.from('news_posts').upsert(record, { onConflict: 'slug' }));
+  }
+
+  async function mutateTracker(payload) {
+    const record = Object.assign({}, payload, {
+      created_by: currentUserId,
+      published_at: payload.status === 'published' ? new Date().toISOString() : null,
+      updated_at: new Date().toISOString()
+    });
+    if (!record.id) delete record.id;
+    return requireQuery(supabase.from('tracker_updates').upsert(record));
+  }
+
+  async function mutateCommunityPost(payload) {
+    const record = Object.assign({}, payload);
+    if (!record.id) delete record.id;
+    return requireQuery(supabase.from('community_posts').upsert(record));
+  }
+
+  async function mutateCommunityNotification(payload) {
+    const record = Object.assign({}, payload);
+    if (!record.id) delete record.id;
+    return requireQuery(supabase.from('community_notifications').upsert(record));
+  }
+
+  async function deleteCommunityNotification(record) {
+    setStatus('community-notification-status', 'Excluindo aviso…', false);
+    try {
+      await requireQuery(supabase.from('community_notifications').delete().eq('id', record.id));
+      setStatus('community-notification-status', 'Aviso excluído.', false);
+      await refreshDashboard();
+    } catch (error) {
+      setStatus('community-notification-status', error.message, true);
+    }
   }
 
   function setupMutationForm(name, payloadBuilder, mutateFn, successMessage) {
@@ -427,9 +575,7 @@
       submit.disabled = true;
       try {
         const payload = payloadBuilder(form);
-        await supabaseRequest(async (client, user) => {
-          await mutateFn(payload, user);
-        });
+        await mutateFn(payload);
         setStatus(statusId, successMessage, false);
         await refreshDashboard();
         if (name === 'donation') resetForm('donation');
@@ -442,12 +588,13 @@
   }
 
   async function activateWorkspace(user) {
+    currentUserId = user.id;
     workspace.hidden = false;
     logoutButton.hidden = false;
     loginForm.hidden = true;
-    loginStatus.textContent = user.email ? `Sessão autorizada: ${user.email}` : 'Sessão de operador autorizada.';
+    loginStatus.textContent = user && user.email ? `Sessão autorizada: ${user.email}` : 'Sessão de operador autorizada.';
     adminMode.dataset.state = 'connected';
-    adminMode.textContent = 'Supabase conectado · sessão de operador autenticada';
+    adminMode.textContent = 'Supabase conectado · sessão de administrador autenticada';
     try {
       await refreshDashboard();
     } catch (error) {
@@ -457,49 +604,58 @@
 
   async function checkExistingSession() {
     try {
-      const client = await loadSupabase();
-      const { data: { session } } = await client.auth.getSession();
-      if (session && session.access_token) {
-        // Verify the session is still valid and user is authorized
-        const { data: { user } } = await client.auth.getUser(session.access_token);
-        if (user && isAuthorized(user)) {
-          storeSession(session.access_token, session.expires_in || 3600);
-          await activateWorkspace(user);
-          return true;
-        }
-      }
-    } catch (e) {
-      // Session check failed
+      const { data, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      if (!data.session) return false;
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      const user = userData.user;
+      if (!user) return false;
+      await requireAdmin(user);
+      await activateWorkspace(user);
+      return true;
+    } catch (error) {
+      loginStatus.textContent = error.message;
+      return false;
     }
-    return false;
+  }
+
+  async function requireAdmin(user) {
+    const { data: record, error } = await supabase
+      .from('admin_users')
+      .select('user_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (error) throw error;
+    if (!record) {
+      await supabase.auth.signOut();
+      throw new Error('Esta conta não está cadastrada como administradora.');
+    }
   }
 
   loginForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const submit = loginForm.querySelector('[type="submit"]');
     submit.disabled = true;
-    loginStatus.textContent = 'Autenticando com Supabase…';
+    loginStatus.textContent = 'Autenticando com o Supabase…';
     loginStatus.classList.remove('is-error');
     const email = fieldValue(loginForm, 'email');
     const password = field(loginForm, 'password').value;
     try {
-      const client = await loadSupabase();
-      const { data, error } = await client.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
       if (error) throw error;
+      if (!data.user) throw new Error('O Supabase não retornou o usuário autenticado.');
+      await requireAdmin(data.user);
       field(loginForm, 'password').value = '';
-      if (!data.user || !isAuthorized(data.user)) {
-        await client.auth.signOut();
-        throw new Error('Conta não autorizada para acesso administrativo. Contate o administrador para adicionar seu UID à allowlist (window.KynosAdminConfig.adminUserIds no admin/config.js e/ou tabela public.admins no Supabase).');
-      }
-      if (data.session) {
-        storeSession(data.session.access_token, data.session.expires_in || 3600);
-      }
       await activateWorkspace(data.user);
     } catch (error) {
       loginStatus.textContent = error.message;
       loginStatus.classList.add('is-error');
       adminMode.dataset.state = 'local';
-      adminMode.textContent = 'Autenticação falhou · verifique credenciais e allowlist';
+      adminMode.textContent = 'Autenticação falhou · confira as credenciais e a tabela admin_users';
     } finally {
       submit.disabled = false;
     }
@@ -507,12 +663,12 @@
 
   logoutButton.addEventListener('click', async () => {
     try {
-      const client = await loadSupabase();
-      await client.auth.signOut();
-    } catch (e) {
-      // Ignore sign out errors
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error) {
+      setStatus('campaign-status', error.message, true);
     }
-    clearSession();
+    currentUserId = null;
     workspace.hidden = true;
     loginForm.hidden = false;
     logoutButton.hidden = true;
@@ -539,6 +695,8 @@
   document.getElementById('new-campaign').addEventListener('click', () => resetForm('campaign'));
   document.getElementById('new-news').addEventListener('click', () => resetForm('news'));
   document.getElementById('new-tracker').addEventListener('click', () => resetForm('tracker'));
+  document.getElementById('new-community-post').addEventListener('click', () => resetForm('community-post'));
+  document.getElementById('new-community-notification').addEventListener('click', () => resetForm('community-notification'));
 
   setupMutationForm('campaign', campaignPayload, mutateCampaign, 'Campanha salva com sucesso.');
   setupMutationForm('donation', (form) => ({
@@ -552,22 +710,18 @@
   }), mutateDonation, 'Doação registrada com sucesso.');
   setupMutationForm('news', newsPayload, mutateNews, 'Notícia salva com sucesso.');
   setupMutationForm('tracker', trackerPayload, mutateTracker, 'Atualização salva com sucesso.');
+  setupMutationForm('community-post', communityPostPayload, mutateCommunityPost, 'Post salvo com sucesso.');
+  setupMutationForm('community-notification', communityNotificationPayload, mutateCommunityNotification, 'Aviso salvo com sucesso.');
 
-  // Initialize: check for existing session
-  if (window.location.protocol === 'file:') {
-    adminMode.dataset.state = 'local';
-    adminMode.textContent = 'Modo arquivo local · Supabase Auth requer HTTPS';
-    loginStatus.textContent = 'Publique no GitHub Pages (HTTPS) para habilitar Supabase Auth.';
-  } else {
-    adminMode.textContent = 'Verificando sessão existente…';
-    checkExistingSession().then((hasSession) => {
-      if (!hasSession) {
-        adminMode.dataset.state = 'local';
-        adminMode.textContent = 'Entre com uma conta autorizada para gerenciar os dados';
-      }
-    }).catch(() => {
+  adminMode.textContent = 'Verificando sessão Supabase…';
+  checkExistingSession().then((hasSession) => {
+    if (!hasSession) {
       adminMode.dataset.state = 'local';
-      adminMode.textContent = 'Erro ao verificar sessão · tente fazer login';
-    });
-  }
+      adminMode.textContent = 'Entre com uma conta cadastrada em admin_users';
+    }
+  }).catch((error) => {
+    adminMode.dataset.state = 'local';
+    adminMode.textContent = 'Erro ao verificar sessão Supabase';
+    loginStatus.textContent = error.message;
+  });
 }());
